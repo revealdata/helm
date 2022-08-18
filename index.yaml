@@ -3,6 +3,16 @@ entries:
   reveal-keycloak:
   - apiVersion: v2
     appVersion: 18.0.0
+    created: "2022-08-18T18:06:46.482830182Z"
+    description: Reveal Keycloak
+    digest: 5c4bd9ce74d2507d64ca37c79be938d567d276bd69398958257f18c8c07b6062
+    name: reveal-keycloak
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-keycloak-0.7.0/reveal-keycloak-0.7.0.tgz
+    version: 0.7.0
+  - apiVersion: v2
+    appVersion: 18.0.0
     created: "2022-08-18T17:10:49.073514343Z"
     description: Reveal Keycloak
     digest: 3c480f4fecd8ab7aeb80b694d50243e9d6fd6f0a7716504374b5a11ca3bef212
@@ -11,4 +21,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/reveal-keycloak-0.6.0/reveal-keycloak-0.6.0.tgz
     version: 0.6.0
-generated: "2022-08-18T17:10:49.073521043Z"
+generated: "2022-08-18T18:06:46.482839682Z"
