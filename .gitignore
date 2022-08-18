@@ -1,0 +1,6 @@
+*.tar
+*.tgz
+*.zip
+.DS_Store
+.vscode/*
+license/*_license.txt

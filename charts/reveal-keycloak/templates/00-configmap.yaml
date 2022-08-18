@@ -1,0 +1,49 @@
+{{- if not .Values.global.NoNamespace }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.global.namespace | default .Release.Name }}
+{{- end }}
+---
+# Keycloak Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-config
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+data:
+  {{- if .Values.ingress.public.enabled }}
+  # https://www.keycloak.org/server/hostname
+  KC_HOSTNAME: {{ .Values.ingress.public.hostname }}
+  {{- end }}
+  {{- if .Values.ingress.admin.enabled }}
+  KC_ADMIN_HOSTNAME: {{ .Values.ingress.admin.hostname }}
+  {{- else }}
+  KC_ADMIN_HOSTNAME: {{ .Values.ingress.public.hostname }}
+  {{- end }}
+  KC_HOSTNAME_STRICT: "false"
+  # https://www.keycloak.org/server/features
+  {{- if .Values.keycloak.features -}}
+  KC_FEATURES: "{{ .Values.keycloak.features }}"
+  {{- end }}
+  # https://www.keycloak.org/server/caching
+  KC_CACHE: "ispn"
+  KC_CACHE_STACK: "kubernetes"
+  JAVA_OPTS_APPEND: " -Djgroups.dns.query=keycloak-jgroups-ping.{{ .Values.global.namespace | default .Release.Name }}.svc.cluster.local "
+{{ if .Values.keycloak.env }}
+{{- toYaml .Values.keycloak.env | indent 2 }}
+{{- end }}
+
+---
+# Keycloak Proxy Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-proxy-config
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+data:
+  TEMPLATE: keycloak
+{{ if .Values.keycloak.proxy.env }}
+{{- toYaml .Values.keycloak.proxy.env | indent 2 }}
+{{- end }}

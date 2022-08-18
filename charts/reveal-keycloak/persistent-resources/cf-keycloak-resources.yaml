@@ -1,0 +1,246 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Keycloak Persistent Resources
+Parameters:
+  Namespace:
+    Type: String
+    Description: "The K8s Namespace used for this deployment"
+    Default: keycloak-revealglobal
+  OIDCIssuerId:
+    # Use the following command to get the OIDC provider (replace the values enclosed in '<>'):
+    # aws --profile <CLI-PROFILE>  eks describe-cluster --name <EKS-CLUSTER-NAME> --query "cluster.identity.oidc.issuer" --output text
+    Type: String
+    Description: 'The EKS OIDC Issuer ID ONLY. Command: aws --profile <CLI-PROFILE>  eks describe-cluster --name <EKS-CLUSTER-NAME> --query "cluster.identity.oidc.issuer" --output text'
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: "The VPC ID where resources will be deployed. Must be in the selected VPC"
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    # Note: You will need to deplare a subnet for each AZ where EKS is deployed
+    #       If you require more than 2 subnets, you will also need to add
+    #       `more MountTargetResource` declarations below. (Cloudformation limitations)
+    Description: "A list of SubnetIds in the VPC where services will be deployed"
+  KeycloakAdminUsername:
+    Type: String
+    Default: revealadmin
+    Description: "The Keycloak Administrator username"
+  KeycloakAdminPassword:
+    Type: String
+    MinLength: 8
+    NoEcho: True
+    Description: "The Keycloak Administrator password"
+    Default: "{VyV!kkTtn?hWqI,b=1C"
+  DbInstanceIdentifier:
+    Type: String
+    Description: The RDS Database identifier/name
+    Default: keycloak
+  DbClass:
+    Type: String
+    Description: "The database instance size"
+    Default: db.t3.large
+    AllowedValues:
+      - db.t3.micro
+      - db.t3.small
+      - db.t3.large
+  MasterDbUsername:
+    Type: String
+    MinLength: 8
+    Default: postgres
+    Description: "The Keycloak database master username"
+  MasterDbPassword:
+    Type: String
+    MinLength: 8
+    NoEcho: True
+    Description: "The Keycloak database master password"
+    Default: "Ht5bviHEWdinDdoHkDuJ"
+  KeycloakDbName:
+    Type: String
+    Default: keycloak
+    Description: "The Keycloak database name"
+Resources:
+  DatabaseSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Join ["-", ["rds", !Ref Namespace, "database-sg"]]
+      GroupDescription: Allow database traffic to RDS
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp : "10.0.0.0/8"
+          Description: "Allow internal Postgres"
+      Tags:
+        - Key: "CFStackName"
+          Value: !Sub "${AWS::StackName}"
+        - Key: "EKS-Namespace"
+          Value: !Ref Namespace
+  DatabaseSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: !Join ["-", ["RDS Subnets for Namespace: ", !Ref Namespace ]]
+      DBSubnetGroupName: !Join ["-", ["rds", !Ref Namespace, "database-sg"]]
+      SubnetIds: !Ref SubnetIds
+      Tags:
+        - Key: "CFStackName"
+          Value: !Sub "${AWS::StackName}"
+        - Key: "EKS-Namespace"
+          Value: !Ref Namespace
+  DatabaseClusterResource:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      DBClusterIdentifier: !Sub "${DbInstanceIdentifier}-cluster"
+      DatabaseName: !Ref KeycloakDbName
+      DBSubnetGroupName: !Ref DatabaseSubnetGroup
+      EnableCloudwatchLogsExports:
+        -  postgresql
+      Engine: aurora-postgresql
+      EngineVersion: 14.3
+      Port: 5432
+      MasterUsername: !Ref MasterDbUsername
+      MasterUserPassword: !Ref MasterDbPassword
+      EnableIAMDatabaseAuthentication: true
+      StorageEncrypted: true
+      RestoreType: full-copy
+      VpcSecurityGroupIds:
+        - !GetAtt DatabaseSecurityGroup.GroupId
+      Tags:
+        - Key: "CFStackName"
+          Value: !Sub "${AWS::StackName}"
+        - Key: "EKS-Namespace"
+          Value: !Ref Namespace
+  DatabaseResource1:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref DatabaseClusterResource
+      DBInstanceIdentifier: !Sub "${DbInstanceIdentifier}-instance-1"
+      DBInstanceClass: !Ref DbClass
+      Engine: aurora-postgresql
+      EngineVersion: 14.3
+      PubliclyAccessible: False
+      Tags:
+        - Key: "CFStackName"
+          Value: !Sub "${AWS::StackName}"
+        - Key: "EKS-Namespace"
+          Value: !Ref Namespace
+  DatabaseResource2:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref DatabaseClusterResource
+      DBInstanceIdentifier: !Sub "${DbInstanceIdentifier}-instance-2"
+      DBInstanceClass: !Ref DbClass
+      Engine: aurora-postgresql
+      EngineVersion: 14.3
+      PubliclyAccessible: False
+      Tags:
+        - Key: "CFStackName"
+          Value: !Sub "${AWS::StackName}"
+        - Key: "EKS-Namespace"
+          Value: !Ref Namespace
+  KeycloakAdminSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "keycloak/user/${DbInstanceIdentifier}/admin"
+      Description: "Keycloak EKS Admin Account"
+      SecretString: !Sub |
+          {
+            "Namespace": "${Namespace}",
+            "username": "${KeycloakAdminUsername}",
+            "password": "${KeycloakAdminPassword}"
+          }
+      Tags:
+        - Key: "CFStackName"
+          Value: !Sub "${AWS::StackName}"
+        - Key: "EKS-Namespace"
+          Value: !Ref Namespace
+  KeycloakDbSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "keycloak/database/${DbInstanceIdentifier}/master"
+      Description: "Keycloak EKS Master Database"
+      SecretString: !Sub |
+          {
+            "Namespace": "${Namespace}",
+            "host": "${DatabaseClusterResource.Endpoint.Address}",
+            "port": "${DatabaseClusterResource.Endpoint.Port}",
+            "username": "${MasterDbUsername}",
+            "password": "${MasterDbPassword}",
+            "engine": "postgres",
+            "dbClusterIdentifier": "${DbInstanceIdentifier}",
+            "dbname": "${KeycloakDbName}"
+          }
+      Tags:
+        - Key: "CFStackName"
+          Value: !Sub "${AWS::StackName}"
+        - Key: "EKS-Namespace"
+          Value: !Ref Namespace
+  KeycloakDbSecretAttachment:
+    Type: AWS::SecretsManager::SecretTargetAttachment
+    Properties:
+      SecretId: !Ref KeycloakDbSecret
+      TargetId: !Sub "${DbInstanceIdentifier}-cluster"
+      TargetType: AWS::RDS::DBCluster
+  KeycloakSecretsPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Join ["", [!Ref Namespace, "-secret-policy"]]
+      Description: "Allows config secret access to EKS Keycloak instance"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: 
+              - "secretsmanager:GetSecretValue"
+              - "secretsmanager:DescribeSecret"
+            Resource: 
+              - !Ref KeycloakAdminSecret
+              - !Ref KeycloakDbSecret
+          - Effect: Allow
+            Action: "secretsmanager:ListSecrets"
+            Resource: "*"
+  KeycloakSecretsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join ["", [!Ref Namespace, "-secret-role"]]
+      Description: "EKS Service account role"
+      AssumeRolePolicyDocument: !Sub |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": "sts:AssumeRoleWithWebIdentity",
+                "Condition": {
+                  "StringEquals": {
+                    "oidc.eks.${AWS::Region}.${AWS::URLSuffix}/id/${OIDCIssuerId}:aud": "sts.${AWS::URLSuffix}",
+                    "oidc.eks.${AWS::Region}.${AWS::URLSuffix}/id/${OIDCIssuerId}:sub": "system:serviceaccount:${Namespace}:aws-secrets-provider-sa"
+                  }
+                },
+                "Principal": {
+                  "Federated": "arn:aws:iam::${AWS::AccountId}:oidc-provider/oidc.eks.${AWS::Region}.${AWS::URLSuffix}/id/${OIDCIssuerId}"
+                }
+              }
+            ]
+          }
+      ManagedPolicyArns:
+        - !Ref KeycloakSecretsPolicy
+      Tags:
+        - Key: "CFStackName"
+          Value: !Sub "${AWS::StackName}"
+        - Key: "EKS-Namespace"
+          Value: !Ref Namespace
+
+Outputs:
+  "KeycloakAdminSecretArn":
+    Value: !Ref KeycloakAdminSecret
+  "DatabaseSecretArn":
+    Value: !Ref KeycloakDbSecret
+  "PolicyArn":
+    Value: !Ref KeycloakSecretsPolicy
+  "RoleArn":
+    Value: !GetAtt KeycloakSecretsRole.Arn
+  "DatabaseIdentifier":
+    Value: !Ref DbInstanceIdentifier
+  "DatabaseClusterEndpointAddress":
+    Value: !GetAtt DatabaseClusterResource.Endpoint.Address
+  "DatabaseClusterEndpointPort":
+    Value: !GetAtt DatabaseClusterResource.Endpoint.Port
