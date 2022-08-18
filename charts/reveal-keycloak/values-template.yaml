@@ -6,10 +6,12 @@ global:
   NoNamespace: false
   ecr:
     enabled: false
-    #- AWS Account ID (required)
+    #- AWS Account ID (default "053522176595")
     account: ""
     #- ECR AWS Region (default "us-east-1")
-    #region: ""
+    region: ""
+    #- Set the full hostname/url for the secret rather than building it with account and region
+    host: ""
     #- Docker ECR Password (required)
     #-- Command: aws ecr get-login-password
     password: ""
