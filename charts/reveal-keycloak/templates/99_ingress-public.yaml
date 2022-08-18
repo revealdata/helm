@@ -52,8 +52,8 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
     nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
     nginx.ingress.kubernetes.io/upstream-vhost: {{ quote .Values.ingress.public.hostname }}
-    # Deny admin paths if admin ingress is enabled
     {{- if .Values.ingress.admin.enabled }}
+    # Deny admin paths if admin ingress is enabled
     nginx.ingress.kubernetes.io/server-snippet: |
       location ~* "^/admin" {
           deny all;

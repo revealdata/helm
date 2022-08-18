@@ -50,14 +50,6 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-buffering: "off"
     nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
     nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
-    # nginx.ingress.kubernetes.io/upstream-vhost: {{ quote .Values.ingress.admin.hostname }}
-    # nginx.ingress.kubernetes.io/configuration-snippet: |
-    #     proxy_set_header X-Forwarded-Host $http_host;
-    #     proxy_set_header X-Forwarded-Proto $scheme;
-    #     proxy_set_header X-Forwarded-Port $server_port;
-    #     proxy_set_header X-Real-IP $remote_addr;
-    #     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    #     proxy_ignore_client_abort   on;
     {{ if .Values.ingress.admin.annotations }}
     {{- toYaml .Values.ingress.admin.annotations }}
     {{- end }}

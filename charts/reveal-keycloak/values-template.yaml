@@ -100,11 +100,13 @@ keycloak:
     #- Define static resources for the keycloak pods
     resources:
       memory: 2
-    #- A list of CA certificate files in PEM format that will be imported into the Keycloak Trust Store
+    #- Import CA certificate files in PEM format into the Keycloak Trust Store
     #-- The directory containing CA certificates must reside in the chart root directory
     #-- The directory must not be in the .helmignore file
     cacerts:
-      - "ca/cafile.pem"
+      enabled: true
+        #- Optional path to the directory where CA certificates are located
+        path: "pki/ca"
     env:
       KC_LOG_LEVEL: "INFO"
       #-- https://www.keycloak.org/server/hostname

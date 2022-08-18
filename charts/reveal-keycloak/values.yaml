@@ -1,0 +1,32 @@
+global:
+  ecr:
+    enabled: false
+
+secrets:
+  provider: "kubernetes"
+  kubernetes:
+    keycloak_admin_user: "admin"
+    keycloak_admin_password: "ChangeMe1!"
+    kc_db: "postgres"
+    kc_db_url_host: "keycloak-db"
+    kc_db_url_port: "5432"
+    kc_db_url_database: "keycloak"
+    kc_db_username: "keycloak"
+    kc_db_password: "keycloak1"
+
+ingress:
+  public:
+    enabled: true
+    class: nginx
+    hostname: "keycloak.localhost.localdomain"
+  admin:
+    enabled: false
+
+keycloak:
+  image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/reveal/keycloak
+  tag: 18.0.2
+  cacerts: 
+    enabled: false
+  proxy:
+    image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/reveal/ui/base
+    tag: 1.1.5
