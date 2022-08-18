@@ -9,7 +9,7 @@ Reveal Brainsapce Helm Repository
 
 ### Add the repo to helm
 ```bash
-helm repo add reveal https://purediscovery.github.io/helm-repo/
+helm repo add reveal https://revealdata.github.io/helm/
 helm repo update
 ```
 
