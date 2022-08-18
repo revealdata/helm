@@ -3,7 +3,7 @@ Reveal Brainsapce Helm Repository
 
 ## Charts
 - reveal-keycloak
-- reveal-brainspace
+- brainspace-series11
 
 ## Usage
 

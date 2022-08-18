@@ -1,0 +1,215 @@
+---
+# Deployment: brains-ana
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: brains-ana
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels:
+    app.kubernetes.io/name: brains-ana
+    app.kubernetes.io/part-of: brainspace
+    app.kubernetes.io/managed-by: brainspace-ci
+    app.kubernetes.io/component: analytics
+spec:
+  selector:
+    matchLabels:
+      app: deployment-brains-ana
+  progressDeadlineSeconds: 600
+  replicas: {{ .Values.brains_ana.replicas | default 1 }}
+  revisionHistoryLimit: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: deployment-brains-ana
+      {{- if .Values.brains_ana.reloadOnUpgrade }}
+      annotations:
+        timestamp: {{ now | quote }}
+      {{- end }}
+    spec:
+      # IMPORTANT: This allows multiple ANA pods to be resolvable by the APP pod.
+      # Requires k8s ver. 1.22
+      setHostnameAsFQDN: true
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: amd64
+        {{- if .Values.brains_ana.nodeGroup }}
+        eks.amazonaws.com/nodegroup: {{ .Values.brains_ana.nodeGroup }}
+        {{- end }}
+      {{- if .Values.global.ecr }} {{- if .Values.global.ecr.secret }}
+      imagePullSecrets:
+      - name: {{ .Values.global.ecr.secret }}
+      {{- end }} {{- end }}
+      {{- if and .Values.secrets.ServiceAccount }}
+      {{- if .Values.secrets.ServiceAccount.RoleArn }}
+      serviceAccountName: aws-secrets-provider-sa
+      {{- end }}{{- end }}
+      initContainers:
+      - name: brains-bt
+        image: {{ .Values.brains_bt.image }}:{{ .Values.brains_bt.tag }}
+        command: ["/bin/ash"]
+        # args: ["-c", "while true; do echo -n . && sleep 10; done"]
+        args: ["-c", "apk add rsync && rsync -av --chown 1604:1604 /usr/data/{{ .Values.brains_bt.basis_dir }}/* /usr/data/vol/{{ .Values.brains_bt.basis_dir }}/ && rsync -av --chown 1604:1604 /usr/data/BatchTools/* /usr/data/vol/BatchTools/ && chown 1604:1604 /localdata"]
+        imagePullPolicy: {{ .Values.brains_bt.imagePullPolicy | default "IfNotPresent" }}
+        volumeMounts:
+          - name: basis-data
+            mountPath: /usr/data/vol/{{ .Values.brains_bt.basis_dir }}
+          - name: bt-data
+            mountPath: /usr/data/vol/BatchTools
+          - name: local-data
+            mountPath: /localdata
+      containers:
+      - name: brains-ana
+        image: {{ .Values.brains_ana.image }}:{{ .Values.brains_ana.tag }}
+        imagePullPolicy: {{ .Values.brains_ana.imagePullPolicy | default "Always" }}
+        {{- if .Values.brains_ana.resources }}
+        resources:
+          requests:
+            {{- if .Values.brains_ana.resources.memory }}
+            memory: "{{ .Values.brains_ana.resources.memory }}Gi"
+            {{ end }}
+            {{- if .Values.brains_ana.resources.cpu }}
+            cpu: "{{ .Values.brains_ana.resources.cpu }}000m"
+            {{- end }}
+        {{- end }}
+        ports:
+        - containerPort: 1604
+        envFrom:
+        - configMapRef:
+            name: brains-config
+        - configMapRef:
+            name: brains-ana-config
+        env:
+          - name: BRAINS_ANA_ROLE
+            value: ANA
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: brainspace-secrets
+                key: brainspace_db_user
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: brainspace-secrets
+                key: brainspace_db_password
+          - name: PGPASSWORD
+            valueFrom:
+                secretKeyRef:
+                  name: brainspace-secrets
+                  key: brainspace_db_password
+          - name: POSTGRES_HOST
+            valueFrom:
+              secretKeyRef:
+                name: brainspace-secrets
+                key: brainspace_db_host
+          - name: POSTGRES_PORT
+            valueFrom:
+              secretKeyRef:
+                name: brainspace-secrets
+                key: brainspace_db_port
+          - name: POSTGRES_DB
+            valueFrom:
+              secretKeyRef:
+                name: brainspace-secrets
+                key: brainspace_db_name
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/bash", "-c", "[[ -e /var/lib/brains/app/analytics-server/logs/analysisserver.log ]] && rm -f /var/lib/brains/app/analytics-server/logs/analysisserver.log; ln -s /dev/stdout /var/lib/brains/app/analytics-server/logs/analysisserver.log"]
+        volumeMounts:
+        {{- if .Values.global.secretArn }}
+        - name: brainspace-secrets-vol
+          mountPath: "/mnt/brainspace-secrets"
+          readOnly: true
+        {{- end }}
+        - name: basis-data
+          readOnly: true
+          mountPath: /var/lib/brains/.brainspace/{{ .Values.brains_bt.basis_dir }}
+        - name: bt-data
+          readOnly: true
+          mountPath: /var/lib/brains/.brainspace/BatchTools
+        - name: shared-data
+          readOnly: false
+          mountPath: /data
+        - name: app-localdata
+          readOnly: false
+          mountPath: /mnt/localdata
+        - name: local-data
+          readOnly: false
+          mountPath: /localdata
+      volumes:
+      {{- if eq .Values.secrets.provider "secrets-store-csi" }}
+      - name: brainspace-secrets-vol
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "brainspace-secrets"
+      {{- end }}
+      - name: local-data
+        {{- if .Values.brains_ana.storage }}
+        {{- if eq .Values.brains_ana.storage.type "ebs" }}
+        ephemeral:
+          volumeClaimTemplate:
+            metadata:
+              creationTimestamp: null
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: {{ .Values.brains_ana.storage.size | default 500 }}Gi
+              storageClassName: gp2
+              volumeMode: Filesystem
+        {{- end }}
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+      {{- if eq .Values.storage.type "efs" }}
+      - name: bt-data
+        emptyDir: {}
+      - name: basis-data
+        emptyDir: {}
+      - name: shared-data
+        persistentVolumeClaim:
+          claimName: efs-claim-data
+      - name: app-localdata
+        persistentVolumeClaim:
+          claimName: efs-claim-app-localdata
+      {{- else }}
+      - name: shared-data
+        emptyDir: {}
+      - name: app-localdata
+        emptyDir: {}
+      {{- end }}
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 15
+      tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 300
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 300
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: brains-ana
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+spec:
+  type: NodePort
+  selector:
+    app: deployment-brains-ana
+  ports:
+    - name: http
+      protocol: TCP
+      port: 1604
+      targetPort: 1604

@@ -1,0 +1,67 @@
+{{- if not .Values.global.NoNamespace }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.global.namespace | default .Release.Name }}
+{{- end }}
+---
+# Brainspace Global Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: brains-config
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+data:
+  BRAINS_HOSTNAME: {{ .Values.ingress.hostname | default "brainspace.localdomain" }}
+  DOMAIN: {{ .Values.global.namespace | default .Release.Name }}.svc.cluster.local
+  {{ if .Values.global.env }}
+  {{- toYaml .Values.global.env }}
+  {{- end }}
+  {{- if .Values.global.database.UseSsl }}
+  POSTGRES_SSL_FACTORY: "org.postgresql.ssl.NonValidatingFactory"
+  {{- end }}
+  POSTGRES_HOST_AUTH_METHOD: {{ .Values.global.database.AuthMech | default "scram-sha-256" }}
+
+---
+# Brainspace Application Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: brains-ui-config
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+data:
+  {{ if .Values.brains_ui.env }}
+  {{- toYaml .Values.brains_ui.env }}
+  {{- end }}
+
+---
+# Brainspace Application Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: brains-app-config
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+data:
+  DOMAIN: {{ .Values.global.namespace | default .Release.Name }}.svc.cluster.local
+{{ if .Values.global.env }}
+{{- toYaml .Values.global.env | indent 2 }}
+{{- end }}
+{{ if .Values.brains_app.env }}
+{{- toYaml .Values.brains_app.env | indent 2 }}
+{{- end }}
+
+---
+# Brainspace Analysis Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: brains-ana-config
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+data:
+{{ if .Values.global.env }}
+{{- toYaml .Values.global.env | indent 2 }}
+{{- end }}
+{{ if .Values.brains_ana.env }}
+{{- toYaml .Values.brains_ana.env | indent 2 }}
+{{- end }}

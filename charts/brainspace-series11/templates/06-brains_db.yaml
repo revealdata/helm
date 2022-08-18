@@ -1,0 +1,101 @@
+---
+{{ if .Values.global.database.useContainer }}
+# Deployment: brains-db
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: brains-db
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels:
+    app.kubernetes.io/name: brains-db
+    app.kubernetes.io/part-of: brainspace
+    app.kubernetes.io/managed-by: brainspace-ci
+    app.kubernetes.io/component: database
+spec:
+  selector:
+    matchLabels:
+      app: deployment-brains-db
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: deployment-brains-db
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: amd64
+        {{- if .Values.brains_db.nodeGroup }}
+        eks.amazonaws.com/nodegroup: {{ .Values.brains_db.nodeGroup }}
+        {{- end }}
+      {{- if .Values.global.ecr }} {{- if .Values.global.ecr.secret }}
+      imagePullSecrets:
+      - name: {{ .Values.global.ecr.secret }}
+      {{- end }} {{- end }}
+      containers:
+      - name: brains-db
+        image: {{ .Values.brains_db.image }}:{{ .Values.brains_db.tag }}
+        imagePullPolicy: {{ .Values.global.bt.imagePullPolicy | default "Always" }}
+        {{- if .Values.brains_db.resources }}
+        resources:
+          limits:
+            {{- if .Values.brains_db.resources.memory }}
+            memory: "{{ .Values.brains_db.resources.memory }}Mi" # Megabytes
+            {{- end }}
+            {{- if .Values.brains_db.resources.cpu }}
+            cpu: "{{ .Values.brains_db.resources.cpu }}000m" # 2 CPU
+            {{- end }}
+        {{- end }}
+        ports:
+        - containerPort: 5432
+        envFrom:
+        - configMapRef:
+            name: brains-config
+        volumeMounts:
+        - name: db-data
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      {{- if .Values.global.efs }}
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: efs-claim-db-data
+      {{- else if .Values.global.localStorage.rootPath }}
+      - name: db-data
+        hostPath:
+          path: "{{ .Values.global.localStorage.rootPath }}/{{ .Release.Name }}/db"
+          type: DirectoryOrCreate
+      {{- else }}
+      - name: db-data
+        emptyDir: {}
+      {{- end }}
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 300
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 300
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: brains-db
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+spec:
+  type: NodePort
+  selector:
+    app: deployment-brains-db
+  ports:
+   - name: http
+     protocol: TCP
+     port: 5432
+     targetPort: 5432
+{{ end }}

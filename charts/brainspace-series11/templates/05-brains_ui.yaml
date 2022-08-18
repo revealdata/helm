@@ -1,0 +1,73 @@
+---
+# Deployment: brains-ui
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: brains-ui
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels:
+    app.kubernetes.io/name: brains-ui
+    app.kubernetes.io/part-of: brainspace
+    app.kubernetes.io/managed-by: brainspace-ci
+    app.kubernetes.io/component: application
+spec:
+  selector:
+    matchLabels:
+      app: deployment-brains-ui
+  progressDeadlineSeconds: 600
+  replicas: {{ .Values.brains_ui.replicas | default 1 }}
+  revisionHistoryLimit: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: deployment-brains-ui
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: amd64
+        {{- if .Values.brains_ui.nodeGroup }}
+        eks.amazonaws.com/nodegroup: {{ .Values.brains_ui.nodeGroup }}
+        {{- end }}
+      {{- if .Values.global.ecr }} {{- if .Values.global.ecr.secret }}
+      imagePullSecrets:
+      - name: {{ .Values.global.ecr.secret }}
+      {{- end }} {{- end }}
+      containers:
+      - name: brains-ui
+        image: {{ .Values.brains_ui.image }}:{{ .Values.brains_ui.tag }}
+        imagePullPolicy: {{ .Values.brains_ui.imagePullPolicy | default "Always" }}
+        ports:
+        - containerPort: 8080
+        - containerPort: 8443
+        envFrom:
+        - configMapRef:
+            name: brains-ui-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: brains-ui
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  annotations:
+    #  Health check path annotations
+    alb.ingress.kubernetes.io/healthcheck-path: /ui-version.json
+    # Change this annotation when brainspace app supports HTTP backend
+    alb.ingress.kubernetes.io/backend-protocol: "HTTPS"
+spec:
+  selector:
+    app: deployment-brains-ui
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 443

@@ -1,0 +1,253 @@
+---
+# Deployment: brains-app
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: brains-app
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels:
+    app.kubernetes.io/name: brains-app
+    app.kubernetes.io/part-of: brainspace
+    app.kubernetes.io/component: application
+spec:
+  selector:
+    matchLabels:
+      app: deployment-brains-app
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: deployment-brains-app
+      {{- if .Values.brains_app.reloadOnUpgrade }}
+      annotations:
+        timestamp: {{ now | quote }}
+      {{- end }}
+    spec:
+      hostname: brains-app
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: amd64
+        {{- if .Values.brains_app.nodeGroup }}
+        eks.amazonaws.com/nodegroup: {{ .Values.brains_app.nodeGroup }}
+        {{- end }}
+      {{- if .Values.global.ecr }}{{- if .Values.global.ecr.secret }}
+      imagePullSecrets:
+      - name: {{ .Values.global.ecr.secret }}
+      {{- end }} {{- end }}
+      {{- if .Values.secrets.ServiceAccount }}
+      {{- if .Values.secrets.ServiceAccount.RoleArn }}
+      serviceAccountName: aws-secrets-provider-sa
+      {{- end }}{{- end }}
+      volumes:
+      {{- if eq .Values.storage.type "efs" }}
+      - name: bt-data
+        emptyDir: {}
+      - name: basis-data
+        emptyDir: {}
+      - name: plugins-data
+        emptyDir: {}
+      - name: shared-data
+        persistentVolumeClaim:
+          claimName: efs-claim-data
+      - name: app-localdata
+        persistentVolumeClaim:
+          claimName: efs-claim-app-localdata
+      - name: plugins-additional-data
+        persistentVolumeClaim:
+          claimName: efs-claim-app-plugins
+      - name: shared-logs
+        persistentVolumeClaim:
+          claimName: efs-claim-logs
+      {{- if .Values.global.development }}
+      - name: devshared-data
+        persistentVolumeClaim:
+          claimName: efs-claim-devshared  # (BRAINSPACE INTERNAL)
+      {{- end }}
+      {{- else }}
+      - name: bt-data
+        emptyDir: {}
+      - name: basis-data
+        emptyDir: {}
+      - name: plugins-data
+        emptyDir: {}
+      - name: shared-data
+        emptyDir: {}
+      - name: app-localdata
+        emptyDir: {}
+      - name: plugins-additional-data
+        emptyDir: {}
+      - name: shared-logs
+        emptyDir: {}
+      {{- end }}
+      {{- if .Values.global.brainspace.licenseFile }}
+      - name: brains-license-vol
+        secret:
+          secretName: brains-license
+          optional: true
+      {{- end }}
+      {{- if eq .Values.secrets.provider "secrets-store-csi" }}
+      - name: brainspace-secrets-vol
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "brainspace-secrets-provider"
+      {{- end }}
+      initContainers:
+      - name: brains-bt
+        image: {{ .Values.brains_bt.image }}:{{ .Values.brains_bt.tag }}
+        command: ["/bin/ash"]
+        args: ["-c", "apk add rsync && rsync -av --chown 1604:1604 /usr/data/{{ .Values.brains_bt.basis_dir }}/* /usr/data/vol/{{ .Values.brains_bt.basis_dir }}/ && rsync -av --chown 1604:1604 /usr/data/BatchTools/* /usr/data/vol/BatchTools/"]
+        imagePullPolicy: {{ .Values.brains_bt.imagePullPolicy | default "IfNotPresent" }}
+        volumeMounts:
+          - name: basis-data
+            mountPath: /usr/data/vol/{{ .Values.brains_bt.basis_dir }}
+          - name: bt-data
+            mountPath: /usr/data/vol/BatchTools
+      - name: brains-plugins
+        image: {{ .Values.brains_app.plugins.image }}:{{ .Values.brains_app.plugins.tag }}
+        command: ["/bin/ash"]
+        args: ["-c", "apk add rsync && rsync -av --chown 1604:1604 /plugins/* /fs-plugins/"]
+        imagePullPolicy: {{ .Values.brains_app.plugins.imagePullPolicy | default "Always" }}
+        volumeMounts:
+          - name: plugins-data
+            mountPath: /fs-plugins
+      - name: brains-additional-plugins
+        image: {{ .Values.brains_app.additionalPlugins.image }}:{{ .Values.brains_app.additionalPlugins.tag }}
+        command: ["/bin/ash"]
+        args: ["-c", "apk add rsync && rsync -av --chown 1604:1604 /plugins/* /fs-plugins/"]
+        imagePullPolicy: {{ .Values.brains_app.additionalPlugins.imagePullPolicy | default "Always" }}
+        volumeMounts:
+          - name: plugins-additional-data
+            mountPath: /fs-plugins
+      containers:
+      - name: brains-app
+        image: {{ .Values.brains_app.image }}:{{ .Values.brains_app.tag }}
+        imagePullPolicy: {{ .Values.brains_app.imagePullPolicy | default "Always" }}
+        {{- if .Values.brains_app.resources }}
+        resources:
+          requests:
+            {{- if .Values.brains_app.resources.memory }}
+            memory: "{{ .Values.brains_app.resources.memory }}Gi"
+            {{- end }}
+            {{- if .Values.brains_app.resources.cpu }}
+            cpu: "{{ .Values.brains_app.resources.cpu }}000m"
+            {{- end }}
+        {{- end }}
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - configMapRef:
+            name: brains-config
+        - configMapRef:
+            name: brains-app-config
+        env:
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: brainspace-secrets
+                key: brainspace_db_user
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: brainspace-secrets
+                key: brainspace_db_password
+          - name: PGPASSWORD
+            valueFrom:
+                secretKeyRef:
+                  name: brainspace-secrets
+                  key: brainspace_db_password
+          - name: POSTGRES_HOST
+            valueFrom:
+              secretKeyRef:
+                name: brainspace-secrets
+                key: brainspace_db_host
+          - name: POSTGRES_PORT
+            valueFrom:
+              secretKeyRef:
+                name: brainspace-secrets
+                key: brainspace_db_port
+          - name: POSTGRES_DB
+            valueFrom:
+              secretKeyRef:
+                name: brainspace-secrets
+                key: brainspace_db_name
+        {{- if .Values.global.brainspace.licenseFile }}
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/bash", "-c", "[[ -e /var/lib/brains/license/brainspace_license.txt ]] && cp /var/lib/brains/license/brainspace_license.txt /var/lib/brains/.brainspace/brainspace_license.txt"]
+        {{- end }}
+        volumeMounts:
+        - name: basis-data
+          readOnly: true
+          mountPath: /var/lib/brains/.brainspace/{{ .Values.brains_bt.basis_dir }}
+        - name: bt-data
+          readOnly: true
+          mountPath: /var/lib/brains/.brainspace/BatchTools
+        - name: shared-data
+          readOnly: false
+          mountPath: /data
+        - name: app-localdata
+          readOnly: false
+          mountPath: /localdata
+        - name: plugins-data
+          readOnly: false
+          mountPath: /var/lib/brains/.brainspace/plugins/default
+        - name: plugins-additional-data
+          readOnly: false
+          mountPath: /var/lib/brains/.brainspace/plugins/additional
+        {{- if and .Values.global.development (eq .Values.storage.type "efs") }}
+        - name: devshared-data # (BRAINSPACE INTERNAL)
+          readOnly: true
+          mountPath: /devshared_data
+        {{- end }}
+        - name: shared-logs
+          readOnly: false
+          mountPath: /usr/local/tomcat/logs
+          subPath: {{ .Values.brains_app.logDir }}
+        {{- if .Values.global.brainspace.licenseFile }}
+        - name: brains-license-vol
+          mountPath: "/var/lib/brains/license"
+          readOnly: true
+        {{- end }}
+        {{- if eq .Values.secrets.provider "secrets-store-csi" }}
+        - name: brainspace-secrets-vol
+          mountPath: "/mnt/brainspace-secrets"
+          readOnly: true
+        {{- end }}
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 120
+      tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 300
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 300
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: brains-app
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  annotations:
+    #  Health check path annotations
+    alb.ingress.kubernetes.io/healthcheck-path: /rest/ping
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+spec:
+  type: NodePort
+  selector:
+    app: deployment-brains-app
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080

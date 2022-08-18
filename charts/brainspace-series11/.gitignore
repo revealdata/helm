@@ -1,0 +1,3 @@
+releases/docker-desktop/*.yaml
+releases/brains-local/*.yaml
+license/*_license.txt

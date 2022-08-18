@@ -1,0 +1,115 @@
+{{- if .Values.brains_ana.autoscale.enabled }}
+---
+# Deployment: ana-autoscale
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ana-autoscale
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels:
+    app.kubernetes.io/name: ana-autoscale
+    app.kubernetes.io/part-of: brainspace
+    app.kubernetes.io/managed-by: brainspace-ci
+    app.kubernetes.io/component: analytics
+spec:
+  selector:
+    matchLabels:
+      app: deployment-ana-autoscale
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: deployment-ana-autoscale
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: amd64
+        {{- if .Values.brains_ana.nodeGroup }}
+        eks.amazonaws.com/nodegroup: {{ .Values.brains_ana.nodeGroup }}
+        {{- end }}
+      {{- if .Values.global.ecr }} {{- if .Values.global.ecr.secret }}
+      imagePullSecrets:
+      - name: {{ .Values.global.ecr.secret }}
+      {{- end }} {{- end }}
+      {{- if .Values.brains_ana.autoscale.enabled }}
+      serviceAccountName: ana-scale-role-sa
+      {{- end }}
+      containers:
+      - name: ana-autoscale
+        image: {{ .Values.brains_ana.autoscale.image }}:{{ .Values.brains_ana.autoscale.tag | default "latest" }}
+        imagePullPolicy: {{ .Values.brains_ana.imagePullPolicy | default "Always" }}
+        env:
+          - name: MIN_ANA_PODS
+            value: {{ .Values.brains_ana.autoscale.thresholds.min | default 0 | quote }}
+          - name: MAX_ANA_PODS
+            value: {{ .Values.brains_ana.autoscale.thresholds.max | default 2 | quote }}
+          - name: DEBUG
+            value: {{ .Values.brains_ana.autoscale.debug | default 0 | quote }}
+          - name: KUBERNETES_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: brainspace-secrets
+                key: brainspace_db_user
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: brainspace-secrets
+                key: brainspace_db_password
+          - name: PGPASSWORD
+            valueFrom:
+                secretKeyRef:
+                  name: brainspace-secrets
+                  key: brainspace_db_password
+          - name: POSTGRES_HOST
+            valueFrom:
+              secretKeyRef:
+                name: brainspace-secrets
+                key: brainspace_db_host
+          - name: POSTGRES_PORT
+            valueFrom:
+              secretKeyRef:
+                name: brainspace-secrets
+                key: brainspace_db_port
+          - name: POSTGRES_DB
+            valueFrom:
+              secretKeyRef:
+                name: brainspace-secrets
+                key: brainspace_db_name
+        envFrom:
+        - configMapRef:
+            name: brains-config
+        {{- if eq .Values.secrets.provider "secrets-store-csi" }}
+        volumeMounts:
+          - name: brainspace-secrets-vol
+            mountPath: "/mnt/brainspace-secrets"
+            readOnly: true
+        {{- end }}
+      {{- if eq .Values.secrets.provider "secrets-store-csi" }}
+      volumes:
+        - name: brainspace-secrets-vol
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "brainspace-secrets"
+      {{- end }}
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 10
+      tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 300
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 300
+{{- end }}

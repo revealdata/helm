@@ -1,0 +1,290 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Brainspace Persistent Resources
+Parameters:
+  Namespace:
+    Type: String
+  OIDCIssuerId:
+    # Use the following command to get the OIDC provider (replace the values enclosed in '<>'):
+    # aws --profile <CLI-PROFILE>  eks describe-cluster --name <EKS-CLUSTER-NAME> --query "cluster.identity.oidc.issuer" --output text
+    Type: String
+    Description: 'The EKS OIDC Issuer ID ONLY. Command: aws --profile <CLI-PROFILE>  eks describe-cluster --name <EKS-CLUSTER-NAME> --query "cluster.identity.oidc.issuer" --output text'
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Default: "vpc-084dc59a5a2eaaf87"
+    Description: "The VPC ID where resources will be deployed"
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+    # Note: You will need to deplare a subnet for each AZ where EKS is deployed
+    #       If you require more than 2 subnets, you will also need to add
+    #       `more MountTargetResource` declarations below. (Cloudformation limitations)
+    Default: "subnet-003c752ee627e41c6, subnet-0c657786eba971d01"
+    Description: "A list of SubnetIds in the VPC where services will be deployed"
+  DbClass:
+    Type: String
+    Default: db.t3.micro
+    AllowedValues:
+      - db.t3.micro
+      - db.t3.small
+      - db.t3.large
+  DBMultiAZ:
+    Type: String
+    Default: "False"
+    AllowedValues: ["True", "False"]
+    Description: "Use a Multi AZ RDS Instance. Either True or False."
+  MasterDbPassword:
+    Type: String
+    Default: brainspace1
+    MinLength: 8
+    NoEcho: True
+    Description: "The Brainspace database master 'postgres' password"
+  BrainsDbName:
+    Type: String
+    Default: brainspace
+    Description: "The Brainspace database name"
+  BrainsDbUsername:
+    Type: String
+    Default: brainspace
+    Description: "The Brainspace database username"
+  BrainsDbPassword:
+    Type: String
+    Default: brainspace1
+    MinLength: 8
+    NoEcho: True
+    Description: "The Brainspace database user's password"
+Resources:
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Join ["-", ["efs", !Ref Namespace, "persistant-volume-sg"]]
+      GroupDescription: Allow EFS Traffic to persistant storage
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 2049
+          ToPort: 2049
+          CidrIp : "10.0.0.0/8"
+          Description: "Allow internal NFS"
+  DatabaseSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Join ["-", ["rds", !Ref Namespace, "database-sg"]]
+      GroupDescription: Allow database traffic to RDS
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp : "10.0.0.0/8"
+          Description: "Allow internal Postgres"
+      Tags:
+        - Key: "CFStackName"
+          Value: !Sub "${AWS::StackName}"
+        - Key: "EKS-Namespace"
+          Value: !Ref Namespace
+  DatabaseSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: !Join ["-", ["RDS Subnets for Namespace: ", !Ref Namespace ]]
+      DBSubnetGroupName: !Join ["-", ["rds", !Ref Namespace, "database-sg"]]
+      SubnetIds: !Ref SubnetIds
+      Tags:
+        - Key: "CFStackName"
+          Value: !Sub "${AWS::StackName}"
+        - Key: "EKS-Namespace"
+          Value: !Ref Namespace
+  DatabaseResource:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Join ["-", ["eks", !Ref Namespace, "db"]]
+      Engine: postgres
+      EngineVersion: 13.4
+      AllowMajorVersionUpgrade: False
+      DBInstanceClass: !Ref DbClass
+      AllocatedStorage: 20
+      StorageType: gp2
+      MultiAZ: !Ref DBMultiAZ
+      PubliclyAccessible: False
+      DBSubnetGroupName:
+        !Ref DatabaseSubnetGroup
+      VPCSecurityGroups:
+        - !GetAtt DatabaseSecurityGroup.GroupId
+      DBName: postgres
+      MasterUsername: postgres
+      MasterUserPassword: !Ref MasterDbPassword
+      Tags:
+        - Key: "CFStackName"
+          Value: !Sub "${AWS::StackName}"
+        - Key: "EKS-Namespace"
+          Value: !Ref Namespace
+  FileSystemResource:
+    Type: AWS::EFS::FileSystem
+    Properties:
+      PerformanceMode: generalPurpose
+      FileSystemTags:
+        - Key: Name
+          Value:  !Join ["-", [!Ref Namespace, "persistant-volume"]]
+        - Key: "EKS-Namespace"
+          Value: !Ref Namespace
+        - Key: "CFStackName"
+          Value: !Sub "${AWS::StackName}"
+  MountTargetResource1:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref FileSystemResource
+      SubnetId: !Select [0, !Ref SubnetIds]
+      SecurityGroups:
+      - !GetAtt InstanceSecurityGroup.GroupId
+  MountTargetResource2:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref FileSystemResource
+      SubnetId: !Select [1, !Ref SubnetIds]
+      SecurityGroups:
+      - !GetAtt InstanceSecurityGroup.GroupId
+  SharedLogsAccessPoint:
+    Type: 'AWS::EFS::AccessPoint'
+    Properties:
+      FileSystemId: !Ref FileSystemResource
+      PosixUser:
+        Uid: "1604"
+        Gid: "1604"
+      RootDirectory:
+        CreationInfo:
+          OwnerGid: "1604"
+          OwnerUid: "1604"
+          Permissions: "0755"
+        Path: "/logs"
+  SharedDataAccessPoint:
+    Type: 'AWS::EFS::AccessPoint'
+    Properties:
+      FileSystemId: !Ref FileSystemResource
+      PosixUser:
+        Uid: "1604"
+        Gid: "1604"
+      RootDirectory:
+        CreationInfo:
+          OwnerGid: "1604"
+          OwnerUid: "1604"
+          Permissions: "0755"
+        Path: "/data"
+  AppLocalDataAccessPoint:
+    Type: 'AWS::EFS::AccessPoint'
+    Properties:
+      FileSystemId: !Ref FileSystemResource
+      PosixUser:
+        Uid: "1604"
+        Gid: "1604"
+      RootDirectory:
+        CreationInfo:
+          OwnerGid: "1604"
+          OwnerUid: "1604"
+          Permissions: "0755"
+        Path: "/app-localdata"
+  AppPluginsAccessPoint:
+    Type: 'AWS::EFS::AccessPoint'
+    Properties:
+      FileSystemId: !Ref FileSystemResource
+      PosixUser:
+        Uid: "1604"
+        Gid: "1604"
+      RootDirectory:
+        CreationInfo:
+          OwnerGid: "1604"
+          OwnerUid: "1604"
+          Permissions: "0755"
+        Path: "/app-plugins"
+  BrainspaceSecrets:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Join ["", ["eks/", !Ref Namespace, "-resources"]]
+      Description: "Brainspace EKS Database Secrets"
+      SecretString: !Sub |
+          {
+            "Namespace": "${Namespace}",
+            "FileSystemId":"${FileSystemResource.FileSystemId}",
+            "SharedLogsAccessPoint": "${SharedLogsAccessPoint.AccessPointId}",
+            "SharedDataAccessPoint": "${SharedDataAccessPoint.AccessPointId}",
+            "AppLocalDataAccessPoint": "${AppLocalDataAccessPoint.AccessPointId}",
+            "AppPluginsAccessPoint": "${AppPluginsAccessPoint.AccessPointId}",
+            "host": "${DatabaseResource.Endpoint.Address}",
+            "port": "${DatabaseResource.Endpoint.Port}",
+            "username": "postgres",
+            "password": "${MasterDbPassword}",
+            "brainsDbUsername": "${BrainsDbUsername}",
+            "brainsDbPassword": "${BrainsDbPassword}",
+            "database": "${BrainsDbName}"
+          }
+      Tags:
+        - Key: "CFStackName"
+          Value: !Sub "${AWS::StackName}"
+        - Key: "EKS-Namespace"
+          Value: !Ref Namespace
+  BrainspaceSecretsPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Join ["", [!Ref Namespace, "-secret-policy"]]
+      Description: "Allows config secret access to EKS Brainspace instance"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: 
+              - "secretsmanager:GetSecretValue"
+              - "secretsmanager:DescribeSecret"
+            Resource: !Ref BrainspaceSecrets
+          - Effect: Allow
+            Action: "secretsmanager:ListSecrets"
+            Resource: "*"
+  BrainspaceSecretsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join ["", [!Ref Namespace, "-secret-role"]]
+      Description: "EKS Service account role"
+      AssumeRolePolicyDocument: !Sub |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": "sts:AssumeRoleWithWebIdentity",
+                "Condition": {
+                  "StringEquals": {
+                    "oidc.eks.${AWS::Region}.${AWS::URLSuffix}/id/${OIDCIssuerId}:aud": "sts.${AWS::URLSuffix}",
+                    "oidc.eks.${AWS::Region}.${AWS::URLSuffix}/id/${OIDCIssuerId}:sub": "system:serviceaccount:${Namespace}:aws-secrets-provider-sa"
+                  }
+                },
+                "Principal": {
+                  "Federated": "arn:aws:iam::${AWS::AccountId}:oidc-provider/oidc.eks.${AWS::Region}.${AWS::URLSuffix}/id/${OIDCIssuerId}"
+                }
+              }
+            ]
+          }
+      ManagedPolicyArns:
+        - !Ref BrainspaceSecretsPolicy
+      Tags:
+        - Key: "CFStackName"
+          Value: !Sub "${AWS::StackName}"
+        - Key: "EKS-Namespace"
+          Value: !Ref Namespace
+
+Outputs:
+  "SecretArn":
+    Value: !Ref BrainspaceSecrets
+  "PolicyArn":
+    Value: !Ref BrainspaceSecretsPolicy
+  "RoleArn":
+    Value: !GetAtt BrainspaceSecretsRole.Arn
+  "FileSystemId":
+    Value: !GetAtt FileSystemResource.FileSystemId
+  "SharedLogsAccessPoint":
+    Value: !GetAtt SharedLogsAccessPoint.AccessPointId
+  "SharedDataAccessPoint":
+    Value: !GetAtt SharedDataAccessPoint.AccessPointId
+  "AppLocalDataAccessPoint":
+    Value: !GetAtt AppLocalDataAccessPoint.AccessPointId
+  "AppPluginsAccessPoint":
+    Value: !GetAtt AppPluginsAccessPoint.AccessPointId
+  "DatabaseEndpointAddress":
+    Value: !GetAtt DatabaseResource.Endpoint.Address
+  "DatabaseEndpointPort":
+    Value: !GetAtt DatabaseResource.Endpoint.Port

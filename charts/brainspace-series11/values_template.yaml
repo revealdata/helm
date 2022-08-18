@@ -1,0 +1,199 @@
+---
+global:
+  #- Optionally set a namespace value. If empty, the helm release name is used
+  namespace: ""
+  #- Optionally disable the namespace creation as it may already exist
+  NoNamespace: false
+  brainspace:
+    #- Replace the Brainspace license file. 
+    #- File must reside in the 'license' directory in the root of the helm chart
+    #- The .helmignore file must not include 'license/'
+    licenseFile: ""
+  database:
+    #- Use a PostgreSQL container and dbAccessPointId
+    #- false = using an outside database like AWS RDS
+    useContainer: false
+    #- Use an SSL connection to PostgreSQL
+    UseSsl: true
+    #- PostgreSQL Auth mechanism (md5, scram-sha-256)
+    AuthMech: "scram-sha-256"
+  #- env: An optional list of global environment variables
+  env:
+    TEST: "true"
+
+  ecr:
+    enabled: false
+    #- AWS Account ID (required)
+    account: ""
+    #- ECR AWS Region (default "us-east-1")
+    #region: ""
+    #- Docker ECR Password (required)
+    #-- Command: aws ecr get-login-password
+    password: ""
+
+storage:
+  type: efs
+  efs:
+    #- The EFS FileSystemId (storage/cf-efs-storage.yaml: FileSystemId)
+    FileSystemId: ""
+    #- Shared /data EFS AccessPointId (storage/cf-efs-storage.yaml: SharedDataAccessPoint)
+    dataAccessPointId: ""
+    #- Shared /logs EFS AccessPointId (storage/cf-efs-storage.yaml: SharedLogsAccessPoint)
+    logsAccessPointId: ""
+    #- Brainspace APP /localdata EFS AccessPointId (storage/cf-efs-storage.yaml: AppLocalDataAccessPoint)
+    localdataAccessPointId: ""
+    #- Brainspace APP plugins EFS AccessPointId (storage/cf-efs-storage.yaml: AppPluginsAccessPoint)
+    pluginsAccessPointId: ""
+    #- Brainspace Database EFS AccessPointId (storage/cf-efs-storage.yaml: DatabaseDataAccessPoint)
+    dbAccessPointId: ""
+
+secrets:
+  #- The secrets provider
+  #-- Providers:
+  #--- secrets-store-csi: (https://secrets-store-csi-driver.sigs.k8s.io)
+  #--- external-secrets: (https://external-secrets.io/v0.5.9/)
+  #--- kubernetes: Use kubernetes secret. Add secrets to the 'kubernetes' section below.
+  provider: "external-secrets"
+
+  #- Optionally use a service account with RBAC for obtaining secrets (AWS Only)
+  #-- The IAM Role ARN created by CloudFormation or Terraform
+  #-- Required if using provider: "secrets-store-csi"
+  ServiceAccount:
+    RoleArn: ""
+
+  # -- OPTIONS FOR: 'external-secrets' -- #
+  ExternalSecrets:
+    #- The external-secrets provider
+    #-- Providers: 
+    #--- aws: AWS SecretsManager
+    #--- azurekv: Azure KeyVault
+    provider: aws
+    #- Options for aws (AWS SecretsManager)
+    aws:
+      #- Region: The AWS region where the secret resides (default "us-east-1")
+      Region: "<ADD VALUE IF USING secrets.provider='external-secrets'>"
+      #- SecretName: The Secrets Manager Name for the admin and database secrets created by CloudFormation or Terraform
+      SecretName: "<ADD VALUE IF USING secrets.provider='external-secrets' and ExternalSecrets.provider='aws'>"
+    #- Options for azurekv (Azure KeyVault)
+    azurekv:
+      auth: 
+        ClientID: "<ADD VALUE IF USING secrets.provider='external-secrets' and ExternalSecrets.provider='azurekv'>"
+        ClientSecret: "<ADD VALUE IF USING secrets.provider='external-secrets' and ExternalSecrets.provider='azurekv'>"
+      TennantId: "<ADD VALUE IF USING secrets.provider='external-secrets' and ExternalSecrets.provider='azurekv'>"
+      VaultUrl: "<ADD VALUE IF USING secrets.provider='external-secrets' and ExternalSecrets.provider='azurekv'>"
+
+  # -- OPTIONS FOR: 'secrets-store-csi' (AWS ONLY) -- #
+  SecretsStoreCSI:
+    #- SecretArn: The Secrets Manager ARN for the admin and database secrets created by CloudFormation or Terraform
+    secretArn: "<ADD VALUE IF USING secrets.provider='secrets-store-csi'>"
+
+  # -- OPTIONS FOR: provider: 'kubernetes' -- #
+  kubernetes:
+    #- Brainspace database hostname
+    brainspace_db_host: ""
+    #- Brainspace PostgreSQL database name
+    brainspace_db_name: "brainspace"
+    #- Brainspace PostgreSQL database username
+    brainspace_db_user: "brainspace"
+    #- Brainspace PostgreSQL database password
+    brainspace_db_password: ""
+    brainspace_db_port: "5432"
+
+ingress:
+  #- The ingress class
+  #-- Options:
+  #--- alb: (AWS Application Load balancer - https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/)
+  #--- nginx: Nginx Ingress (https://kubernetes.github.io/ingress-nginx/)
+  class: "alb"
+  hostname: "<ADD BRAINSPACE HOSTNAME HERE>"
+  #- sslCertArn is only valid when using the 'alb' class
+  sslCertArn: ""
+  #- Uncomment below to add custom annotations for the ingress
+  # annotations:
+
+brains_db:
+  #- Brainspace database/postgres container image
+  image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/postgres"
+  #- batch database/postgres container tag
+  tag: "latest"
+  #- Force a re-deploy when a helm upgrade happens
+  reloadOnUpgrade: true
+
+brains_ui:
+  # Number of replicas for the UI workload
+  replicas: 1
+  # Brainspace UI container image
+  image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/ui"
+  # Brainspace UI container tag
+  tag: "latest"
+  #- Force a re-deploy when a helm upgrade happens
+  reloadOnUpgrade: true
+
+brains_bt:
+    # batch tools container image
+    image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/batch-tools"
+    # batch tools container tag
+    tag: "line.7.0-githash-f9b8442"
+    # basis tech directory
+    basis_dir: "basis-tech-rbl-7.39.0_rex-7.48.0_rli-7.23.2_c63.0_perpetual.4"
+
+brains_app:
+  #- Brainspace APP container image
+  image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/application"
+  # Brainspace APP container tag
+  tag: "latest"
+  #- Force a re-deploy when a helm upgrade happens
+  reloadOnUpgrade: true
+  plugins:
+    #- Brainspace APP plugins container image
+    image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/plugins"
+    #- Brainspace APP plugins container tag
+    tag: "latest"
+  additionalPlugins:
+    #- Brainspace APP additionsl plugins container image
+    image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/additional-plugins"
+    # Brainspace APP additional plugins container tag
+    tag: "latest"
+  #- logs directory in persistant storage
+  logDir: "app"
+  #- Define static resources for the brains_app pods
+  resources:
+    memory: 12
+    cpu: 4
+  env:
+    #- CATALINA_OPTS Value should be  equal to brains_app.resources.memory
+    CATALINA_OPTS: "-Xmx12g"
+
+brains_ana:
+  #- Brainspace ANA (analytics) container image
+  image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/analytics-server"
+  # Brainspace ANA (analytics) container tag
+  tag: "latest"
+  replicas: 0
+  #- Force a re-deploy when a helm upgrade happens
+  reloadOnUpgrade: false
+  #- localdata storage
+  storage:
+    #- storage type
+    #-- Options:
+    #--- 'ebs'
+    #--- 'emptyDir' (node local storage)
+    type: "ebs"
+    size: 400
+  #- Define static resources for the brains_ana pods
+  resources:
+    memory: 8
+    cpu: 2
+  env:
+    ANALYSIS_HEAP_MAX: 1g
+    #- BT_HEAP_MAX Value should be (brains_ana.resources.memory - ANALYSIS_HEAP_MAX)
+    BT_HEAP_MAX: 7g
+  #- Use the ANA Auto-scaling pod
+  autoscale:
+    enabled: true
+    image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/brainspace/ana-autoscale
+    tag: 1.0.0
+    debug: "0"
+    thresholds:
+      min: 0
+      max: 2
