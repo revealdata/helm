@@ -4,7 +4,7 @@ Parameters:
   Namespace:
     Type: String
     Description: "The K8s Namespace used for this deployment"
-    Default: keycloak-revealglobal
+    Default: keycloak-reveal-<environment>-<region>
   OIDCIssuerId:
     # Use the following command to get the OIDC provider (replace the values enclosed in '<>'):
     # aws --profile <CLI-PROFILE>  eks describe-cluster --name <EKS-CLUSTER-NAME> --query "cluster.identity.oidc.issuer" --output text
@@ -28,7 +28,7 @@ Parameters:
     MinLength: 8
     NoEcho: True
     Description: "The Keycloak Administrator password"
-    Default: "{VyV!kkTtn?hWqI,b=1C"
+    # Default: ""
   DbInstanceIdentifier:
     Type: String
     Description: The RDS Database identifier/name
@@ -51,7 +51,7 @@ Parameters:
     MinLength: 8
     NoEcho: True
     Description: "The Keycloak database master password"
-    Default: "Ht5bviHEWdinDdoHkDuJ"
+    # Default: ""
   KeycloakDbName:
     Type: String
     Default: keycloak
@@ -139,7 +139,7 @@ Resources:
   KeycloakAdminSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: !Sub "keycloak/user/${DbInstanceIdentifier}/admin"
+      Name: !Sub "eks/keycloak/user/${DbInstanceIdentifier}/admin"
       Description: "Keycloak EKS Admin Account"
       SecretString: !Sub |
           {
@@ -155,7 +155,7 @@ Resources:
   KeycloakDbSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
-      Name: !Sub "keycloak/database/${DbInstanceIdentifier}/master"
+      Name: !Sub "eks/rds/keycloak/${DbInstanceIdentifier}/master"
       Description: "Keycloak EKS Master Database"
       SecretString: !Sub |
           {
