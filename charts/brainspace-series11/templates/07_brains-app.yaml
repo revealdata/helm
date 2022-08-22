@@ -43,7 +43,7 @@ spec:
       serviceAccountName: aws-secrets-provider-sa
       {{- end }}{{- end }}
       volumes:
-      {{- if or (eq .Values.storage.type "efs-sc") (eq .Values.storage.type "pvc") }}
+      {{- if or (eq .Values.storage.class "efs-sc") (eq .Values.storage.class "pvc") }}
       - name: bt-data
         emptyDir: {}
       - name: basis-data
@@ -165,7 +165,7 @@ spec:
         - name: plugins-additional-data
           readOnly: false
           mountPath: /var/lib/brains/.brainspace/plugins/additional
-        {{- if and .Values.global.development (eq .Values.storage.type "efs") }}
+        {{- if and .Values.global.development (eq .Values.storage.class "efs") }}
         - name: devshared-data # (BRAINSPACE INTERNAL)
           readOnly: true
           mountPath: /devshared_data

@@ -139,7 +139,7 @@ spec:
         emptyDir: {}
       - name: basis-data
         emptyDir: {}
-      {{- if or (eq .Values.storage.type "efs-sc") (eq .Values.storage.type "pvc") }}
+      {{- if or (eq .Values.storage.class "efs-sc") (eq .Values.storage.class "pvc") }}
       - name: shared-data
         persistentVolumeClaim:
           claimName: {{ .Values.storage.pvc.sharedData | default "pvc-shared-data" }}
