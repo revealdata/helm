@@ -61,15 +61,15 @@ storage:
   #-- The following volume claim names must already exist
   #-- The values in 'values-template.yaml' are the defaults
   pvc:
-    #- Shared Data `/data`
+    #- Shared Data `/data` (accessMode: ReadWriteMany)
     sharedData: "pvc-shared-data"
-    #- Application logs
+    #- Application logs (accessMode: ReadWriteMany)
     sharedLogs: "pvc-shared-logs"
-    #- Application Local Data `/localdata`
+    #- Application Local Data `/localdata` (accessMode: ReadWriteMany)
     appLocalData: "pvc-app-localdata"
-    #- Application Plugins
+    #- Application Plugins (accessMode: ReadWriteOnce)
     appPlugins: "pvc-app-plugins"
-    #- Database (only required if global.database.useContainer = true)
+    #- Database (only required if global.database.useContainer = true) (accessMode: ReadWriteOnce)
     databaseData: "pv-db-data"
 
 secrets:
@@ -207,11 +207,11 @@ brains_ana:
   reloadOnUpgrade: false
   #- localdata storage
   storage:
-    #- storage type
+    #- storage class
     #-- Options:
-    #--- 'ebs'
+    #--- 'gp2'
     #--- 'emptyDir' (node local storage)
-    type: "ebs"
+    class: "gp2"
     size: 400
   #- Define static resources for the brains_ana pods
   resources:

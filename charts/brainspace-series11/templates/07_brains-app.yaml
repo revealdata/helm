@@ -52,16 +52,16 @@ spec:
         emptyDir: {}
       - name: shared-data
         persistentVolumeClaim:
-          claimName: {{ .Values.storage.pvc.sharedData | default "pvc-shared-data" }}
+          claimName: {{- if .Values.storage.pvc }} {{ .Values.storage.pvc.sharedData }} {{- else }} pvc-shared-data {{- end }}
       - name: app-localdata
         persistentVolumeClaim:
-          claimName: {{ .Values.storage.pvc.appLocalData | default "pvc-app-localdata" }}
+          claimName: {{- if .Values.storage.pvc }} {{ .Values.storage.pvc.appLocalData }} {{- else }} pvc-app-localdata {{- end }}
       - name: plugins-additional-data
         persistentVolumeClaim:
-          claimName: {{ .Values.storage.pvc.appPlugins | default "pvc-app-plugins" }} 
+          claimName: {{- if .Values.storage.pvc }} {{ .Values.storage.pvc.appPlugins }} {{- else }} pvc-app-plugins {{- end }}
       - name: shared-logs
         persistentVolumeClaim:
-          claimName: {{ .Values.storage.pvc.sharedLogs | default "pvc-shared-logs" }}
+          claimName: {{- if .Values.storage.pvc }} {{ .Values.storage.pvc.sharedLogs }} {{- else }} pvc-shared-logs {{- end }}
       {{- else }}
       - name: bt-data
         emptyDir: {}

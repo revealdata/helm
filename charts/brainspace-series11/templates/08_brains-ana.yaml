@@ -117,8 +117,10 @@ spec:
             secretProviderClass: "brainspace-secrets"
       {{- end }}
       - name: local-data
-        {{- if .Values.brains_ana.storage }}
-        {{- if eq .Values.brains_ana.storage.type "ebs" }}
+        {{- if .Values.brains_ana.storage.class }}
+        {{- if eq .Values.brains_ana.storage.class "emptyDir" }}
+        emptyDir: {}
+        {{- else }}
         ephemeral:
           volumeClaimTemplate:
             metadata:
@@ -129,7 +131,7 @@ spec:
               resources:
                 requests:
                   storage: {{ .Values.brains_ana.storage.size | default 500 }}Gi
-              storageClassName: gp2
+              storageClassName: {{ .Values.brains_ana.storage.class }}
               volumeMode: Filesystem
         {{- end }}
         {{- else }}
@@ -142,10 +144,10 @@ spec:
       {{- if or (eq .Values.storage.class "efs-sc") (eq .Values.storage.class "pvc") }}
       - name: shared-data
         persistentVolumeClaim:
-          claimName: {{ .Values.storage.pvc.sharedData | default "pvc-shared-data" }}
+          claimName: {{- if .Values.storage.pvc }} {{ .Values.storage.pvc.sharedData }} {{- else }} pvc-shared-data {{- end }}
       - name: app-localdata
         persistentVolumeClaim:
-          claimName: {{ .Values.storage.pvc.appLocalData | default "pvc-app-localdata" }}
+          claimName: {{- if .Values.storage.pvc }} {{ .Values.storage.pvc.appLocalData }} {{- else }} pvc-app-localdata {{- end }}
       {{- else }}
       - name: shared-data
         emptyDir: {}
