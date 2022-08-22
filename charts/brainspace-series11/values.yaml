@@ -1,0 +1,62 @@
+---
+global:
+  namespace: ""
+  database:
+      useContainer: true
+      useSsl: true
+      AuthMech: "scram-sha-256"
+
+storage:
+  type: emptyDir
+secrets:
+  provider: kubernetes
+  kubernetes:
+    brainspace_db_host: "brains-db"
+    brainspace_db_name: "brainspace"
+    brainspace_db_user: "brainspace"
+    brainspace_db_password: "brainspace1"
+    brainspace_db_port: "5432"
+
+ingress:
+  class: nginx
+  hostname: "brainspace.localdomain"
+
+brains_db:
+  image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/postgres"
+  tag: "latest"
+
+brains_ui:
+  replicas: 1
+  image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/ui"
+  tag: "latest"
+
+brains_bt:
+    image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/batch-tools"
+    tag: "line.7.0-githash-f9b8442"
+    basis_dir: "basis-tech-rbl-7.39.0_rex-7.48.0_rli-7.23.2_c63.0_perpetual.4"
+
+brains_app:
+  image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/application"
+  logDir: "app"
+  tag: "latest"
+  plugins:
+    image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/plugins"
+    tag: "latest"
+  additionalPlugins:
+    image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/additional-plugins"
+    tag: "latest"
+
+brains_ana:
+  image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/analytics-server"
+  tag: "latest"
+  replicas: 0
+  storage:
+    type: "emptyDir"
+  autoscale:
+    enabled: true
+    image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/brainspace/ana-autoscale
+    tag: 1.0.0
+    debug: "0"
+    thresholds:
+      min: 0
+      max: 2

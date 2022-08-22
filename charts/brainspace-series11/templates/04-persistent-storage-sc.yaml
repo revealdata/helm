@@ -1,0 +1,194 @@
+---
+{{- if eq .Values.storage.class "efs-sc" }}
+
+{{- if .Values.global.database.useContainer }}
+{{- if .Values.storage.efs.DatabaseDataAccessPointId }}
+---
+## PostgreSQL data Persistent volume
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-db-data-{{ .Values.global.namespace | default .Release.Name }}
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ .Values.storage.class }}
+  csi:
+    {{- if eq .Values.storage.class "efs-sc" }}
+    driver: efs.csi.aws.com
+    volumeHandle: {{ .Values.storage.efs.fileSystemId }}::{{ .Values.storage.efs.DatabaseDataAccessPointId }}
+    {{- end }}
+---
+## PostgreSQL data Persistent volume claim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-db-data
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.storage.class }}
+  volumeName: pv-db-data-{{ .Values.global.namespace | default .Release.Name }}
+  resources:
+    requests:
+      storage: 1Gi
+{{- end }}{{- end }}
+
+{{- if .Values.storage.efs.SharedLogsAccessPointId }}
+---
+## Shared Logs Persistent volume
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-shard-logs-{{ .Values.global.namespace | default .Release.Name }}
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ .Values.storage.class }}
+  csi:
+    {{- if eq .Values.storage.class "efs-sc" }}
+    driver: efs.csi.aws.com
+    volumeHandle: {{ trim .Values.storage.efs.fileSystemId }}::{{ trim .Values.storage.efs.SharedLogsAccessPointId }}
+    {{- end }}
+
+---
+## Shared Logs Persistent claim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-shared-logs
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: {{ .Values.storage.class }}
+  volumeName: pv-shard-logs-{{ .Values.global.namespace | default .Release.Name }}
+  resources:
+    requests:
+      storage: 1Gi
+{{- end }}
+
+{{- if .Values.storage.efs.SharedDataAccessPointId }}
+---
+## Shared /data Persistent volume
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-shard-data-{{ .Values.global.namespace | default .Release.Name }}
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ .Values.storage.class }}
+  csi:
+    {{- if eq .Values.storage.class "efs-sc" }}
+    driver: efs.csi.aws.com
+    volumeHandle: {{ trim .Values.storage.efs.fileSystemId }}::{{ trim .Values.storage.efs.SharedDataAccessPointId }}
+    {{- end }}
+
+---
+## Shared /data Persistent claim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-shared-data
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: {{ .Values.storage.class }}
+  volumeName: pv-shard-data-{{ .Values.global.namespace | default .Release.Name }}
+  resources:
+    requests:
+      storage: 1Gi
+{{- end }}
+
+{{- if .Values.storage.efs.AppLocalDataAccessPointId }}
+---
+## APP /localdata Persistent volume
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-app-localdata-{{ .Values.global.namespace | default .Release.Name }}
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ .Values.storage.class }}
+  csi:
+    {{- if eq .Values.storage.class "efs-sc" }}
+    driver: efs.csi.aws.com
+    volumeHandle: {{ trim .Values.storage.efs.fileSystemId }}::{{ trim .Values.storage.efs.AppLocalDataAccessPointId }}
+    {{- end }}
+
+---
+## APP /localdata Persistent volume claim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-app-localdata
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: {{ .Values.storage.class }}
+  volumeName: pv-app-localdata-{{ .Values.global.namespace | default .Release.Name }}
+  resources:
+    requests:
+      storage: 10Gi
+{{- end }}
+
+{{- if .Values.storage.efs.AppPluginsAccessPointId }}
+---
+## APP plugins Persistent volume
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-app-plugins-{{ .Values.global.namespace | default .Release.Name }}
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ .Values.storage.class }}
+  csi:
+    {{- if eq .Values.storage.class "efs-sc" }}
+    driver: efs.csi.aws.com
+    volumeHandle: {{ trim .Values.storage.efs.fileSystemId }}::{{ trim .Values.storage.efs.AppPluginsAccessPointId }}
+    {{- end }}
+
+---
+## APP plugins Persistent volume claim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-app-plugins
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.storage.class }}
+  volumeName: pv-app-plugins-{{ .Values.global.namespace | default .Release.Name }}
+  resources:
+    requests:
+      storage: 10Gi
+{{- end }}
+
+{{- end }}

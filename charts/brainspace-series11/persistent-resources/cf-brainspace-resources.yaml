@@ -10,14 +10,14 @@ Parameters:
     Description: 'The EKS OIDC Issuer ID ONLY. Command: aws --profile <CLI-PROFILE>  eks describe-cluster --name <EKS-CLUSTER-NAME> --query "cluster.identity.oidc.issuer" --output text'
   VpcId:
     Type: AWS::EC2::VPC::Id
-    Default: "vpc-084dc59a5a2eaaf87"
+    Default: ""
     Description: "The VPC ID where resources will be deployed"
   SubnetIds:
     Type: List<AWS::EC2::Subnet::Id>
     # Note: You will need to deplare a subnet for each AZ where EKS is deployed
     #       If you require more than 2 subnets, you will also need to add
     #       `more MountTargetResource` declarations below. (Cloudformation limitations)
-    Default: "subnet-003c752ee627e41c6, subnet-0c657786eba971d01"
+    #Default: ""
     Description: "A list of SubnetIds in the VPC where services will be deployed"
   DbClass:
     Type: String
@@ -75,7 +75,12 @@ Resources:
           FromPort: 5432
           ToPort: 5432
           CidrIp : "10.0.0.0/8"
-          Description: "Allow internal Postgres"
+          Description: "Allow Postgres from Private Addresses"
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp : "172.21.0.0/16"
+          Description: "Allow Postgres from P81 Universal"
       Tags:
         - Key: "CFStackName"
           Value: !Sub "${AWS::StackName}"
@@ -154,6 +159,9 @@ Resources:
           OwnerUid: "1604"
           Permissions: "0755"
         Path: "/logs"
+      AccessPointTags:
+        - Key: Name
+          Value: "SharedLogsAccessPoint"
   SharedDataAccessPoint:
     Type: 'AWS::EFS::AccessPoint'
     Properties:
@@ -167,6 +175,9 @@ Resources:
           OwnerUid: "1604"
           Permissions: "0755"
         Path: "/data"
+      AccessPointTags:
+        - Key: Name
+          Value: "SharedDataAccessPoint"
   AppLocalDataAccessPoint:
     Type: 'AWS::EFS::AccessPoint'
     Properties:
@@ -180,6 +191,9 @@ Resources:
           OwnerUid: "1604"
           Permissions: "0755"
         Path: "/app-localdata"
+      AccessPointTags:
+        - Key: Name
+          Value: "AppLocalDataAccessPoint"
   AppPluginsAccessPoint:
     Type: 'AWS::EFS::AccessPoint'
     Properties:
@@ -193,6 +207,25 @@ Resources:
           OwnerUid: "1604"
           Permissions: "0755"
         Path: "/app-plugins"
+      AccessPointTags:
+        - Key: Name
+          Value: "AppPluginsAccessPoint"
+  DatabaseDataAccessPoint:
+    Type: 'AWS::EFS::AccessPoint'
+    Properties:
+      FileSystemId: !Ref FileSystemResource
+      PosixUser:
+        Uid: "70"
+        Gid: "70"
+      RootDirectory:
+        CreationInfo:
+          OwnerGid: "70"
+          OwnerUid: "70"
+          Permissions: "0755"
+        Path: "/db"
+      AccessPointTags:
+        - Key: Name
+          Value: "DatabaseDataAccessPoint"
   BrainspaceSecrets:
     Type: AWS::SecretsManager::Secret
     Properties:
@@ -206,6 +239,7 @@ Resources:
             "SharedDataAccessPoint": "${SharedDataAccessPoint.AccessPointId}",
             "AppLocalDataAccessPoint": "${AppLocalDataAccessPoint.AccessPointId}",
             "AppPluginsAccessPoint": "${AppPluginsAccessPoint.AccessPointId}",
+            "DatabaseDataAccessPoint": "${DatabaseDataAccessPoint.AccessPointId}",
             "host": "${DatabaseResource.Endpoint.Address}",
             "port": "${DatabaseResource.Endpoint.Port}",
             "username": "postgres",
@@ -284,6 +318,8 @@ Outputs:
     Value: !GetAtt AppLocalDataAccessPoint.AccessPointId
   "AppPluginsAccessPoint":
     Value: !GetAtt AppPluginsAccessPoint.AccessPointId
+  "DatabaseDataAccessPoint":
+    Value: !GetAtt DatabaseDataAccessPoint.AccessPointId
   "DatabaseEndpointAddress":
     Value: !GetAtt DatabaseResource.Endpoint.Address
   "DatabaseEndpointPort":

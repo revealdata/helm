@@ -8,7 +8,6 @@ metadata:
   labels:
     app.kubernetes.io/name: brains-ana
     app.kubernetes.io/part-of: brainspace
-    app.kubernetes.io/managed-by: brainspace-ci
     app.kubernetes.io/component: analytics
 spec:
   selector:
@@ -44,8 +43,8 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.global.ecr.secret }}
       {{- end }} {{- end }}
-      {{- if and .Values.secrets.ServiceAccount }}
-      {{- if .Values.secrets.ServiceAccount.RoleArn }}
+      {{- if and .Values.secrets.serviceAccount }}
+      {{- if and (eq .Values.secrets.provider "secrets-store-csi" ) .Values.secrets.serviceAccount.roleArn }}
       serviceAccountName: aws-secrets-provider-sa
       {{- end }}{{- end }}
       initContainers:
@@ -66,16 +65,9 @@ spec:
       - name: brains-ana
         image: {{ .Values.brains_ana.image }}:{{ .Values.brains_ana.tag }}
         imagePullPolicy: {{ .Values.brains_ana.imagePullPolicy | default "Always" }}
-        {{- if .Values.brains_ana.resources }}
         resources:
           requests:
-            {{- if .Values.brains_ana.resources.memory }}
-            memory: "{{ .Values.brains_ana.resources.memory }}Gi"
-            {{ end }}
-            {{- if .Values.brains_ana.resources.cpu }}
-            cpu: "{{ .Values.brains_ana.resources.cpu }}000m"
-            {{- end }}
-        {{- end }}
+            {{- include "resources.values" .Values.brains_ana | indent 8 }}
         ports:
         - containerPort: 1604
         envFrom:
@@ -84,38 +76,12 @@ spec:
         - configMapRef:
             name: brains-ana-config
         env:
-          - name: BRAINS_ANA_ROLE
-            value: ANA
-          - name: POSTGRES_USER
-            valueFrom:
-              secretKeyRef:
-                name: brainspace-secrets
-                key: brainspace_db_user
-          - name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: brainspace-secrets
-                key: brainspace_db_password
-          - name: PGPASSWORD
-            valueFrom:
-                secretKeyRef:
-                  name: brainspace-secrets
-                  key: brainspace_db_password
-          - name: POSTGRES_HOST
-            valueFrom:
-              secretKeyRef:
-                name: brainspace-secrets
-                key: brainspace_db_host
-          - name: POSTGRES_PORT
-            valueFrom:
-              secretKeyRef:
-                name: brainspace-secrets
-                key: brainspace_db_port
-          - name: POSTGRES_DB
-            valueFrom:
-              secretKeyRef:
-                name: brainspace-secrets
-                key: brainspace_db_name
+          - name: ANALYSIS_HEAP_MAX
+            value: "1g"
+          {{- /* env vars for Java Resources (_helpers.tpl) */}}
+          {{- include "java.resources.values" .Values.brains_ana | indent 6 }}
+          {{- /* env vars for Brainspace secrets (_helpers.tpl) */}}
+          {{- include "resources.env.secrets" . |indent 6 }}
         lifecycle:
           postStart:
             exec:
@@ -169,17 +135,17 @@ spec:
         {{- else }}
         emptyDir: {}
         {{- end }}
-      {{- if eq .Values.storage.type "efs" }}
       - name: bt-data
         emptyDir: {}
       - name: basis-data
         emptyDir: {}
+      {{- if or (eq .Values.storage.type "efs-sc") (eq .Values.storage.type "pvc") }}
       - name: shared-data
         persistentVolumeClaim:
-          claimName: efs-claim-data
+          claimName: {{ .Values.storage.pvc.sharedData | default "pvc-shared-data" }}
       - name: app-localdata
         persistentVolumeClaim:
-          claimName: efs-claim-app-localdata
+          claimName: {{ .Values.storage.pvc.appLocalData | default "pvc-app-localdata" }}
       {{- else }}
       - name: shared-data
         emptyDir: {}
@@ -197,6 +163,10 @@ spec:
         key: node.kubernetes.io/unreachable
         operator: Exists
         tolerationSeconds: 300
+      - effect: "NoSchedule"
+        key: "linux_large_brs"
+        operator: "Exists"
+        
 
 ---
 apiVersion: v1

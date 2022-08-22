@@ -11,11 +11,13 @@ global:
     licenseFile: ""
   database:
     #- Use a PostgreSQL container and dbAccessPointId
-    #- false = using an outside database like AWS RDS
+    #-- If you are using Brainspace DB container, set secret's 'host' value to 'brains-db'
+    #-- false = using an outside database like AWS RDS
     useContainer: false
     #- Use an SSL connection to PostgreSQL
-    UseSsl: true
+    useSsl: true
     #- PostgreSQL Auth mechanism (md5, scram-sha-256)
+    #- Use 'md5' if using the database container
     AuthMech: "scram-sha-256"
   #- env: An optional list of global environment variables
   env:
@@ -34,20 +36,41 @@ global:
     password: ""
 
 storage:
-  type: efs
+  #- Persistent Storage Class
+  #-- Options:
+  #--- efs-sc: (https://github.com/kubernetes-sigs/aws-efs-csi-driver)
+  #--- pvc: Use pre-existing persistent volume claims
+  class: efs-sc
+
+  #- Options for class: efs-sc
   efs:
     #- The EFS FileSystemId (storage/cf-efs-storage.yaml: FileSystemId)
-    FileSystemId: ""
+    fileSystemId: ""
     #- Shared /data EFS AccessPointId (storage/cf-efs-storage.yaml: SharedDataAccessPoint)
-    dataAccessPointId: ""
+    SharedDataAccessPointId: ""
     #- Shared /logs EFS AccessPointId (storage/cf-efs-storage.yaml: SharedLogsAccessPoint)
-    logsAccessPointId: ""
+    SharedLogsAccessPointId: ""
     #- Brainspace APP /localdata EFS AccessPointId (storage/cf-efs-storage.yaml: AppLocalDataAccessPoint)
-    localdataAccessPointId: ""
+    AppLocalDataAccessPointId: ""
     #- Brainspace APP plugins EFS AccessPointId (storage/cf-efs-storage.yaml: AppPluginsAccessPoint)
-    pluginsAccessPointId: ""
+    AppPluginsAccessPointId: ""
     #- Brainspace Database EFS AccessPointId (storage/cf-efs-storage.yaml: DatabaseDataAccessPoint)
-    dbAccessPointId: ""
+    DatabaseDataAccessPointId: ""
+
+  #- Options for class: pvc
+  #-- The following volume claim names must already exist
+  #-- The values in 'values-template.yaml' are the defaults
+  pvc:
+    #- Shared Data `/data`
+    sharedData: "pvc-shared-data"
+    #- Application logs
+    sharedLogs: "pvc-shared-logs"
+    #- Application Local Data `/localdata`
+    appLocalData: "pvc-app-localdata"
+    #- Application Plugins
+    appPlugins: "pvc-app-plugins"
+    #- Database (only required if global.database.useContainer = true)
+    databaseData: "pv-db-data"
 
 secrets:
   #- The secrets provider
@@ -60,11 +83,11 @@ secrets:
   #- Optionally use a service account with RBAC for obtaining secrets (AWS Only)
   #-- The IAM Role ARN created by CloudFormation or Terraform
   #-- Required if using provider: "secrets-store-csi"
-  ServiceAccount:
-    RoleArn: ""
+  serviceAccount:
+    roleArn: ""
 
   # -- OPTIONS FOR: 'external-secrets' -- #
-  ExternalSecrets:
+  externalSecrets:
     #- The external-secrets provider
     #-- Providers: 
     #--- aws: AWS SecretsManager
@@ -73,19 +96,19 @@ secrets:
     #- Options for aws (AWS SecretsManager)
     aws:
       #- Region: The AWS region where the secret resides (default "us-east-1")
-      Region: "<ADD VALUE IF USING secrets.provider='external-secrets'>"
+      region: "<ADD VALUE IF USING secrets.provider='external-secrets'>"
       #- SecretName: The Secrets Manager Name for the admin and database secrets created by CloudFormation or Terraform
-      SecretName: "<ADD VALUE IF USING secrets.provider='external-secrets' and ExternalSecrets.provider='aws'>"
+      secretName: "<ADD VALUE IF USING secrets.provider='external-secrets' and ExternalSecrets.provider='aws'>"
     #- Options for azurekv (Azure KeyVault)
     azurekv:
       auth: 
-        ClientID: "<ADD VALUE IF USING secrets.provider='external-secrets' and ExternalSecrets.provider='azurekv'>"
-        ClientSecret: "<ADD VALUE IF USING secrets.provider='external-secrets' and ExternalSecrets.provider='azurekv'>"
-      TennantId: "<ADD VALUE IF USING secrets.provider='external-secrets' and ExternalSecrets.provider='azurekv'>"
-      VaultUrl: "<ADD VALUE IF USING secrets.provider='external-secrets' and ExternalSecrets.provider='azurekv'>"
+        clientID: "<ADD VALUE IF USING secrets.provider='external-secrets' and ExternalSecrets.provider='azurekv'>"
+        clientSecret: "<ADD VALUE IF USING secrets.provider='external-secrets' and ExternalSecrets.provider='azurekv'>"
+      tennantId: "<ADD VALUE IF USING secrets.provider='external-secrets' and ExternalSecrets.provider='azurekv'>"
+      vaultUrl: "<ADD VALUE IF USING secrets.provider='external-secrets' and ExternalSecrets.provider='azurekv'>"
 
   # -- OPTIONS FOR: 'secrets-store-csi' (AWS ONLY) -- #
-  SecretsStoreCSI:
+  secretsStoreCSI:
     #- SecretArn: The Secrets Manager ARN for the admin and database secrets created by CloudFormation or Terraform
     secretArn: "<ADD VALUE IF USING secrets.provider='secrets-store-csi'>"
 
@@ -120,6 +143,8 @@ brains_db:
   tag: "latest"
   #- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: true
+  #- Specify a K8s node group for this deployment to run in
+  nodeGroup: ""
 
 brains_ui:
   # Number of replicas for the UI workload
@@ -130,6 +155,8 @@ brains_ui:
   tag: "latest"
   #- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: true
+  #- Specify a K8s node group for this deployment to run in
+  nodeGroup: ""
 
 brains_bt:
     # batch tools container image
@@ -146,6 +173,8 @@ brains_app:
   tag: "latest"
   #- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: true
+  #- Specify a K8s node group for this deployment to run in
+  nodeGroup: ""
   plugins:
     #- Brainspace APP plugins container image
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/plugins"
@@ -162,15 +191,17 @@ brains_app:
   resources:
     memory: 12
     cpu: 4
+  #- Optionally set custm environment variables for Brainspace Application
   env:
-    #- CATALINA_OPTS Value should be  equal to brains_app.resources.memory
-    CATALINA_OPTS: "-Xmx12g"
+    ENV_VAR: "env_value"
 
 brains_ana:
   #- Brainspace ANA (analytics) container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/analytics-server"
   # Brainspace ANA (analytics) container tag
   tag: "latest"
+  #- Specify a K8s node group for this deployment to run in
+  nodeGroup: ""
   replicas: 0
   #- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: false
@@ -186,10 +217,10 @@ brains_ana:
   resources:
     memory: 8
     cpu: 2
+  #- Optionally set custm environment variables for Brainspace Analytics
   env:
-    ANALYSIS_HEAP_MAX: 1g
-    #- BT_HEAP_MAX Value should be (brains_ana.resources.memory - ANALYSIS_HEAP_MAX)
-    BT_HEAP_MAX: 7g
+    ENV_VAR: "env_value"
+    
   #- Use the ANA Auto-scaling pod
   autoscale:
     enabled: true

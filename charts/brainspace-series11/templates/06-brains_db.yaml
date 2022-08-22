@@ -38,7 +38,7 @@ spec:
       containers:
       - name: brains-db
         image: {{ .Values.brains_db.image }}:{{ .Values.brains_db.tag }}
-        imagePullPolicy: {{ .Values.global.bt.imagePullPolicy | default "Always" }}
+        imagePullPolicy: {{ .Values.brains_bt.imagePullPolicy | default "Always" }}
         {{- if .Values.brains_db.resources }}
         resources:
           limits:
@@ -51,6 +51,9 @@ spec:
         {{- end }}
         ports:
         - containerPort: 5432
+        env:
+          {{- /* env vars for Brainspace secrets (_helpers.tpl) */}}
+          {{- include "resources.env.secrets" . |indent 5 }}
         envFrom:
         - configMapRef:
             name: brains-config
@@ -58,15 +61,10 @@ spec:
         - name: db-data
           mountPath: /var/lib/postgresql/data
       volumes:
-      {{- if .Values.global.efs }}
+      {{- if or (eq .Values.storage.type "efs-sc") (eq .Values.storage.type "pvc") }}
       - name: db-data
         persistentVolumeClaim:
-          claimName: efs-claim-db-data
-      {{- else if .Values.global.localStorage.rootPath }}
-      - name: db-data
-        hostPath:
-          path: "{{ .Values.global.localStorage.rootPath }}/{{ .Release.Name }}/db"
-          type: DirectoryOrCreate
+          claimName: {{ .Values.storage.pvc.databaseData | default "pv-db-data" }}
       {{- else }}
       - name: db-data
         emptyDir: {}

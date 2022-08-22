@@ -38,12 +38,12 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.global.ecr.secret }}
       {{- end }} {{- end }}
-      {{- if .Values.secrets.ServiceAccount }}
-      {{- if .Values.secrets.ServiceAccount.RoleArn }}
+      {{- if .Values.secrets.serviceAccount }}
+      {{- if and (eq .Values.secrets.provider "secrets-store-csi" ) .Values.secrets.serviceAccount.roleArn }}
       serviceAccountName: aws-secrets-provider-sa
       {{- end }}{{- end }}
       volumes:
-      {{- if eq .Values.storage.type "efs" }}
+      {{- if or (eq .Values.storage.type "efs-sc") (eq .Values.storage.type "pvc") }}
       - name: bt-data
         emptyDir: {}
       - name: basis-data
@@ -52,21 +52,16 @@ spec:
         emptyDir: {}
       - name: shared-data
         persistentVolumeClaim:
-          claimName: efs-claim-data
+          claimName: {{ .Values.storage.pvc.sharedData | default "pvc-shared-data" }}
       - name: app-localdata
         persistentVolumeClaim:
-          claimName: efs-claim-app-localdata
+          claimName: {{ .Values.storage.pvc.appLocalData | default "pvc-app-localdata" }}
       - name: plugins-additional-data
         persistentVolumeClaim:
-          claimName: efs-claim-app-plugins
+          claimName: {{ .Values.storage.pvc.appPlugins | default "pvc-app-plugins" }} 
       - name: shared-logs
         persistentVolumeClaim:
-          claimName: efs-claim-logs
-      {{- if .Values.global.development }}
-      - name: devshared-data
-        persistentVolumeClaim:
-          claimName: efs-claim-devshared  # (BRAINSPACE INTERNAL)
-      {{- end }}
+          claimName: {{ .Values.storage.pvc.sharedLogs | default "pvc-shared-logs" }}
       {{- else }}
       - name: bt-data
         emptyDir: {}
@@ -83,12 +78,13 @@ spec:
       - name: shared-logs
         emptyDir: {}
       {{- end }}
+      {{- if .Values.global.brainspace }}
       {{- if .Values.global.brainspace.licenseFile }}
       - name: brains-license-vol
         secret:
           secretName: brains-license
           optional: true
-      {{- end }}
+      {{- end }}{{- end }}
       {{- if eq .Values.secrets.provider "secrets-store-csi" }}
       - name: brainspace-secrets-vol
         csi:
@@ -128,16 +124,9 @@ spec:
       - name: brains-app
         image: {{ .Values.brains_app.image }}:{{ .Values.brains_app.tag }}
         imagePullPolicy: {{ .Values.brains_app.imagePullPolicy | default "Always" }}
-        {{- if .Values.brains_app.resources }}
         resources:
           requests:
-            {{- if .Values.brains_app.resources.memory }}
-            memory: "{{ .Values.brains_app.resources.memory }}Gi"
-            {{- end }}
-            {{- if .Values.brains_app.resources.cpu }}
-            cpu: "{{ .Values.brains_app.resources.cpu }}000m"
-            {{- end }}
-        {{- end }}
+          {{- include "resources.values" .Values.brains_app | indent 8 }}
         ports:
         - containerPort: 8080
         envFrom:
@@ -146,42 +135,17 @@ spec:
         - configMapRef:
             name: brains-app-config
         env:
-          - name: POSTGRES_USER
-            valueFrom:
-              secretKeyRef:
-                name: brainspace-secrets
-                key: brainspace_db_user
-          - name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: brainspace-secrets
-                key: brainspace_db_password
-          - name: PGPASSWORD
-            valueFrom:
-                secretKeyRef:
-                  name: brainspace-secrets
-                  key: brainspace_db_password
-          - name: POSTGRES_HOST
-            valueFrom:
-              secretKeyRef:
-                name: brainspace-secrets
-                key: brainspace_db_host
-          - name: POSTGRES_PORT
-            valueFrom:
-              secretKeyRef:
-                name: brainspace-secrets
-                key: brainspace_db_port
-          - name: POSTGRES_DB
-            valueFrom:
-              secretKeyRef:
-                name: brainspace-secrets
-                key: brainspace_db_name
+          {{- /* env vars for Java Resources (_helpers.tpl) */}}
+          {{- include "java.resources.values" .Values.brains_app | indent 6 }}
+          {{- /* env vars for Brainspace secrets (_helpers.tpl) */}}
+          {{- include "resources.env.secrets" . |indent 6 }}
+        {{- if .Values.global.brainspace }}
         {{- if .Values.global.brainspace.licenseFile }}
         lifecycle:
           postStart:
             exec:
               command: ["/bin/bash", "-c", "[[ -e /var/lib/brains/license/brainspace_license.txt ]] && cp /var/lib/brains/license/brainspace_license.txt /var/lib/brains/.brainspace/brainspace_license.txt"]
-        {{- end }}
+        {{- end }}{{- end }}
         volumeMounts:
         - name: basis-data
           readOnly: true
@@ -209,12 +173,13 @@ spec:
         - name: shared-logs
           readOnly: false
           mountPath: /usr/local/tomcat/logs
-          subPath: {{ .Values.brains_app.logDir }}
+          subPath: {{ .Values.brains_app.logDir | default "app" }}
+        {{- if .Values.global.brainspace }}
         {{- if .Values.global.brainspace.licenseFile }}
         - name: brains-license-vol
           mountPath: "/var/lib/brains/license"
           readOnly: true
-        {{- end }}
+        {{- end }}{{- end }}
         {{- if eq .Values.secrets.provider "secrets-store-csi" }}
         - name: brainspace-secrets-vol
           mountPath: "/mnt/brainspace-secrets"
@@ -231,6 +196,10 @@ spec:
         key: node.kubernetes.io/unreachable
         operator: Exists
         tolerationSeconds: 300
+      - effect: "NoSchedule"
+        key: "linux_large_brs"
+        operator: "Exists"
+        
 
 ---
 apiVersion: v1

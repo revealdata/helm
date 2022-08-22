@@ -18,7 +18,7 @@ data:
   {{ if .Values.global.env }}
   {{- toYaml .Values.global.env }}
   {{- end }}
-  {{- if .Values.global.database.UseSsl }}
+  {{- if .Values.global.database.useSsl }}
   POSTGRES_SSL_FACTORY: "org.postgresql.ssl.NonValidatingFactory"
   {{- end }}
   POSTGRES_HOST_AUTH_METHOD: {{ .Values.global.database.AuthMech | default "scram-sha-256" }}
