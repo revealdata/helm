@@ -8,7 +8,6 @@ metadata:
   labels:
     app.kubernetes.io/name: keycloak
     app.kubernetes.io/part-of: keycloak
-    app.kubernetes.io/managed-by: reveal-ops
     app.kubernetes.io/component: application
 spec:
   selector:
@@ -38,9 +37,10 @@ spec:
         {{- if .Values.keycloak.nodegroup }}
         alpha.eksctl.io/nodegroup-name: {{ .Values.keycloak.nodegroup }}
         {{- end }}
-      {{- if eq  .Values.secrets.provider "secrets-store-csi" }}
+      {{- if .Values.secrets.serviceAccount }}
+      {{- if .Values.secrets.serviceAccount.roleArn }}
       serviceAccountName: aws-secrets-provider-sa
-      {{- end }}
+      {{- end }}{{- end }}
       volumes:
         {{- if eq  .Values.secrets.provider "secrets-store-csi" }}
         - name: keycloak-secrets-vol
@@ -116,41 +116,8 @@ spec:
         - configMapRef:
             name: keycloak-config
         env:
-          - name: KEYCLOAK_ADMIN
-            valueFrom:
-              secretKeyRef:
-                name: keycloak-secrets
-                key: keycloak_admin_user
-          - name: KEYCLOAK_ADMIN_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: keycloak-secrets
-                key: keycloak_admin_password
-          - name: KC_DB_USERNAME
-            valueFrom:
-              secretKeyRef:
-                name: keycloak-secrets
-                key: kc_db_username
-          - name: KC_DB_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: keycloak-secrets
-                key: kc_db_password
-          - name: KC_DB
-            valueFrom:
-              secretKeyRef:
-                name: keycloak-secrets
-                key: kc_db
-          - name: KC_DB_URL_HOST
-            valueFrom:
-              secretKeyRef:
-                name: keycloak-secrets
-                key: kc_db_url_host
-          - name: KC_DB_URL_DATABASE
-            valueFrom:
-              secretKeyRef:
-                name: keycloak-secrets
-                key: kc_db_url_database
+          {{- /* output env vars for Keycloak secrets (_helpers.tpl) */}}
+          {{- include "resources.env.secrets" . | indent 6 }}
       schedulerName: default-scheduler
       terminationGracePeriodSeconds: 10
       tolerations:

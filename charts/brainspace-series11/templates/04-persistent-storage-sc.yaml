@@ -45,7 +45,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pv-shard-logs-{{ .Values.global.namespace | default .Release.Name }}
+  name: pv-shared-logs-{{ .Values.global.namespace | default .Release.Name }}
 spec:
   capacity:
     storage: 10Gi
@@ -71,7 +71,7 @@ spec:
   accessModes:
     - ReadWriteMany
   storageClassName: {{ .Values.storage.class }}
-  volumeName: pv-shard-logs-{{ .Values.global.namespace | default .Release.Name }}
+  volumeName: pv-shared-logs-{{ .Values.global.namespace | default .Release.Name }}
   resources:
     requests:
       storage: 1Gi
@@ -83,7 +83,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pv-shard-data-{{ .Values.global.namespace | default .Release.Name }}
+  name: pv-shared-data-{{ .Values.global.namespace | default .Release.Name }}
 spec:
   capacity:
     storage: 10Gi
@@ -109,7 +109,7 @@ spec:
   accessModes:
     - ReadWriteMany
   storageClassName: {{ .Values.storage.class }}
-  volumeName: pv-shard-data-{{ .Values.global.namespace | default .Release.Name }}
+  volumeName: pv-shared-data-{{ .Values.global.namespace | default .Release.Name }}
   resources:
     requests:
       storage: 1Gi

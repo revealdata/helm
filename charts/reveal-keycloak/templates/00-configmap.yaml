@@ -1,4 +1,4 @@
-{{- if not .Values.global.NoNamespace }}
+{{- if not .Values.global.noNamespace }}
 ---
 apiVersion: v1
 kind: Namespace

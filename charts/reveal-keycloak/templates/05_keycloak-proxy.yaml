@@ -8,7 +8,6 @@ metadata:
   labels:
     app.kubernetes.io/name: keycloak-proxy
     app.kubernetes.io/part-of: keycloak
-    app.kubernetes.io/managed-by: reveal-ops
     app.kubernetes.io/component: application
 spec:
   selector:
