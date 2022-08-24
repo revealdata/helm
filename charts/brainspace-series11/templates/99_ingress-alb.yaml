@@ -15,9 +15,11 @@ metadata:
     external-dns.alpha.kubernetes.io/hostname: {{ .Values.ingress.hostname }}
     {{- end }}
     {{- if .Values.ingress.public }}
+    alb.ingress.kubernetes.io/scheme: internet-facing
     service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
     service.beta.kubernetes.io/aws-load-balancer-internal: "false"
     {{- else }}
+    alb.ingress.kubernetes.io/scheme: internal
     service.beta.kubernetes.io/aws-load-balancer-scheme: "internal"
     service.beta.kubernetes.io/aws-load-balancer-internal: "true"
     {{- end }}

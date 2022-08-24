@@ -55,7 +55,7 @@ brains_ana:
   autoscale:
     enabled: true
     image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/brainspace/ana-autoscale
-    tag: 1.0.0
+    tag: "latest"
     debug: "0"
     thresholds:
       min: 0

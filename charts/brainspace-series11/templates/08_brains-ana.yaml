@@ -14,7 +14,7 @@ spec:
     matchLabels:
       app: deployment-brains-ana
   progressDeadlineSeconds: 600
-  replicas: {{ .Values.brains_ana.replicas | default 1 }}
+  replicas: {{ .Values.brains_ana.replicas | default 0 }}
   revisionHistoryLimit: 10
   strategy:
     type: RollingUpdate
@@ -76,6 +76,8 @@ spec:
         - configMapRef:
             name: brains-ana-config
         env:
+          - name: BRAINS_ANA_ROLE
+            value: ANA
           - name: ANALYSIS_HEAP_MAX
             value: "1g"
           {{- /* env vars for Java Resources (_helpers.tpl) */}}

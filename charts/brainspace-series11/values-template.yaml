@@ -195,7 +195,7 @@ brains_app:
   env: {}
     # ENV_VAR: "env_value"
   #- Optionally set custom tolerations
-  tollerations: []
+  tolerations: []
     # - effect: "NoSchedule"
     #     key: "linux-large"
     #     operator: "Exists"
@@ -227,7 +227,7 @@ brains_ana:
   env: {}
     # ENV_VAR: "env_value"
   #- Optionally set custom tolerations
-  tollerations: []
+  tolerations: []
     # - effect: "NoSchedule"
     #     key: "linux-large"
     #     operator: "Exists"
@@ -236,7 +236,7 @@ brains_ana:
   autoscale:
     enabled: true
     image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/brainspace/ana-autoscale
-    tag: 1.0.0
+    tag: "latest"
     debug: "0"
     thresholds:
       min: 0
