@@ -192,8 +192,14 @@ brains_app:
     memory: 12
     cpu: 4
   #- Optionally set custm environment variables for Brainspace Application
-  env:
-    ENV_VAR: "env_value"
+  env: {}
+    # ENV_VAR: "env_value"
+  #- Optionally set custom tolerations
+  tollerations: []
+    # - effect: "NoSchedule"
+    #     key: "linux-large"
+    #     operator: "Exists"
+
 
 brains_ana:
   #- Brainspace ANA (analytics) container image
@@ -218,8 +224,13 @@ brains_ana:
     memory: 8
     cpu: 2
   #- Optionally set custm environment variables for Brainspace Analytics
-  env:
-    ENV_VAR: "env_value"
+  env: {}
+    # ENV_VAR: "env_value"
+  #- Optionally set custom tolerations
+  tollerations: []
+    # - effect: "NoSchedule"
+    #     key: "linux-large"
+    #     operator: "Exists"
     
   #- Use the ANA Auto-scaling pod
   autoscale:
