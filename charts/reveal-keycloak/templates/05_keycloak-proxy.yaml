@@ -84,6 +84,9 @@ spec:
         key: node.kubernetes.io/unreachable
         operator: Exists
         tolerationSeconds: 300
+        {{- if .Values.keycloak.proxy.tolerations }}
+{{ toYaml .Values.keycloak.proxy.tolerations | indent 6}}
+        {{- end }}
 
 ---
 apiVersion: v1

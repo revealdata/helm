@@ -72,55 +72,65 @@ secrets:
       database: "<ADD VALUE IF USING secrets.provider='secrets-store-csi'>"
   
 ingress:
-    #- The ingress class (set per ingress)
-    #-- Options:
-    #--- alb: (AWS Application Load balancer - https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/)
-    #--- nginx: Nginx Ingress (https://kubernetes.github.io/ingress-nginx/)
-    public:
-      enabled: true
-      hostname: "<ADD EXTERNAL HOSTNAME HERE>"
-      class: "alb"
-      #- sslCertArn is only valid when using the 'alb' class
-      sslCertArn: ""
-      #- Uncomment below to add custom annotations for the public ingress
-      # annotations:
-    admin:
-      enabled: true
-      hostname: "<ADD ADMIN HOSTNAME HERE>"
-      class: "alb"
-      #- sslCertArn is only valid when using the 'alb' class
-      sslCertArn: ""
-      #- Uncomment below to add custom annotations for the admin ingress
-      # annotations:
+  #- The ingress class (set per ingress)
+  #-- Options:
+  #--- alb: (AWS Application Load balancer - https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/)
+  #--- nginx: Nginx Ingress (https://kubernetes.github.io/ingress-nginx/)
+  public:
+    enabled: true
+    hostname: "<ADD EXTERNAL HOSTNAME HERE>"
+    class: "alb"
+    #- sslCertArn is only valid when using the 'alb' class
+    sslCertArn: ""
+    #- Uncomment below to add custom annotations for the public ingress
+    # annotations:
+  admin:
+    enabled: true
+    hostname: "<ADD ADMIN HOSTNAME HERE>"
+    class: "alb"
+    #- sslCertArn is only valid when using the 'alb' class
+    sslCertArn: ""
+    #- Uncomment below to add custom annotations for the admin ingress
+    # annotations:
 
 keycloak:
-    image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/reveal/keycloak
-    tag: 18.0.2
+  image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/reveal/keycloak
+  tag: 18.0.2
+  replicas: 1
+  #- Force a re-deploy when a helm upgrade happens
+  reloadOnUpgrade: false
+  #- Define static resources for the keycloak pods
+  resources:
+    memory: 2
+  #- Import CA certificate files in PEM format into the Keycloak Trust Store
+  #-- The directory containing CA certificates must reside in the chart root directory
+  #-- The directory must not be in the .helmignore file
+  cacerts:
+    enabled: true
+      #- Optional path to the directory where CA certificates are located
+      path: "pki/ca"
+  env:
+    KC_LOG_LEVEL: "INFO"
+    #-- https://www.keycloak.org/server/hostname
+    #-- https://www.keycloak.org/server/db
+    #-- Uncomment and add values if needed
+    #KEYCLOAK_ADMIN: ""
+    #KEYCLOAK_ADMIN_PASSWORD: ""
+    #- Set to false if using MSSQL
+    KC_TRANSACTION_XA_ENABLED: "true"
+  #- Optionally set custom tolerations
+  tollerations: []
+    # - effect: "NoSchedule"
+    #     key: "linux-large"
+    #     operator: "Exists"
+  proxy:
+    image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/reveal/ui/base
+    tag: 1.1.5
     replicas: 1
-    #- Force a re-deploy when a helm upgrade happens
-    reloadOnUpgrade: false
-    #- Define static resources for the keycloak pods
-    resources:
-      memory: 2
-    #- Import CA certificate files in PEM format into the Keycloak Trust Store
-    #-- The directory containing CA certificates must reside in the chart root directory
-    #-- The directory must not be in the .helmignore file
-    cacerts:
-      enabled: true
-        #- Optional path to the directory where CA certificates are located
-        path: "pki/ca"
     env:
-      KC_LOG_LEVEL: "INFO"
-      #-- https://www.keycloak.org/server/hostname
-      #-- https://www.keycloak.org/server/db
-      #-- Uncomment and add values if needed
-      #KEYCLOAK_ADMIN: ""
-      #KEYCLOAK_ADMIN_PASSWORD: ""
-      #- Set to false if using MSSQL
-      KC_TRANSACTION_XA_ENABLED: "true"
-    proxy:
-      image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/reveal/ui/base
-      tag: 1.1.5
-      replicas: 1
-      env:
-        TEST: "false" # Only use in testing snd development. Disables security headers.
+      TEST: "false" # Only use in testing snd development. Disables security headers.
+    #- Optionally set custom tolerations
+    tollerations: []
+      # - effect: "NoSchedule"
+      #     key: "linux-large"
+      #     operator: "Exists"
