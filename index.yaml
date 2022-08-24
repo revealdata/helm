@@ -3,6 +3,16 @@ entries:
   brainspace-series11:
   - apiVersion: v2
     appVersion: 7.0.0
+    created: "2022-08-24T22:53:25.052238076Z"
+    description: A Helm chart for Brainspace with Reveal Series11
+    digest: a0166b3b5d58090df4538233467c47409783240dc6036870420a294559c3a97a
+    name: brainspace-series11
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/brainspace-series11-0.3.6/brainspace-series11-0.3.6.tgz
+    version: 0.3.6
+  - apiVersion: v2
+    appVersion: 7.0.0
     created: "2022-08-24T15:12:54.53608042Z"
     description: A Helm chart for Brainspace with Reveal Series11
     digest: f97ec0c2b3280c0ff92f515fb5e43563e524445f6e79e3d7159ec5894b718478
@@ -76,4 +86,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/reveal-keycloak-0.7.2/reveal-keycloak-0.7.2.tgz
     version: 0.7.2
-generated: "2022-08-24T15:12:54.536095721Z"
+generated: "2022-08-24T22:53:25.052274279Z"
