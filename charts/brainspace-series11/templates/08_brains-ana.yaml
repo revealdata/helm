@@ -168,8 +168,8 @@ spec:
       - effect: "NoSchedule"
         key: "linux_large_brs"
         operator: "Exists"
-        {{- if .Values.brains_app.tolerations }}
-{{ toYaml .Values.brains_app.tolerations | indent 6}}
+        {{- if .Values.brains_ana.tolerations }}
+{{ toYaml .Values.brains_ana.tolerations | indent 6}}
         {{- end }}
         
 
