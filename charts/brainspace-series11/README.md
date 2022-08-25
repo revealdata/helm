@@ -19,4 +19,4 @@ helm delete brains70-preprod
 ```
 
 ## Values
-The values_template.yaml includes documentation comments throughout
+The values.yaml includes documentation comments throughout
