@@ -2,7 +2,7 @@ apiVersion: v2
 name: reveal-keycloak
 description: Reveal Keycloak
 type: application
-version: 0.7.4
+version: 0.7.5
 appVersion: "18.0.0"
 maintainers:
 - name: Reveal-Brainspace
