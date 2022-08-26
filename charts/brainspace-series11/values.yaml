@@ -130,11 +130,13 @@ ingress:
   # --- alb: (AWS Application Load balancer - https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/)
   # --- nginx: Nginx Ingress (https://kubernetes.github.io/ingress-nginx/)
   class: "alb"
+  # -- Will the ingress use an internal or internet-facing load balancer
+  public: false
   hostname: "<ADD BRAINSPACE HOSTNAME HERE>"
   # -- sslCertArn is only valid when using the 'alb' class
   sslCertArn: ""
-  # -- Uncomment below to add custom annotations for the ingress
-  # annotations:
+  # -- Custom annotations for the ingress
+  annotations: {}
 
 brains_db:
   # -- Brainspace database/postgres container image
@@ -239,5 +241,7 @@ brains_ana:
     tag: "latest"
     debug: "0"
     thresholds:
+      # -- The minimum number of replicas of the brains_ana deployment
       min: 0
+      # -- The maximum number of replicas of the brains_ana deployment
       max: 2
