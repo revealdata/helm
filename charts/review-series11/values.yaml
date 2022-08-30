@@ -26,11 +26,15 @@ secrets:
 
   # -- OPTIONS FOR: provider: 'kubernetes' -- #
   kubernetes:
-    databaseServer: ""
-    userManagementDB: ""
-    AuthMethod: ""
-    SqlUsername: ""
-    SqlPassword: ""
+    review-sql-server: ""
+    review-user-management-db: ""
+    review-sql-auth-method: ""
+    review-sql-username: ""
+    review-sql-password: ""
+    # Needs to be [0-9A-Z]{48}
+    review-website-decryption-key: ""
+    # Needs to be [0-9A-Z]{128}
+    review-website-validation-key: ""
 
   # -- OPTIONS FOR: 'external-secrets' -- #
   externalSecrets:

@@ -4,35 +4,35 @@
       valueFrom:
         secretKeyRef:
           name: review-secrets
-          key: databaseServer
+          key: review-sql-server
     - name: userManagementDB
       valueFrom:
         secretKeyRef:
           name: review-secrets
-          key: userManagementDB
+          key: review-user-management-db
     - name: AuthMethod
       valueFrom:
         secretKeyRef:
           name: review-secrets
-          key: AuthMethod
+          key: review-sql-auth-method
     - name: SqlUsername
       valueFrom:
         secretKeyRef:
           name: review-secrets
-          key: SqlUsername
+          key: review-sql-username
     - name: SqlPassword
       valueFrom:
         secretKeyRef:
           name: review-secrets
-          key: SqlPassword
+          key: review-sql-password
     - name: websiteDecryptionKey
       valueFrom:
         secretKeyRef:
           name: review-secrets
-          key: websiteDecryptionKey
+          key: review-website-decryption-key
     - name: websiteValidationKey
       valueFrom:
         secretKeyRef:
           name: review-secrets
-          key: websiteValidationKey
+          key: review-website-validation-key
 {{- end -}}
