@@ -64,4 +64,19 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/reveal-keycloak-0.7.4/reveal-keycloak-0.7.4.tgz
     version: 0.7.4
-generated: "2022-08-26T13:52:12.612638001Z"
+  reveal-review:
+  - apiVersion: v2
+    appVersion: 11.0.0
+    created: "2022-08-30T19:22:07.336893181Z"
+    description: Reveal Review
+    digest: ccdc6a1c365159b3d905b8b4e4b6c6efe99ea3124c895a84a7a7b9c7756d18de
+    maintainers:
+    - email: info@revealdata
+      name: Reveal-Brainspace
+      url: https://revealdata.com
+    name: reveal-review
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-review-1.0.0/reveal-review-1.0.0.tgz
+    version: 1.0.0
+generated: "2022-08-30T19:22:07.336905781Z"
