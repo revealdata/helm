@@ -1,0 +1,98 @@
+{{- range .Values.review.review_services }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  {{.name}}
+  namespace: {{$.Values.global.namespace | default $.Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: deployment-{{.name}}
+  progressDeadlineSeconds: 600
+  replicas: {{ .replicas }}
+  revisionHistoryLimit: 10
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: deployment-{{.name}}
+      {{- if $.Values.review.reloadOnUpgrade }}
+      annotations:
+        timestamp: {{ now | quote }}
+      {{- end }}
+    spec:
+      nodeSelector:
+{{- if eq .os "linux" }}
+{{- $nodeSelector := concat $.Values.review.nodeSelector.linux .nodeSelector }}
+{{ toYaml $nodeSelector | indent 8 }}
+{{- else }}
+{{- $nodeSelector := concat $.Values.review.nodeSelector.windows .nodeSelector }}
+{{ toYaml $nodeSelector | indent 8 }}
+{{- end }}
+      containers:
+      - image: {{.image}}:{{.tag}}
+        {{- if .has_listening_service }}
+        ports:
+        - containerPort: 80
+        {{- end }}
+        envFrom:
+          - configMapRef:
+              name: "review-env"
+        env:
+        {{- if .extra_environment_variables }}
+{{ toYaml .extra_environment_variables | indent 10 }}
+        {{- end }}
+{{- /* output env vars for Review secrets (_helpers.tpl) */}}
+{{- include "resources.env.secrets" . | indent 6 }}
+        resources:
+{{ $resources := mergeOverwrite $.Values.review.resources .resources }}
+{{- toYaml $resources | indent 10 }}
+        imagePullPolicy: Always
+        name: {{ .name }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: false
+        stdin: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        tty: true
+      dnsConfig: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      tolerations:
+{{- if eq .os "linux" }}
+{{ $tolerations := concat $.Values.review.tolerations.linux .tolerations }}
+{{- toYaml $tolerations | indent 8 }}
+{{- else }}
+{{ $tolerations := concat $.Values.review.tolerations.windows .tolerations }}
+{{- toYaml $tolerations | indent 8 }}
+{{- end }}
+{{- if eq .has_listening_service true }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-{{.name}}
+  namespace: {{$.Values.global.namespace | default $.Release.Name }}
+  annotations:
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+
+spec:
+  selector:
+    app: deployment-{{.name}}
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+{{- end }}
+{{- end }}

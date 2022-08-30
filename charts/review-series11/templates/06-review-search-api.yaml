@@ -1,0 +1,78 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: review-search-api
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: deployment-review-search-api
+  progressDeadlineSeconds: 600
+  replicas: {{ .Values.review.search_api.replicas | default 1 }}
+  revisionHistoryLimit: 10
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: deployment-review-search-api
+      annotations:
+        timestamp: {{ now | quote }}
+    spec:
+      nodeSelector:
+{{ $nodeSelector := concat .Values.review.nodeSelector.linux .Values.review.search_api.nodeSelector }}
+{{- toYaml $nodeSelector | indent 8 }}
+      containers:
+      - image: {{.Values.review.search_api.image}}:{{.Values.review.search_api.tag}}
+        ports:
+        - containerPort: 443
+        envFrom:
+        - configMapRef:
+            name: "review-env"
+        env:
+{{- /* output env vars for Review secrets (_helpers.tpl) */}}
+{{- include "resources.env.secrets" . | indent 6 }}
+        resources:
+{{ $resources := mergeOverwrite .Values.review.resources .Values.review.search_api.resources }}
+{{- toYaml $resources | indent 10 }}
+        imagePullPolicy: Always
+        name: review-search-api
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: false
+        stdin: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        tty: true
+      dnsConfig: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      tolerations:
+{{ $tolerations := concat .Values.review.tolerations.linux .Values.review.api.tolerations }}
+{{- toYaml $tolerations | indent 8 }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-review-search-api
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  annotations:
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+
+spec:
+  selector:
+    app: deployment-review-search-api
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80

@@ -1,0 +1,310 @@
+---
+global:
+  # -- Optionally set a namespace value. If empty, the helm release name is used
+  namespace: ""
+  # -- Optionally disable the namespace creation as it may already exist
+  noNamespace: false
+  ecr:
+    enabled: false
+    # -- AWS Account ID (default "053522176595")
+    account: ""
+    # -- ECR AWS Region (default "us-east-1")
+    region: ""
+    # -- Set the full hostname/url for the secret rather than building it with account and region
+    host: ""
+    # -- Docker ECR Password (required)
+    # -- Command: aws ecr get-login-password
+    password: ""
+
+secrets:
+  # -- The secrets provider
+  # -- Providers:
+  # -- secrets-store-csi: (https://secrets-store-csi-driver.sigs.k8s.io)
+  # -- external-secrets: (https://external-secrets.io/v0.5.9/)
+  # -- kubernetes: Use kubernetes secret. Add secrets to the 'kubernetes' section below.
+  provider: "external-secrets"
+
+  # -- OPTIONS FOR: provider: 'kubernetes' -- #
+  kubernetes:
+    databaseServer: ""
+    userManagementDB: ""
+    AuthMethod: ""
+    SqlUsername: ""
+    SqlPassword: ""
+
+  # -- OPTIONS FOR: 'external-secrets' -- #
+  externalSecrets:
+    # -- The external-secrets provider
+    # -- Providers:
+    # -- aws: AWS SecretsManager
+    # -- azurekv: Azure KeyVault
+    provider: aws
+    # -- Options for aws (AWS SecretsManager)
+    aws:
+      # -- Region: The AWS region where the secret resides (default "us-east-1")
+      Region: "us-east-1"
+      # -- secretName: The Secrets Manager Name for the admin and database secrets created by CloudFormation or Terraform
+      secretName:
+        reviewDatabase: ""
+        reviewWebEncryption: ""
+    # -- Options for azurekv (Azure KeyVault)
+    azurekv:
+      auth:
+        ClientID: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='azurekv'>"
+        ClientSecret: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='azurekv'>"
+      TennantId: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='azurekv'>"
+      VaultUrl: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='azurekv'>"
+
+ingress:
+  # -- The ingress class (set per ingress)
+  # -- Options:
+  # -- alb: (AWS Application Load balancer - https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/)
+  # -- nginx: Nginx Ingress (https://kubernetes.github.io/ingress-nginx/)
+  enabled: true
+  # -- Multiple hostnames can be provided if using external DNS, however this may not work for ingress-nginx
+  hostname: "<ADD EXTERNAL HOSTNAME HERE>,<ADD EXTERNAL HOSTNAME HERE>"
+  class: "alb"
+  # -- sslCertArn is only valid when using the 'alb' class. Leave empty for aut-select
+  sslCertArn: ""
+  # -- Uncomment below to add custom annotations for the public ingress
+  annotations: {}
+
+review:
+  # -- tolerations for all review containers
+  tolerations:
+    windows: []
+    linux: []
+  # - effect: "NoSchedule"
+  #     key: "linux-large"
+  #     operator: "Exists"
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "1000m"
+    limits:
+      memory: "4Gi"
+      cpu: "8000m"
+  nodeSelector:
+    windows:
+      - "kubernetes.io/os": "windows"
+      - "kubernetes.io/arch": "amd64"
+    linux:
+      - "kubernetes.io/os": "linux"
+      - "kubernetes.io/arch": "amd64"
+
+  web:
+    image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/publish"
+    tag: "reveal-series11-qa"
+    os: "windows"
+    tolerations: []
+    resources:
+      requests:
+        memory: "2Gi"
+      limits:
+        memory: "4Gi"
+    nodeSelector: []
+    replicas: 1
+
+  api:
+    image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/publish_api"
+    tag: "reveal-series11-qa"
+    os: "linux"
+    tolerations: []
+    resources: {}
+    nodeSelector: []
+    replicas: 1
+
+  search_api:
+    image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/search_api"
+    tag: "reveal-series11-qa"
+    name: "review-search-api"
+    os: "linux"
+    tolerations: []
+    resources: {}
+    nodeSelector: []
+    replicas: 1
+
+  ui:
+    image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/reveal/11series/ui"
+    tag: "latest"
+    os: "linux"
+    tolerations: []
+    resources: {}
+    nodeSelector: []
+    replicas: 2
+
+  review_services:
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/assignment"
+      tag: "reveal-series11-qa"
+      name: "review-assignment"
+      os: "linux"
+      has_listening_service: True
+      listens_at: "review_assignment"
+      tolerations: []
+      resources: {}
+      nodeSelector: []
+      replicas: 1
+
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/assignmentstatus"
+      tag: "reveal-series11-qa"
+      name: "review-assignmentstatus"
+      os: "linux"
+      has_listening_service: False
+      tolerations: []
+      resources: {}
+      nodeSelector: []
+      replicas: 1
+
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/bulktag"
+      tag: "reveal-series11-qa"
+      name: "review-bulktag"
+      os: "linux"
+      has_listening_service: True
+      listens_at: "review_bulktag"
+      tolerations: []
+      resources: {}
+      nodeSelector: []
+      replicas: 1
+
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/documentloader"
+      tag: "reveal-series11-qa"
+      name: "review-documentloader"
+      os: "linux"
+      has_listening_service: True
+      listens_at: "review_documentloader"
+      tolerations: []
+      resources: {}
+      nodeSelector: []
+      replicas: 1
+
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/export"
+      tag: "reveal-series11-qa"
+      name: "review-export"
+      os: "linux"
+      has_listening_service: True
+      listens_at: "review_export"
+      tolerations: []
+      resources: {}
+      nodeSelector: []
+      replicas: 1
+
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/indexbatch"
+      tag: "reveal-series11-qa"
+      name: "review-indexbatch"
+      os: "linux"
+      has_listening_service: True
+      listens_at: "review_indexbatch"
+      tolerations: []
+      resources: {}
+      nodeSelector: []
+      replicas: 1
+
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/indexserver"
+      tag: "reveal-series11-qa"
+      name: "review-indexserver"
+      os: "linux"
+      has_listening_service: True
+      listens_at: "review_indexserver"
+      tolerations: []
+      resources: {}
+      nodeSelector: []
+      replicas: 1
+
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/print"
+      tag: "reveal-series11-qa"
+      name: "review-print"
+      os: "linux"
+      has_listening_service: True
+      listens_at: "review_print"
+      tolerations: []
+      resources: {}
+      nodeSelector: []
+      replicas: 1
+
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/productionserver"
+      tag: "reveal-series11-qa"
+      name: "review-productionserver"
+      os: "linux"
+      has_listening_service: True
+      listens_at: "review_productionserver"
+      tolerations: []
+      resources: {}
+      nodeSelector: []
+      replicas: 1
+
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/search"
+      tag: "reveal-series11-qa"
+      name: "review-search"
+      os: "linux"
+      has_listening_service: True
+      listens_at: "review_search"
+      tolerations: []
+      resources: {}
+      nodeSelector: []
+      replicas: 1
+
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/productionclient"
+      tag: "reveal-series11-qa"
+      name: "review-productionclient"
+      os: "linux"
+      has_listening_service: False
+      tolerations: []
+      resources: {}
+      nodeSelector: []
+      replicas: 1
+
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/indexclient"
+      tag: "reveal-series11-qa"
+      name: "review-indexclient"
+      os: "linux"
+      has_listening_service: False
+      tolerations: []
+      resources: {}
+      nodeSelector: []
+      replicas: 1
+
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/imaging"
+      tag: "reveal-series11-qa"
+      name: "review-imaging-bulk"
+      os: "windows"
+      has_listening_service: False
+      tolerations: []
+      resources: {}
+      nodeSelector: []
+      replicas: 1
+
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/imaging"
+      tag: "reveal-series11-qa"
+      name: "review-imaging-totf"
+      os: "windows"
+      has_listening_service: False
+      extra_environment_variables:
+        - name: TOTF
+          value: "True"
+      tolerations: []
+      resources: {}
+      nodeSelector: []
+      replicas: 1
+
+  # -- Force a re-deploy when a helm upgrade happens
+  reloadOnUpgrade: false
+
+  env:
+    # -- Network path to store logs
+    LogsLocation: "\\\\storage\\review-store\\logs"
+    # --  Network path to store atalasoft cache
+    websiteAtalasoftCacheLocation: "\\\\storage\\review-store\\atalasoft"
+    # --  Network path to temporarily store images for review.
+    websiteImagesLocation: "\\\\storage\\review-store\\images"
+    # -- Keycloak client for Web to use. Should almost always be RevealWeb
+    KeycloakClient: RevealWeb
+    # -- Keycloak realm name. Usually the same as msaNumber
+    KeycloakRealm: "99999999"
+    # -- Keycloak URL.
+    KeycloakURL: https://auth.dev.revealdata.com/auth/realms
+    # -- Must be an integer.
+    msaNumber: "99999999"
+    # -- AWS Region. Can be left at default `us-east-1`
+    AWSRegion: us-east-1
+    # -- State server. Currently unused, but will be eventually altered to allow for redis.
+    stateServer: NONE

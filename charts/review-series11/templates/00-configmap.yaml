@@ -1,0 +1,17 @@
+{{- if not .Values.global.noNamespace }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.global.namespace | default .Release.Name }}
+{{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+data:
+  # Note that the indentation here can get quite funky. So be careful with this method of pulling in
+  # the block object from values.yaml
+{{ toYaml .Values.review.env | indent 2 }}
+metadata:
+  name: "review-env"
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
