@@ -76,11 +76,24 @@ ingress:
 review:
   # -- tolerations for all review containers
   tolerations:
-    windows: []
-    linux: []
-  # - effect: "NoSchedule"
-  #     key: "linux-large"
-  #     operator: "Exists"
+    windows:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 300
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 300
+    linux:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 300
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 300
   resources:
     requests:
       memory: "512Mi"
@@ -90,11 +103,11 @@ review:
       cpu: "8000m"
   nodeSelector:
     windows:
-      - "kubernetes.io/os": "windows"
-      - "kubernetes.io/arch": "amd64"
+      "kubernetes.io/os": "windows"
+      "kubernetes.io/arch": "amd64"
     linux:
-      - "kubernetes.io/os": "linux"
-      - "kubernetes.io/arch": "amd64"
+      "kubernetes.io/os": "linux"
+      "kubernetes.io/arch": "amd64"
 
   web:
     image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/publish"
@@ -106,7 +119,7 @@ review:
         memory: "2Gi"
       limits:
         memory: "4Gi"
-    nodeSelector: []
+    nodeSelector: {}
     replicas: 1
 
   api:
@@ -115,7 +128,7 @@ review:
     os: "linux"
     tolerations: []
     resources: {}
-    nodeSelector: []
+    nodeSelector: {}
     replicas: 1
 
   search_api:
@@ -125,7 +138,7 @@ review:
     os: "linux"
     tolerations: []
     resources: {}
-    nodeSelector: []
+    nodeSelector: {}
     replicas: 1
 
   ui:
@@ -134,7 +147,7 @@ review:
     os: "linux"
     tolerations: []
     resources: {}
-    nodeSelector: []
+    nodeSelector: {}
     replicas: 2
 
   review_services:
@@ -146,7 +159,7 @@ review:
       listens_at: "review_assignment"
       tolerations: []
       resources: {}
-      nodeSelector: []
+      nodeSelector: {}
       replicas: 1
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/assignmentstatus"
@@ -156,7 +169,7 @@ review:
       has_listening_service: False
       tolerations: []
       resources: {}
-      nodeSelector: []
+      nodeSelector: {}
       replicas: 1
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/bulktag"
@@ -167,7 +180,7 @@ review:
       listens_at: "review_bulktag"
       tolerations: []
       resources: {}
-      nodeSelector: []
+      nodeSelector: {}
       replicas: 1
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/documentloader"
@@ -178,7 +191,7 @@ review:
       listens_at: "review_documentloader"
       tolerations: []
       resources: {}
-      nodeSelector: []
+      nodeSelector: {}
       replicas: 1
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/export"
@@ -189,7 +202,7 @@ review:
       listens_at: "review_export"
       tolerations: []
       resources: {}
-      nodeSelector: []
+      nodeSelector: {}
       replicas: 1
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/indexbatch"
@@ -200,7 +213,7 @@ review:
       listens_at: "review_indexbatch"
       tolerations: []
       resources: {}
-      nodeSelector: []
+      nodeSelector: {}
       replicas: 1
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/indexserver"
@@ -211,7 +224,7 @@ review:
       listens_at: "review_indexserver"
       tolerations: []
       resources: {}
-      nodeSelector: []
+      nodeSelector: {}
       replicas: 1
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/print"
@@ -222,7 +235,7 @@ review:
       listens_at: "review_print"
       tolerations: []
       resources: {}
-      nodeSelector: []
+      nodeSelector: {}
       replicas: 1
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/productionserver"
@@ -233,7 +246,7 @@ review:
       listens_at: "review_productionserver"
       tolerations: []
       resources: {}
-      nodeSelector: []
+      nodeSelector: {}
       replicas: 1
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/search"
@@ -244,7 +257,7 @@ review:
       listens_at: "review_search"
       tolerations: []
       resources: {}
-      nodeSelector: []
+      nodeSelector: {}
       replicas: 1
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/productionclient"
@@ -254,7 +267,7 @@ review:
       has_listening_service: False
       tolerations: []
       resources: {}
-      nodeSelector: []
+      nodeSelector: {}
       replicas: 1
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/indexclient"
@@ -264,7 +277,7 @@ review:
       has_listening_service: False
       tolerations: []
       resources: {}
-      nodeSelector: []
+      nodeSelector: {}
       replicas: 1
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/imaging"
@@ -274,7 +287,7 @@ review:
       has_listening_service: False
       tolerations: []
       resources: {}
-      nodeSelector: []
+      nodeSelector: {}
       replicas: 1
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/imaging"
@@ -287,7 +300,7 @@ review:
           value: "True"
       tolerations: []
       resources: {}
-      nodeSelector: []
+      nodeSelector: {}
       replicas: 1
 
   # -- Force a re-deploy when a helm upgrade happens

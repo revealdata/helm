@@ -26,7 +26,7 @@ spec:
       {{- end }}
     spec:
       nodeSelector:
-{{ $nodeSelector := concat .Values.review.nodeSelector.linux .Values.review.ui.nodeSelector }}
+{{ $nodeSelector := mergeOverwrite .Values.review.nodeSelector.linux .Values.review.ui.nodeSelector }}
 {{- toYaml $nodeSelector | indent 8 }}
       containers:
       - image: {{.Values.review.ui.image}}:{{.Values.review.ui.tag}}

@@ -24,7 +24,7 @@ spec:
         timestamp: {{ now | quote }}
     spec:
       nodeSelector:
-{{ $nodeSelector := concat .Values.review.nodeSelector.linux .Values.review.search_api.nodeSelector }}
+{{ $nodeSelector := mergeOverwrite .Values.review.nodeSelector.linux .Values.review.search_api.nodeSelector }}
 {{- toYaml $nodeSelector | indent 8 }}
       containers:
       - image: {{.Values.review.search_api.image}}:{{.Values.review.search_api.tag}}

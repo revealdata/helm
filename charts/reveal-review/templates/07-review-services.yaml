@@ -28,10 +28,10 @@ spec:
     spec:
       nodeSelector:
 {{- if eq .os "linux" }}
-{{- $nodeSelector := concat $.Values.review.nodeSelector.linux .nodeSelector }}
+{{- $nodeSelector := mergeOverwrite $.Values.review.nodeSelector.linux .nodeSelector }}
 {{ toYaml $nodeSelector | indent 8 }}
 {{- else }}
-{{- $nodeSelector := concat $.Values.review.nodeSelector.windows .nodeSelector }}
+{{- $nodeSelector := mergeOverwrite $.Values.review.nodeSelector.windows .nodeSelector }}
 {{ toYaml $nodeSelector | indent 8 }}
 {{- end }}
       containers:
