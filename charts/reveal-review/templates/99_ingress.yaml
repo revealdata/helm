@@ -79,32 +79,4 @@ spec:
                 name: service-review-series11-ui
                 port:
                   number: 443
-
-spec:
-  defaultBackend:
-    service:
-      name: keycloak-proxy
-      port:
-        number: 443
-  rules:
-    {{- if eq $ingress_class "nginx" }}
-    - host: {{ .Values.ingress.hostname }}
-      http:
-    {{- else }}
-    - http:
-    {{- end }}
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                {{- if eq $ingress_class "alb" }}
-                name: ssl-redirect
-                port:
-                  name: use-annotation
-                {{- else }}
-                name: keycloak-proxy
-                port:
-                  number: 443
-                {{- end }}
 {{- end }}
