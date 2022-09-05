@@ -133,7 +133,7 @@ review:
     resources: {}
     nodeSelector: {}
     replicas: 1
-    commandOverride: true
+    commandOverride: false
     command: ""
     args: []
 
