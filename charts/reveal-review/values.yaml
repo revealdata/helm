@@ -121,6 +121,9 @@ review:
         memory: "4Gi"
     nodeSelector: {}
     replicas: 1
+    commandOverride: false
+    command: ""
+    args: []
 
   api:
     image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/publish_api"
@@ -130,6 +133,9 @@ review:
     resources: {}
     nodeSelector: {}
     replicas: 1
+    commandOverride: true
+    command: ""
+    args: []
 
   search_api:
     image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/search_api"
@@ -140,6 +146,9 @@ review:
     resources: {}
     nodeSelector: {}
     replicas: 1
+    commandOverride: false
+    command: ""
+    args: []
 
   ui:
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/reveal/11series/ui"
@@ -149,6 +158,9 @@ review:
     resources: {}
     nodeSelector: {}
     replicas: 2
+    commandOverride: false
+    command: ""
+    args: []
 
   review_services:
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/assignment"
@@ -161,6 +173,9 @@ review:
       resources: {}
       nodeSelector: {}
       replicas: 1
+      commandOverride: false
+      command: ""
+      args: []
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/assignmentstatus"
       tag: "reveal-series11-qa"
@@ -171,6 +186,9 @@ review:
       resources: {}
       nodeSelector: {}
       replicas: 1
+      commandOverride: false
+      command: ""
+      args: []
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/bulktag"
       tag: "reveal-series11-qa"
@@ -182,6 +200,9 @@ review:
       resources: {}
       nodeSelector: {}
       replicas: 1
+      commandOverride: false
+      command: ""
+      args: []
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/documentloader"
       tag: "reveal-series11-qa"
@@ -193,6 +214,9 @@ review:
       resources: {}
       nodeSelector: {}
       replicas: 1
+      commandOverride: false
+      command: ""
+      args: []
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/export"
       tag: "reveal-series11-qa"
@@ -204,6 +228,9 @@ review:
       resources: {}
       nodeSelector: {}
       replicas: 1
+      commandOverride: false
+      command: ""
+      args: []
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/indexbatch"
       tag: "reveal-series11-qa"
@@ -215,6 +242,9 @@ review:
       resources: {}
       nodeSelector: {}
       replicas: 1
+      commandOverride: false
+      command: ""
+      args: []
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/indexserver"
       tag: "reveal-series11-qa"
@@ -226,6 +256,9 @@ review:
       resources: {}
       nodeSelector: {}
       replicas: 1
+      commandOverride: false
+      command: ""
+      args: []
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/print"
       tag: "reveal-series11-qa"
@@ -237,6 +270,9 @@ review:
       resources: {}
       nodeSelector: {}
       replicas: 1
+      commandOverride: false
+      command: ""
+      args: []
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/productionserver"
       tag: "reveal-series11-qa"
@@ -248,6 +284,9 @@ review:
       resources: {}
       nodeSelector: {}
       replicas: 1
+      commandOverride: false
+      command: ""
+      args: []
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/search"
       tag: "reveal-series11-qa"
@@ -259,6 +298,9 @@ review:
       resources: {}
       nodeSelector: {}
       replicas: 1
+      commandOverride: false
+      command: ""
+      args: []
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/productionclient"
       tag: "reveal-series11-qa"
@@ -269,6 +311,9 @@ review:
       resources: {}
       nodeSelector: {}
       replicas: 1
+      commandOverride: false
+      command: ""
+      args: []
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/indexclient"
       tag: "reveal-series11-qa"
@@ -279,6 +324,9 @@ review:
       resources: {}
       nodeSelector: {}
       replicas: 1
+      commandOverride: false
+      command: ""
+      args: []
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/imaging"
       tag: "reveal-series11-qa"
@@ -289,6 +337,9 @@ review:
       resources: {}
       nodeSelector: {}
       replicas: 1
+      commandOverride: false
+      command: ""
+      args: []
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/imaging"
       tag: "reveal-series11-qa"
@@ -302,6 +353,9 @@ review:
       resources: {}
       nodeSelector: {}
       replicas: 1
+      commandOverride: false
+      command: ""
+      args: []
 
   # -- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: false

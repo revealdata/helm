@@ -30,6 +30,13 @@ spec:
 {{- toYaml $nodeSelector | indent 8 }}
       containers:
       - image: {{.Values.review.api.image}}:{{.Values.review.api.tag}}
+        {{- if .Values.review.api.commandOverride }}
+        command: [ "{{ .Values.review.api.command }}" ]
+        args:
+          {{-  range .Values.review.api.args }}
+          - "{{ . }}"
+          {{- end }}
+        {{- end }}
         ports:
         - containerPort: 80
         envFrom:
