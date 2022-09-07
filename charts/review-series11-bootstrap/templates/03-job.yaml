@@ -1,0 +1,30 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: review-series11-bootstrap-
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  ttlSecondsAfterFinished: 6000
+  template:
+    spec:
+      containers:
+      - name: review-series11-bootstrap
+        image:  {{ .Values.bootstrap.image }}:{{ .Values.bootstrap.tag }}
+        imagePullPolicy: Always
+        env:
+{{- /* output env vars for Review secrets (_helpers.tpl) */}}
+{{- include "resources.env.secrets" . | indent 4 }}
+{{- .Values.bootstrap.env }}
+      restartPolicy: Never
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: amd64
+      serviceAccountName: msa-secrets-reader
+  backoffLimit: 4
