@@ -15,11 +15,12 @@ metadata:
 data:
   BRAINS_HOSTNAME: {{ .Values.ingress.hostname | default "brainspace.localdomain" }}
   DOMAIN: {{ .Values.global.namespace | default .Release.Name }}.svc.cluster.local
-  {{ if .Values.global.env }}
-  {{- toYaml .Values.global.env }}
+  {{- if .Values.global.env }}
+  {{ toYaml .Values.global.env }}
   {{- end }}
   {{- if .Values.global.database.useSsl }}
   POSTGRES_SSL_FACTORY: "org.postgresql.ssl.NonValidatingFactory"
+  POSTGRES_SSL: "true"
   {{- end }}
   POSTGRES_HOST_AUTH_METHOD: {{ .Values.global.database.AuthMech | default "scram-sha-256" }}
 
@@ -31,8 +32,8 @@ metadata:
   name: brains-ui-config
   namespace: {{ .Values.global.namespace | default .Release.Name }}
 data:
-  {{ if .Values.brains_ui.env }}
-  {{- toYaml .Values.brains_ui.env }}
+  {{- if .Values.brains_ui.env }}
+  {{ toYaml .Values.brains_ui.env }}
   {{- end }}
 
 ---
@@ -44,8 +45,8 @@ metadata:
   namespace: {{ .Values.global.namespace | default .Release.Name }}
 data:
   DOMAIN: {{ .Values.global.namespace | default .Release.Name }}.svc.cluster.local
-{{ if .Values.global.env }}
-{{- toYaml .Values.global.env | indent 2 }}
+{{- if .Values.global.env }}
+{{ toYaml .Values.global.env | indent 2 }}
 {{- end }}
 {{ if .Values.brains_app.env }}
 {{- toYaml .Values.brains_app.env | indent 2 }}

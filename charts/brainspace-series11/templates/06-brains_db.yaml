@@ -64,7 +64,7 @@ spec:
       {{- if or (eq .Values.storage.class "efs-sc") (eq .Values.storage.class "pvc") }}
       - name: db-data
         persistentVolumeClaim:
-          claimName: {{- if .Values.storage.pvc }} {{ .Values.storage.pvc.databaseData }} {{- else }} pv-db-data {{- end }}
+          claimName: {{- if .Values.storage.pvc }} {{ .Values.storage.pvc.databaseData }} {{- else }} pvc-db-data {{- end }}
       {{- else }}
       - name: db-data
         emptyDir: {}
