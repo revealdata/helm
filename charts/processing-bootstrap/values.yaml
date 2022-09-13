@@ -6,7 +6,7 @@ global:
 bootstrap:
   region:
     enabled: false
-    image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/processing/region_init
+    image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/processing/region_init
     # local.processing_region_init_ver
     tag: 11.0.0.004
     env: {}
