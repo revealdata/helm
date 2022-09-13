@@ -1,7 +1,7 @@
 ---
 global:
-  namespace: ""
-  msaNumber: ""
+  namespace: "foo"
+  msaNumber: "bar"
 
 secrets:
   # -- The secrets provider
@@ -30,8 +30,6 @@ bootstrap:
   service_account_role_arn: ""
   env:
     # Path inside the github repo to use as a base environment file.
-    - name: ENVIRONMENT_FILE
-      value: ""
+    ENVIRONMENT_FILE: ""
     # Github repository from which to pull the environment file from.
-    - name: GIT_REPO_URL
-      value: ""
+    GIT_REPO_URL: ""

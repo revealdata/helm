@@ -16,12 +16,15 @@ spec:
     spec:
       containers:
       - name: review-series11-bootstrap
-        image:  {{ .Values.bootstrap.image }}:{{ .Values.bootstrap.tag }}
+        image: "{{ .Values.bootstrap.image }}:{{ .Values.bootstrap.tag }}"
         imagePullPolicy: Always
         env:
 {{- /* output env vars for Review secrets (_helpers.tpl) */}}
 {{- include "resources.env.secrets" . | indent 4 }}
-{{- .Values.bootstrap.env | indent 4}}
+        - name: "ENVIRONMENT_FILE"
+          value: "{{ .Values.bootstrap.env.ENVIRONMENT_FILE }}"
+        - name: "GIT_REPO_URL"
+          value: "{{ .Values.bootstrap.env.GIT_REPO_URL }}"
       restartPolicy: Never
       nodeSelector:
         kubernetes.io/os: linux
