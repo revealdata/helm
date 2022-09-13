@@ -164,7 +164,7 @@ brains_bt:
     # batch tools container image
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/batch-tools"
     # batch tools container tag
-    tag: "line.7.0-githash-f9b8442"
+    tag: "line.7.0-githash-6118f1b"
     # basis tech directory
     basis_dir: "basis-tech-rbl-7.39.0_rex-7.48.0_rli-7.23.2_c63.0_perpetual.4"
 
