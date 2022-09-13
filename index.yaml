@@ -1,5 +1,16 @@
 apiVersion: v1
 entries:
+  argo-application:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2022-09-13T21:44:05.503770251Z"
+    description: A Helm chart that installs an ArgoCD Application resource.
+    digest: 91172208ab1e5186005253c9e2afd5872c6e977befe6bb5c0a746e9f2dec6e77
+    name: argo-application
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/argo-application-1.0.0/argo-application-1.0.0.tgz
+    version: 1.0.0
   brainspace-series11:
   - apiVersion: v2
     appVersion: 7.0.0
@@ -248,4 +259,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-series11-bootstrap-1.0.0/review-series11-bootstrap-1.0.0.tgz
     version: 1.0.0
-generated: "2022-09-13T20:54:05.987707927Z"
+generated: "2022-09-13T21:44:05.503828053Z"
