@@ -60,6 +60,17 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/brainspace-series11-0.3.6/brainspace-series11-0.3.6.tgz
     version: 0.3.6
+  processing-bootstrap:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2022-09-13T23:15:35.476889482Z"
+    description: Bootstraping the processing service for each MSA
+    digest: 4918a6345fa0c64b4da9c41da6dfd28a74d5c0f2ea22cb58a1613458a3ec611f
+    name: processing-bootstrap
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/processing-bootstrap-1.0.0/processing-bootstrap-1.0.0.tgz
+    version: 1.0.0
   reveal-keycloak:
   - apiVersion: v2
     appVersion: 18.0.0
@@ -259,4 +270,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-series11-bootstrap-1.0.0/review-series11-bootstrap-1.0.0.tgz
     version: 1.0.0
-generated: "2022-09-13T23:08:41.092084081Z"
+generated: "2022-09-13T23:15:35.476930183Z"
