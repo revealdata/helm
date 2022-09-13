@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  generateName: review-series11-bootstrap-
+  name: review-series11-bootstrap
   namespace: {{ .Values.global.namespace | default .Release.Name }}
   annotations:
     # This is what defines this resource as a hook. Without this line, the
