@@ -18,6 +18,10 @@ spec:
   ttlSecondsAfterFinished: {{ .Values.bootstrap.region.ttl | default 6000 }}
   template:
     spec:
+      tolerations:
+      - key: windows_large
+        value: execution
+        effect: NoSchedule
       containers:
       - name: processing-bootstrap
         image: "{{ .Values.bootstrap.region.image }}:{{ .Values.bootstrap.region.tag }}"
@@ -53,6 +57,10 @@ spec:
   ttlSecondsAfterFinished: {{ .Values.bootstrap.instance.ttl | default 6000 }}
   template:
     spec:
+    tolerations:
+    - key: windows_large
+      value: execution
+      effect: NoSchedule
       containers:
       - name: processing-bootstrap
         image: "{{ .Values.bootstrap.instance.image }}:{{ .Values.bootstrap.instance.tag }}"
