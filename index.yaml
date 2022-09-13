@@ -180,6 +180,20 @@ entries:
   review-series11-bootstrap:
   - apiVersion: v2
     appVersion: 11.0.0
+    created: "2022-09-13T13:45:00.338802092Z"
+    description: review-series11-bootstrap
+    digest: e34c06c7ea683142f0aa44547795f7b82d1f56e2e6f60aa80ce5720eb7573092
+    maintainers:
+    - email: info@revealdata
+      name: Reveal-Brainspace
+      url: https://revealdata.com
+    name: review-series11-bootstrap
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/review-series11-bootstrap-1.0.2/review-series11-bootstrap-1.0.2.tgz
+    version: 1.0.2
+  - apiVersion: v2
+    appVersion: 11.0.0
     created: "2022-09-07T23:23:38.146240512Z"
     description: review-series11-bootstrap
     digest: 4d8e557783845113ff38549f1f3f34335646c33fcaca6e2a57a04ee91c0f85a9
@@ -192,4 +206,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-series11-bootstrap-1.0.0/review-series11-bootstrap-1.0.0.tgz
     version: 1.0.0
-generated: "2022-09-12T16:20:39.917504268Z"
+generated: "2022-09-13T13:45:00.338986595Z"
