@@ -1,7 +1,7 @@
 ---
 global:
-  namespace: "foo"
-  msaNumber: "bar"
+  namespace: ""
+  msaNumber: ""
 
 secrets:
   # -- The secrets provider
