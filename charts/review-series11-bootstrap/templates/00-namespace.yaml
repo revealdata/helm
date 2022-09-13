@@ -4,4 +4,5 @@ kind: Namespace
 metadata:
   name: {{ .Values.global.namespace | default .Release.Name }}
   labels:
-    "reveal.app/msa": {{ .Values.global.msaNumber }}
+    "reveal.app/msa": "{{ .Values.global.msaNumber }}"
+    "reveal.app/version": "{{ .Values.bootstrap.version }}"

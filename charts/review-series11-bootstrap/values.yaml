@@ -25,6 +25,7 @@ secrets:
         GIT_SSH_KEY: ""
 
 bootstrap:
+  version: ""
   image: ""
   tag: ""
   service_account_role_arn: ""
