@@ -30,6 +30,8 @@ bootstrap:
   service_account_role_arn: ""
   env:
     # Path inside the github repo to use as a base environment file.
-    ENVIRONMENT_FILE: ""
+    - name: ENVIRONMENT_FILE
+      value: ""
     # Github repository from which to pull the environment file from.
-    GIT_REPO_URL: ""
+    - name: GIT_REPO_URL
+      value: ""

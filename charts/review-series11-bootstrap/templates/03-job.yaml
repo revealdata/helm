@@ -21,7 +21,7 @@ spec:
         env:
 {{- /* output env vars for Review secrets (_helpers.tpl) */}}
 {{- include "resources.env.secrets" . | indent 4 }}
-{{- .Values.bootstrap.env }}
+{{- .Values.bootstrap.env | indent 4}}
       restartPolicy: Never
       nodeSelector:
         kubernetes.io/os: linux
