@@ -42,7 +42,7 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: processing-bootstrap-region
+  name: processing-bootstrap-instance
   namespace: {{ .Values.global.namespace | default .Release.Name }}
   labels:
     "reveal.app/msa": "{{ .Values.global.msaNumber }}"
