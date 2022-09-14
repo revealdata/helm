@@ -60,37 +60,6 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/brainspace-series11-0.3.6/brainspace-series11-0.3.6.tgz
     version: 0.3.6
-  processing-bootstrap:
-  - apiVersion: v2
-    appVersion: 1.0.0
-    created: "2022-09-13T23:56:40.878738048Z"
-    description: Bootstraping the processing service for each MSA
-    digest: b9788cbe78f84f219f80efc1be2c267b812daddade27aeedbe46da0fec8790c1
-    name: processing-bootstrap
-    type: application
-    urls:
-    - https://github.com/revealdata/helm/releases/download/processing-bootstrap-1.0.2/processing-bootstrap-1.0.2.tgz
-    version: 1.0.2
-  - apiVersion: v2
-    appVersion: 1.0.0
-    created: "2022-09-13T23:44:25.25626862Z"
-    description: Bootstraping the processing service for each MSA
-    digest: bed069d969bd4e6f84e785a47b42c7fdec694520ea1f9381f09382776f4b4878
-    name: processing-bootstrap
-    type: application
-    urls:
-    - https://github.com/revealdata/helm/releases/download/processing-bootstrap-1.0.1/processing-bootstrap-1.0.1.tgz
-    version: 1.0.1
-  - apiVersion: v2
-    appVersion: 1.0.0
-    created: "2022-09-13T23:15:35.476889482Z"
-    description: Bootstraping the processing service for each MSA
-    digest: 4918a6345fa0c64b4da9c41da6dfd28a74d5c0f2ea22cb58a1613458a3ec611f
-    name: processing-bootstrap
-    type: application
-    urls:
-    - https://github.com/revealdata/helm/releases/download/processing-bootstrap-1.0.0/processing-bootstrap-1.0.0.tgz
-    version: 1.0.0
   reveal-keycloak:
   - apiVersion: v2
     appVersion: 18.0.0
@@ -163,20 +132,6 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/reveal-review-1.0.4/reveal-review-1.0.4.tgz
     version: 1.0.4
-  - apiVersion: v2
-    appVersion: 11.0.0
-    created: "2022-09-01T20:20:28.225972899Z"
-    description: Reveal Review
-    digest: 88ace7b89420069ccd972c96732ef78bfb362e0ca7274f8c0f2397a7d46cbf44
-    maintainers:
-    - email: info@revealdata
-      name: Reveal-Brainspace
-      url: https://revealdata.com
-    name: reveal-review
-    type: application
-    urls:
-    - https://github.com/revealdata/helm/releases/download/reveal-review-1.0.3/reveal-review-1.0.3.tgz
-    version: 1.0.3
   - apiVersion: v2
     appVersion: 11.0.0
     created: "2022-09-01T20:11:57.505141696Z"
