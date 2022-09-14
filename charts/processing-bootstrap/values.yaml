@@ -1,0 +1,19 @@
+---
+global:
+  namespace: ""
+  msaNumber: "000000"
+
+bootstrap:
+  region:
+    enabled: false
+    image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/processing/region_init
+    # local.processing_region_init_ver
+    tag: 11.0.0.004
+    env: {}
+  instance:
+    enabled: false
+    image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/processing/instance_init
+    # local.processing_instance_init_ver
+    tag: 11.0.0.004
+    env: {}
+  
