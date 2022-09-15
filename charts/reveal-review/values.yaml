@@ -58,6 +58,14 @@ secrets:
         ClientSecret: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='azurekv'>"
       TennantId: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='azurekv'>"
       VaultUrl: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='azurekv'>"
+      remoteRefs:
+        review_sql_server_keyname: ""
+        review_sql_auth_method_keyname: ""
+        review_sql_username_keyname: ""
+        review_sql_password_keyname: ""
+        review_user_management_db_keyname: ""
+        review_website_decryption_key_keyname: ""
+        review_website_validation_key_keyname: ""
 
 ingress:
   # -- The ingress class (set per ingress)
