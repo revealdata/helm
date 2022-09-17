@@ -4,6 +4,9 @@ kind: Deployment
 metadata:
   name: review-search-api
   namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels:
+{{ $labels :=  mergeOverwrite .Values.review.labels .Values.review.ui.labels }}
+{{- toYaml $labels | indent 4 }}
 spec:
   selector:
     matchLabels:

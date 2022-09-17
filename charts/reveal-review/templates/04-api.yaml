@@ -4,6 +4,9 @@ kind: Deployment
 metadata:
   name: review-api
   namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels:
+{{ $labels :=  mergeOverwrite .Values.review.labels .Values.review.api.labels }}
+{{- toYaml $labels | indent 4 }}
 spec:
   selector:
     matchLabels:
@@ -30,13 +33,6 @@ spec:
 {{- toYaml $nodeSelector | indent 8 }}
       containers:
       - image: {{.Values.review.api.image}}:{{.Values.review.api.tag}}
-        {{- if .Values.review.api.commandOverride }}
-        command: [ "{{ .Values.review.api.command }}" ]
-        args:
-          {{-  range .Values.review.api.args }}
-          - "{{ . }}"
-          {{- end }}
-        {{- end }}
         ports:
         - containerPort: 80
         envFrom:

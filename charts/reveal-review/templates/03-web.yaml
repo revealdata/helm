@@ -4,6 +4,9 @@ kind: Deployment
 metadata:
   name: review-web
   namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels:
+{{ $labels :=  mergeOverwrite .Values.review.labels .Values.review.web.labels }}
+{{- toYaml $labels | indent 4 }}
 spec:
   selector:
     matchLabels:

@@ -5,6 +5,9 @@ kind: Deployment
 metadata:
   name:  {{.name}}
   namespace: {{$.Values.global.namespace | default $.Release.Name }}
+  labels:
+{{ $labels :=  deepCopy $.Values.review.labels | mergeOverwrite .labels }}
+{{- toYaml $labels | indent 4 }}
 spec:
   selector:
     matchLabels:
@@ -28,10 +31,10 @@ spec:
     spec:
       nodeSelector:
 {{- if eq .os "linux" }}
-{{- $nodeSelector := mergeOverwrite $.Values.review.nodeSelector.linux .nodeSelector }}
+{{- $nodeSelector := deepCopy $.Values.review.nodeSelector.linux |  mergeOverwrite .nodeSelector }}
 {{ toYaml $nodeSelector | indent 8 }}
 {{- else }}
-{{- $nodeSelector := mergeOverwrite $.Values.review.nodeSelector.windows .nodeSelector }}
+{{- $nodeSelector := deepCopy $.Values.review.nodeSelector.windows |  mergeOverwrite .nodeSelector }}
 {{ toYaml $nodeSelector | indent 8 }}
 {{- end }}
       containers:
@@ -50,8 +53,8 @@ spec:
 {{- /* output env vars for Review secrets (_helpers.tpl) */}}
 {{- include "resources.env.secrets" . | indent 6 }}
         resources:
-{{ $resources := mergeOverwrite $.Values.review.resources .resources }}
-{{- toYaml $resources | indent 10 }}
+{{- $resources := deepCopy $.Values.review.resources |  mergeOverwrite .resources }}
+{{ toYaml $resources | indent 10 }}
         imagePullPolicy: Always
         name: {{ .name }}
         securityContext:

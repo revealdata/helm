@@ -4,6 +4,9 @@ kind: Deployment
 metadata:
   name: review-series11-ui
   namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels:
+{{ $labels :=  mergeOverwrite .Values.review.labels .Values.review.ui.labels }}
+{{- toYaml $labels | indent 4 }}
 spec:
   selector:
     matchLabels:
@@ -26,15 +29,15 @@ spec:
       {{- end }}
     spec:
       nodeSelector:
-{{ $nodeSelector := mergeOverwrite .Values.review.nodeSelector.linux .Values.review.ui.nodeSelector }}
-{{- toYaml $nodeSelector | indent 8 }}
+{{- $nodeSelector := deepCopy .Values.review.nodeSelector.linux |  mergeOverwrite .Values.review.ui.nodeSelector }}
+{{ toYaml $nodeSelector | indent 8 }}
       containers:
       - image: {{.Values.review.ui.image}}:{{.Values.review.ui.tag}}
         ports:
         - containerPort: 443
         resources:
-{{ $resources := mergeOverwrite .Values.review.resources .Values.review.ui.resources }}
-{{- toYaml $resources | indent 10 }}
+{{- $resourcesUi := deepCopy .Values.review.resources | mergeOverwrite .Values.review.ui.resources }}
+{{ toYaml $resourcesUi | indent 10 }}
         imagePullPolicy: Always
         name: review-series11-ui
         securityContext:
@@ -52,8 +55,8 @@ spec:
       schedulerName: default-scheduler
       terminationGracePeriodSeconds: 30
       tolerations:
-{{ $tolerations := concat .Values.review.tolerations.linux .Values.review.ui.tolerations }}
-{{- toYaml $tolerations | indent 8 }}
+{{ $tolerationsUi := concat .Values.review.tolerations.linux .Values.review.ui.tolerations }}
+{{- toYaml $tolerationsUi | indent 8 }}
 
 ---
 apiVersion: v1

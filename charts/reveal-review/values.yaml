@@ -31,9 +31,9 @@ secrets:
     review-sql-auth-method: ""
     review-sql-username: ""
     review-sql-password: ""
-    # Needs to be [0-9A-Z]{48}
+    # Needs to be [0-9A-F]{48}
     review-website-decryption-key: ""
-    # Needs to be [0-9A-Z]{128}
+    # Needs to be [0-9A-F]{128}
     review-website-validation-key: ""
 
   # -- OPTIONS FOR: 'external-secrets' -- #
@@ -116,6 +116,8 @@ review:
     linux:
       "kubernetes.io/os": "linux"
       "kubernetes.io/arch": "amd64"
+  labels:
+    "reveal.app/msa": ""
 
   web:
     image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/publish"
@@ -132,6 +134,8 @@ review:
     commandOverride: false
     command: ""
     args: []
+    labels:
+      "reveal.app/review": "publish"
 
   api:
     image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/publish_api"
@@ -144,6 +148,8 @@ review:
     commandOverride: false
     command: ""
     args: []
+    labels:
+      "reveal.app/review": "publish_api"
 
   search_api:
     image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/search_api"
@@ -157,6 +163,8 @@ review:
     commandOverride: false
     command: ""
     args: []
+    labels:
+      "reveal.app/review": "search_api"
 
   ui:
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/reveal/11series/ui"
@@ -169,6 +177,8 @@ review:
     commandOverride: false
     command: ""
     args: []
+    labels:
+      "reveal.app/review": "ui"
 
   review_services:
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/assignment"
@@ -184,6 +194,8 @@ review:
       commandOverride: false
       command: ""
       args: []
+      labels:
+        "reveal.app/review": "assignment"
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/assignmentstatus"
       tag: "reveal-series11-qa"
@@ -197,6 +209,8 @@ review:
       commandOverride: false
       command: ""
       args: []
+      labels:
+        "reveal.app/review": "assignmentstatus"
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/bulktag"
       tag: "reveal-series11-qa"
@@ -211,6 +225,8 @@ review:
       commandOverride: false
       command: ""
       args: []
+      labels:
+        "reveal.app/review": "bulktag"
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/documentloader"
       tag: "reveal-series11-qa"
@@ -225,6 +241,8 @@ review:
       commandOverride: false
       command: ""
       args: []
+      labels:
+        "reveal.app/review": "documentloader"
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/export"
       tag: "reveal-series11-qa"
@@ -239,6 +257,8 @@ review:
       commandOverride: false
       command: ""
       args: []
+      labels:
+        "reveal.app/review": "export"
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/indexbatch"
       tag: "reveal-series11-qa"
@@ -253,6 +273,8 @@ review:
       commandOverride: false
       command: ""
       args: []
+      labels:
+        "reveal.app/review": "indexbatch"
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/indexserver"
       tag: "reveal-series11-qa"
@@ -267,6 +289,8 @@ review:
       commandOverride: false
       command: ""
       args: []
+      labels:
+        "reveal.app/review": "indexserver"
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/print"
       tag: "reveal-series11-qa"
@@ -281,6 +305,8 @@ review:
       commandOverride: false
       command: ""
       args: []
+      labels:
+        "reveal.app/review": "print"
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/productionserver"
       tag: "reveal-series11-qa"
@@ -295,6 +321,8 @@ review:
       commandOverride: false
       command: ""
       args: []
+      labels:
+        "reveal.app/review": "productionserver"
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/search"
       tag: "reveal-series11-qa"
@@ -309,6 +337,8 @@ review:
       commandOverride: false
       command: ""
       args: []
+      labels:
+        "reveal.app/review": "search"
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/productionclient"
       tag: "reveal-series11-qa"
@@ -322,6 +352,8 @@ review:
       commandOverride: false
       command: ""
       args: []
+      labels:
+        "reveal.app/review": "production_export"
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/indexclient"
       tag: "reveal-series11-qa"
@@ -335,6 +367,8 @@ review:
       commandOverride: false
       command: ""
       args: []
+      labels:
+        "reveal.app/review": "indexing"
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/imaging"
       tag: "reveal-series11-qa"
@@ -348,6 +382,8 @@ review:
       commandOverride: false
       command: ""
       args: []
+      labels:
+        "reveal.app/review": "imaging"
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/imaging"
       tag: "reveal-series11-qa"
@@ -364,6 +400,8 @@ review:
       commandOverride: false
       command: ""
       args: []
+      labels:
+        "reveal.app/review": "imaging_totf"
 
   # -- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: false
