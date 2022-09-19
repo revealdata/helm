@@ -38,9 +38,9 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.global.ecr.secret }}
       {{- end }} {{- end }}
-      {{- if .Values.secrets.serviceAccount }}
-      {{- if and (eq .Values.secrets.provider "secrets-store-csi" ) .Values.secrets.serviceAccount.roleArn }}
-      serviceAccountName: aws-secrets-provider-sa
+      {{- if .Values.global.serviceAccount }}
+      {{- if .Values.global.serviceAccount.roleArn }}
+      serviceAccountName: {{ .Values.global.serviceAccount.name | default "brainspace-sa" }}
       {{- end }}{{- end }}
       volumes:
       {{- if or (eq .Values.storage.class "efs-sc") (eq .Values.storage.class "pvc") }}
@@ -78,21 +78,8 @@ spec:
       - name: shared-logs
         emptyDir: {}
       {{- end }}
-      {{- if .Values.global.brainspace }}
-      {{- if .Values.global.brainspace.licenseFile }}
-      - name: brains-license-vol
-        secret:
-          secretName: brains-license
-          optional: true
-      {{- end }}{{- end }}
-      {{- if eq .Values.secrets.provider "secrets-store-csi" }}
-      - name: brainspace-secrets-vol
-        csi:
-          driver: secrets-store.csi.k8s.io
-          readOnly: true
-          volumeAttributes:
-            secretProviderClass: "brainspace-secrets-provider"
-      {{- end }}
+      # Secrets Volumes
+      {{- include "secrets.volumes" . | indent 6 }}
       initContainers:
       - name: brains-bt
         image: {{ .Values.brains_bt.image }}:{{ .Values.brains_bt.tag }}
@@ -127,6 +114,8 @@ spec:
         resources:
           requests:
           {{- include "resources.values" .Values.brains_app | indent 8 }}
+          limits:
+          {{- include "resources.values" .Values.brains_app | indent 8 }}
         ports:
         - containerPort: 8080
         envFrom:
@@ -138,14 +127,17 @@ spec:
           {{- /* env vars for Java Resources (_helpers.tpl) */}}
           {{- include "java.resources.values" .Values.brains_app | indent 6 }}
           {{- /* env vars for Brainspace secrets (_helpers.tpl) */}}
-          {{- include "resources.env.secrets" . |indent 6 }}
-        {{- if .Values.global.brainspace }}
-        {{- if .Values.global.brainspace.licenseFile }}
+          {{- include "secrets.env" . |indent 6 }}
         lifecycle:
           postStart:
             exec:
-              command: ["/bin/bash", "-c", "[[ -e /var/lib/brains/license/brainspace_license.txt ]] && cp /var/lib/brains/license/brainspace_license.txt /var/lib/brains/.brainspace/brainspace_license.txt"]
-        {{- end }}{{- end }}
+              command: 
+                - "/bin/bash"
+                - "-c"
+                - |
+                  if [[ -e /var/lib/brains/license/brainspace_license.txt ]]; then
+                  cp /var/lib/brains/license/brainspace_license.txt /var/lib/brains/.brainspace/brainspace_license.txt;
+                  fi;
         volumeMounts:
         - name: basis-data
           readOnly: true
@@ -165,26 +157,12 @@ spec:
         - name: plugins-additional-data
           readOnly: false
           mountPath: /var/lib/brains/.brainspace/plugins/additional
-        {{- if and .Values.global.development (eq .Values.storage.class "efs") }}
-        - name: devshared-data # (BRAINSPACE INTERNAL)
-          readOnly: true
-          mountPath: /devshared_data
-        {{- end }}
         - name: shared-logs
           readOnly: false
           mountPath: /usr/local/tomcat/logs
           subPath: {{ .Values.brains_app.logDir | default "app" }}
-        {{- if .Values.global.brainspace }}
-        {{- if .Values.global.brainspace.licenseFile }}
-        - name: brains-license-vol
-          mountPath: "/var/lib/brains/license"
-          readOnly: true
-        {{- end }}{{- end }}
-        {{- if eq .Values.secrets.provider "secrets-store-csi" }}
-        - name: brainspace-secrets-vol
-          mountPath: "/mnt/brainspace-secrets"
-          readOnly: true
-        {{- end }}
+        # Secrets Volume Mounts
+        {{- include "secrets.volumes.mounts" . | indent 8 }}
       schedulerName: default-scheduler
       terminationGracePeriodSeconds: 120
       tolerations:

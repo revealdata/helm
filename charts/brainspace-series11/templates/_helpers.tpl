@@ -46,11 +46,11 @@
 {{- $memory := 8 -}}
 
     {{- if contains "application" .image -}}
-        {{ $env := dict "CATALINA_OPTS" (printf "-Xmx%dg" ($memory | int)) }}
+        {{ $env := dict "CATALINA_OPTS" (printf "-XX:MaxMetaspaceSize=256m -Xmx%dg" (sub ($memory | int) 2)) }}
 
         {{- if .resources -}}
         {{- if .resources.memory -}}
-        {{ $env := dict "CATALINA_OPTS" (printf "-Xmx%dg" (.resources.memory | int)) }}
+        {{ $env := dict "CATALINA_OPTS" (printf "-XX:MaxMetaspaceSize=256m -Xmx%dg" (sub (.resources.memory | int) 2)) }}
         {{- include "java.resources.values.out" $env }}
         {{- else -}}
         {{- include "java.resources.values.out" $env }}
@@ -76,36 +76,61 @@
 
 {{- end -}}
 
-{{- define "resources.env.secrets" -}}
-{{/* output env vars for Brainspace secrets */}}
-    - name: POSTGRES_USER
+{{- define "secrets.env" -}}
+{{/* output env vars for secrets that have an envVar defined */}}
+{{- range .Values.secrets.secretDefinitions }}
+{{- $eksSecretName := .eksSecretName }}
+{{- range .data }}
+{{- $defaults := index $.Values.defaults.secrets .secretKey }}
+  {{- if or .envVar $defaults.envVar }}
+    - name: {{ .envVar | default $defaults.envVar | quote }}
       valueFrom:
         secretKeyRef:
-          name: brainspace-secrets
-          key: brainspace_db_user
-    - name: POSTGRES_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: brainspace-secrets
-          key: brainspace_db_password
-    - name: PGPASSWORD
-      valueFrom:
-          secretKeyRef:
-            name: brainspace-secrets
-            key: brainspace_db_password
-    - name: POSTGRES_HOST
-      valueFrom:
-        secretKeyRef:
-          name: brainspace-secrets
-          key: brainspace_db_host
-    - name: POSTGRES_PORT
-      valueFrom:
-        secretKeyRef:
-          name: brainspace-secrets
-          key: brainspace_db_port
-    - name: POSTGRES_DB
-      valueFrom:
-        secretKeyRef:
-          name: brainspace-secrets
-          key: brainspace_db_name
+          name: {{ $eksSecretName }}
+          key: {{ .secretKey }}
+  {{- end }}
+
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "secrets.volumes" -}}
+{{/* output volumes for secrets that have a volume defined */}}
+{{- range .Values.secrets.secretDefinitions }}
+{{- $eksSecretName := .eksSecretName }}
+{{- range .data }}
+{{- $defaults := index $.Values.defaults.secrets .secretKey }}
+{{- $values := deepCopy . | mergeOverwrite (deepCopy $defaults) }}
+{{- if $values.volume }}
+- name: {{ $values.volume }}
+  secret:
+    secretName: {{ $eksSecretName }}
+    {{- if hasKey $values "optional" }}
+    optional: {{ $values.optional}}
+    {{- else }}
+    optional: false
+    {{- end }}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "secrets.volumes.mounts" -}}
+{{/* output volume mounts for secrets that have a volume defined */}}
+{{- range .Values.secrets.secretDefinitions }}
+{{- $eksSecretName := .eksSecretName }}
+{{- range .data }}
+{{- $defaults := index $.Values.defaults.secrets .secretKey }}
+{{- $values := deepCopy . | mergeOverwrite (deepCopy $defaults) }}
+{{- if and $values.volume $values.mountPath }}
+- name: {{ $values.volume | default $defaults.volume }}
+  mountPath: {{ $values.mountPath | default $defaults.mountPath }}
+  {{- if hasKey $values "readOnly" }}
+  readOnly: {{ $values.readOnly }}
+  {{- else }}
+  readOnly: true 
+  {{- end }}
+{{- end }}
+{{- end -}}
+{{- end -}}
 {{- end -}}
