@@ -1,0 +1,40 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ printf "%s-%s" .Values.name .Values.env }}-ingress
+  annotations:
+    kubernetes.io/ingress.class: {{ .Values.ingress.annotations.ingress }}
+    alb.ingress.kubernetes.io/scheme: {{ .Values.ingress.annotations.scheme }}
+    alb.ingress.kubernetes.io/load-balancer-name: {{ .Values.ingress.annotations.load_balancer_name }}
+    alb.ingress.kubernetes.io/tags: {{ .Values.ingress.annotations.tags }}
+    {{- if .Values.ingress.hostname }}
+    external-dns.alpha.kubernetes.io/hostname: {{ .Values.ingress.hostname }}
+    {{- end }}
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}, {"HTTP":80}]'
+    {{- if .Values.ingress.sslCertArn }}
+    # The ARN of your SSL certificate.
+    alb.ingress.kubernetes.io/certificate-arn: {{ .Values.ingress.sslCertArn }}
+    {{- end }}
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/success-codes: "200,400"
+    alb.ingress.kubernetes.io/healthcheck-path: /graphql
+  labels:
+    app: {{ printf "%s-%s" .Values.name .Values.env }}
+    app.kubernetes.io/name: {{ .Values.name }}
+    app.kubernetes.io/component: {{ .Values.ingress.labels.component }}
+spec:
+  defaultBackend:
+    service:
+      name: reveal-search-api-service
+      port:
+        number: {{ .Values.service.port }}
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: reveal-search-api-service
+                port:
+                  number: {{ .Values.service.port }}

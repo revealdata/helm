@@ -1,0 +1,160 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: argo-workflow-manager
+rules:
+  - verbs:
+      - list
+    apiGroups:
+      - argoproj.io
+    resources:
+      - workfloweventbindings
+  - verbs:
+      - get
+    apiGroups:
+      - argoproj.io
+    resources:
+      - workflowtemplates
+  - verbs:
+      - create
+      - get
+    apiGroups:
+      - argoproj.io
+    resources:
+      - workflows
+      - workflowtaskresults
+  - verbs:
+      - create
+      - get
+      - list
+      - watch
+      - update
+      - delete
+    apiGroups:
+      - ''
+      - apps
+      - batch
+    resources:
+      - jobs
+  - verbs:
+      - watch
+      - list
+      - get
+    apiGroups:
+      - ''
+    resources:
+      - pods
+      - pods/log
+  - verbs:
+      - get
+      - list
+      - watch
+    apiGroups:
+      - ''
+    resources:
+      - services
+  - verbs:
+      - '*'
+    apiGroups:
+      - sparkoperator.k8s.io
+    resources:
+      - sparkapplications
+      - sparkapplications/status
+      - scheduledsparkapplications
+      - scheduledsparkapplications/status
+      - '*'
+  - verbs:
+      - '*'
+    apiGroups:
+      - ''
+    resources:
+      - pods
+  - verbs:
+      - '*'
+    apiGroups:
+      - ''
+    resources:
+      - services
+      - configmaps
+      - secrets
+  - verbs:
+      - create
+      - get
+      - delete
+    apiGroups:
+      - extensions
+      - networking.k8s.io
+    resources:
+      - ingresses
+  - verbs:
+      - get
+    apiGroups:
+      - ''
+    resources:
+      - nodes
+  - verbs:
+      - create
+      - update
+      - patch
+    apiGroups:
+      - ''
+    resources:
+      - events
+  - verbs:
+      - get
+      - list
+      - watch
+    apiGroups:
+      - ''
+    resources:
+      - resourcequotas
+  - verbs:
+      - create
+      - get
+      - update
+      - delete
+    apiGroups:
+      - apiextensions.k8s.io
+    resources:
+      - customresourcedefinitions
+  - verbs:
+      - create
+      - get
+      - update
+      - delete
+    apiGroups:
+      - admissionregistration.k8s.io
+    resources:
+      - mutatingwebhookconfigurations
+      - validatingwebhookconfigurations
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: reveal-search-api-argo
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: {{ .Values.name }}
+  - kind: ServiceAccount
+    name: argo
+    namespace: {{ .Values.name }}
+  - kind: ServiceAccount
+    name: spark
+    namespace: {{ .Values.name }}
+  - kind: ServiceAccount
+    name: spark
+    namespace: spark
+  - kind: ServiceAccount
+    name: reveal-search-api
+    namespace: {{ .Values.name }}
+  - kind: ServiceAccount
+    name: reveal-search-api-spark-operator
+    namespace: {{ .Values.name }}
+
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: argo-workflow-manager

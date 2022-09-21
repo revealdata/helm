@@ -1,0 +1,91 @@
+# Default values for Graphql.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+name: "reveal-search-api"
+replicaCount: 3
+env: dev
+
+ConfigMap: 
+  data: 
+    esHost: ""
+    eeAuth: ""
+    esPort: "9200"
+    enableGqlPlayground: "false"
+    dataopsToolsImageTag: ""
+
+argoWorkflowsArtifactRepository:
+  s3bucket: ""
+
+image: 475250404638.dkr.ecr.us-east-1.amazonaws.com/reveal-search-cli
+tag: bf7663649a41b1289507ffc8cf743c88ce3c8a99
+args: ["api"]
+port: 
+  containerport: 8080
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: reveal-search-api-sa
+  irsa: ""
+
+
+service:
+  type: NodePort
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: true
+  annotations:    
+    ingress: alb
+    scheme: internal
+    load_balancer_name: "reveal-search-api"
+    tags: Application=reveal-search-api
+  sslCertArn: ""
+  hostname: ""
+  Port:
+    number: 80
+  labels:
+    component: api
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+#troubleshooting Postgress authentication
+# https://github.com/bitnami/charts/issues/2061
+
+argo-workflows:
+  postgresql:
+    auth:
+      username: "postgres"
+      password: ""
+  controller:
+    existingConfigMap: "workflow-controller-configmap"
