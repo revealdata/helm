@@ -27,7 +27,9 @@ jobs:
           version: v3.9.3 # renovate: datasource=github-releases depName=helm packageName=helm/helm
 
       - name: Add external Helm repos
-        run: helm repo add bitnami https://charts.bitnami.com/bitnami
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add spark-operator https://googlecloudplatform.github.io/spark-on-k8s-operator
 
       - name: Build chart dependencies
         run: |
