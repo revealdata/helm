@@ -88,6 +88,20 @@ entries:
   reveal-keycloak:
   - apiVersion: v2
     appVersion: 18.0.0
+    created: "2022-09-21T19:23:31.287546921Z"
+    description: Reveal Keycloak
+    digest: ce9bb3c3e05b63bba24189c89e7de140396d2af74ddc2759de981fb6ec45bc8a
+    maintainers:
+    - email: info@revealdata.com
+      name: Reveal-Brainspace
+      url: https://revealdata.com
+    name: reveal-keycloak
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-keycloak-0.7.7/reveal-keycloak-0.7.7.tgz
+    version: 0.7.7
+  - apiVersion: v2
+    appVersion: 18.0.0
     created: "2022-08-25T21:05:54.300202425Z"
     description: Reveal Keycloak
     digest: 8bc71029aee82336da12d5f050cd25c4af7066897174688e69d8c8e3cdc3c2b0
@@ -344,4 +358,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-series11-bootstrap-1.0.0/review-series11-bootstrap-1.0.0.tgz
     version: 1.0.0
-generated: "2022-09-21T13:58:30.429361697Z"
+generated: "2022-09-21T19:23:31.287592424Z"
