@@ -4,6 +4,10 @@ global:
   namespace: ""
   # -- Optionally disable the namespace creation as it may already exist
   noNamespace: false
+  # -- Optionally set a service account for the pods
+  serviceAccount:
+    name: "keycloak-sa"
+    roleArn: ""
   ecr:
     enabled: false
     # -- AWS Account ID (default "053522176595")
@@ -15,19 +19,36 @@ global:
     # -- Docker ECR Password (required)
     # -- Command: aws ecr get-login-password
     password: ""
+
 secrets:
   # -- The secrets provider
   # -- Providers:
-  # -- secrets-store-csi: (https://secrets-store-csi-driver.sigs.k8s.io)
   # -- external-secrets: (https://external-secrets.io/v0.5.9/)
   # -- kubernetes: Use kubernetes secret. Add secrets to the 'kubernetes' section below.
   provider: "external-secrets"
 
-  # -- Optionally use a service account with RBAC for obtaining secrets (AWS Only)
-  # -- The IAM Role ARN created by CloudFormation or Terraform
-  # -- Required if using provider: "secrets-store-csi"
-  serviceAccount:
-    roleArn: ""
+  # -- OPTIONS FOR: 'external-secrets' -- #
+  externalSecrets:
+    # -- The external-secrets provider
+    # -- Providers: 
+    # -- aws: AWS SecretsManager
+    # -- azurekv: Azure KeyVault
+    provider: aws
+    # -- Options for aws (AWS SecretsManager)
+    aws:
+      # -- Region: The AWS region where the secret resides (default "us-east-1")
+      region: "us-east-1"
+      # -- secretName: The Secrets Manager Name for the admin and database secrets created by CloudFormation or Terraform
+      secretName:
+        admin: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='aws'>"
+        database: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='aws'>"
+    # -- Options for azurekv (Azure KeyVault)
+    azurekv:
+      auth:
+        ClientID: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='azurekv'>"
+        ClientSecret: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='azurekv'>"
+      TennantId: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='azurekv'>"
+      VaultUrl: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='azurekv'>"
 
   # -- OPTIONS FOR: provider: 'kubernetes' -- #
   kubernetes:
@@ -41,36 +62,6 @@ secrets:
     kc_db_username: ""
     kc_db_password: ""
 
-  # -- OPTIONS FOR: 'external-secrets' -- #
-  externalSecrets:
-    # -- The external-secrets provider
-    # -- Providers: 
-    # -- aws: AWS SecretsManager
-    # -- azurekv: Azure KeyVault
-    provider: aws
-    # -- Options for aws (AWS SecretsManager)
-    aws:
-      # -- Region: The AWS region where the secret resides (default "us-east-1")
-      Region: "us-east-1"
-      # -- secretName: The Secrets Manager Name for the admin and database secrets created by CloudFormation or Terraform
-      secretName:
-        admin: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='aws'>"
-        database: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='aws'>"
-    # -- Options for azurekv (Azure KeyVault)
-    azurekv:
-      auth:
-        ClientID: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='azurekv'>"
-        ClientSecret: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='azurekv'>"
-      TennantId: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='azurekv'>"
-      VaultUrl: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='azurekv'>"
-
-  # -- OPTIONS FOR: 'secrets-store-csi' (AWS ONLY) -- #
-  secretsStoreCSI:
-    # -- SecretArn: The Secrets Manager ARN for the admin and database secrets created by CloudFormation or Terraform
-    secretArn:
-      admin: "<ADD VALUE IF USING secrets.provider='secrets-store-csi'>"
-      database: "<ADD VALUE IF USING secrets.provider='secrets-store-csi'>"
-  
 ingress:
   # -- The ingress class (set per ingress)
   # -- Options:
@@ -103,12 +94,28 @@ keycloak:
   resources:
     memory: 2
   # -- Import CA certificate files in PEM format into the Keycloak Trust Store
-  # -- The directory containing CA certificates must reside in the chart root directory
-  # -- The directory must not be in the .helmignore file
-  cacerts:
-    enabled: false
-    # -- Optional path to the directory where CA certificates are located
-    path: "pki"
+  # -- A trusted CA cert is required for the Keycloak pod to communicate with LDAPs
+  # -- CA Certificates are added to a secret and mounted to the pod
+  # -- You can also specify an existing secret in the same namespace to use
+  caTrustStore:
+    useExistingSecret: false
+    secretName: "keycloak-cacerts"
+    cacerts: {}
+      # -- The CA certificate file name
+      # - name: "ldap-ca"
+        # -- The CA certificate file contents in PEM format
+        # cert: |
+        #     -----BEGIN CERTIFICATE-----
+        #     MIIDBzCCAe+gAwIBAgIJAMZQ4Z0Z1Z0mMA0GCSqGSIb3DQEBCwUAMIGIMQswCQYD
+        #     VQQGEwJVUzELMAkGA1UECAwCQ0ExFDASBgNVBAcMC1NhbiBGcmFuY2lzY28xEzAR
+        #     BgNVBAoMCkdvb2dsZSBJbmMxJDAiBgNVBAMMG0dvb2dsZSBJbnRlcm5ldCBBdXRo
+        #     ...
+        #     -----END CERTIFICATE-----
+  hostAliases: []
+    # - ip: "127.0.0.1"
+    #   hostnames:
+    #   - "foo.local"
+    #   - "bar.local"
   env:
     KC_LOG_LEVEL: "INFO"
     # -- https://www.keycloak.org/server/hostname
@@ -123,10 +130,10 @@ keycloak:
     #     operator: "Exists"
   proxy:
     image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/reveal/ui/base
-    tag: 1.1.5
+    tag: 1.1.6
     replicas: 1
-    env:
-      TEST: "false" # Only use in testing snd development. Disables security headers.
+    env: {}
+      # TEST: "true" # Only use in testing snd development. Disables security headers.
     # -- Optionally set custom tolerations
     tolerations: []
       # - effect: "NoSchedule"

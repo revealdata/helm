@@ -31,29 +31,29 @@ spec:
       {{- end }}
     spec:
       hostname: keycloak
+      {{- if .Values.keycloak.hostAliases }}
+      hostAliases:
+{{ toYaml .Values.keycloak.hostAliases | indent 6 }}
+      {{- end }}
       nodeSelector:
         kubernetes.io/os: linux
         kubernetes.io/arch: amd64
         {{- if .Values.keycloak.nodegroup }}
         alpha.eksctl.io/nodegroup-name: {{ .Values.keycloak.nodegroup }}
         {{- end }}
-      {{- if .Values.secrets.serviceAccount }}
-      {{- if .Values.secrets.serviceAccount.roleArn }}
-      serviceAccountName: aws-secrets-provider-sa
+      {{- if .Values.global.serviceAccount }}
+      {{- if .Values.global.serviceAccount.roleArn }}
+      serviceAccountName: {{ .Values.global.serviceAccount.name | default "keycloak-sa" }}
       {{- end }}{{- end }}
+      {{- if .Values.keycloak.caTrustStore }}
+      {{- if or (not (empty .Values.keycloak.caTrustStore.cacerts)) (.Values.keycloak.caTrustStore.useExistingSecret) }}
       volumes:
-        {{- if eq  .Values.secrets.provider "secrets-store-csi" }}
-        - name: keycloak-secrets-vol
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: "keycloak-secrets-provider"
-        {{- end }}
-        - name: keycloak-cacerts-vol
+        # Keycloak Trusted CA Certs Volume
+        - name: {{ .Values.keycloak.caTrustStore.secretName | default "keycloak-cacerts" }}-vol
           secret:
-            secretName: keycloak-cacerts
+            secretName: {{ .Values.keycloak.caTrustStore.secretName | default "keycloak-cacerts" }}
             optional: true
+      {{- end }}{{- end }}
       {{- if .Values.global.ecr.enabled }}
       imagePullSecrets:
       - name: aws-ecr-credentials
@@ -103,15 +103,14 @@ spec:
           httpGet:
             path: /health/ready
             port: liveness-port
+        {{- if .Values.keycloak.caTrustStore }}
+        {{- if or (not (empty .Values.keycloak.caTrustStore.cacerts)) (.Values.keycloak.caTrustStore.useExistingSecret) }}
         volumeMounts:
-          {{- if eq  .Values.secrets.provider "secrets-store-csi" }}
-          - name: keycloak-secrets-vol
-            mountPath: "/mnt/keycloak-secrets"
-            readOnly: true
-          {{- end }}
-          - name: keycloak-cacerts-vol
+          # Keycloak Trusted CA Certs Volume Mount
+          - name: {{ .Values.keycloak.caTrustStore.secretName | default "keycloak-cacerts" }}-vol
             mountPath: "/mnt/keycloak-cacerts"
             readOnly: true
+        {{- end }}{{- end }}
         envFrom:
         - configMapRef:
             name: keycloak-config

@@ -30,6 +30,11 @@
         secretKeyRef:
           name: keycloak-secrets
           key: kc_db_url_host
+    - name: KC_DB_URL_PORT
+      valueFrom:
+        secretKeyRef:
+          name: keycloak-secrets
+          key: kc_db_url_port
     - name: KC_DB_URL_DATABASE
       valueFrom:
         secretKeyRef:
