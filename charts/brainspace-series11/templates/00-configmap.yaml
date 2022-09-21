@@ -22,7 +22,7 @@ data:
   POSTGRES_SSL_FACTORY: "org.postgresql.ssl.NonValidatingFactory"
   POSTGRES_SSL: "true"
   {{- end }}
-  POSTGRES_HOST_AUTH_METHOD: {{ .Values.global.database.AuthMech | default "scram-sha-256" }}
+  POSTGRES_HOST_AUTH_METHOD: {{ .Values.global.database.authMech | default "scram-sha-256" }}
 
 ---
 # Brainspace Application Configuration

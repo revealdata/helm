@@ -39,6 +39,8 @@ spec:
       - name: brains-db
         image: {{ .Values.brains_db.image }}:{{ .Values.brains_db.tag }}
         imagePullPolicy: {{ .Values.brains_bt.imagePullPolicy | default "Always" }}
+        # command: ["/bin/bash"]
+        # args: ["-c", "while true; do sleep 30; done;"]
         {{- if .Values.brains_db.resources }}
         resources:
           limits:
@@ -53,7 +55,7 @@ spec:
         - containerPort: 5432
         env:
           {{- /* env vars for Brainspace secrets (_helpers.tpl) */}}
-          {{- include "resources.env.secrets" . |indent 5 }}
+          {{- include "secrets.env" . |indent 5 }}
         envFrom:
         - configMapRef:
             name: brains-config

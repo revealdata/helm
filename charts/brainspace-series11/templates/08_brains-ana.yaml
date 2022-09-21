@@ -43,9 +43,9 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.global.ecr.secret }}
       {{- end }} {{- end }}
-      {{- if and .Values.secrets.serviceAccount }}
-      {{- if and (eq .Values.secrets.provider "secrets-store-csi" ) .Values.secrets.serviceAccount.roleArn }}
-      serviceAccountName: aws-secrets-provider-sa
+      {{- if and .Values.global.serviceAccount }}
+      {{- if .Values.global.serviceAccount.roleArn }}
+      serviceAccountName: {{ .Values.global.serviceAccount.name | default "brainspace-sa" }}
       {{- end }}{{- end }}
       initContainers:
       - name: brains-bt
@@ -68,6 +68,8 @@ spec:
         resources:
           requests:
             {{- include "resources.values" .Values.brains_ana | indent 8 }}
+          limits:
+            {{- include "resources.values" .Values.brains_ana | indent 8 }}
         ports:
         - containerPort: 1604
         envFrom:
@@ -83,11 +85,20 @@ spec:
           {{- /* env vars for Java Resources (_helpers.tpl) */}}
           {{- include "java.resources.values" .Values.brains_ana | indent 6 }}
           {{- /* env vars for Brainspace secrets (_helpers.tpl) */}}
-          {{- include "resources.env.secrets" . |indent 6 }}
+          {{- include "secrets.env" . |indent 6 }}
         lifecycle:
           postStart:
             exec:
-              command: ["/bin/bash", "-c", "[[ -e /var/lib/brains/app/analytics-server/logs/analysisserver.log ]] && rm -f /var/lib/brains/app/analytics-server/logs/analysisserver.log; ln -s /dev/stdout /var/lib/brains/app/analytics-server/logs/analysisserver.log"]
+              command: 
+                - "/bin/bash"
+                - "-c"
+                - |
+                  if [[ -e /var/lib/brains/license/brainspace_license.txt ]]; then
+                  cp /var/lib/brains/license/brainspace_license.txt /var/lib/brains/.brainspace/brainspace_license.txt;
+                  fi;
+                  if [[ -e /var/lib/brains/app/analytics-server/logs/analysisserver.log ]]; then
+                  rm -f /var/lib/brains/app/analytics-server/logs/analysisserver.log; ln -s /dev/stdout /var/lib/brains/app/analytics-server/logs/analysisserver.log;
+                  fi
         volumeMounts:
         {{- if .Values.global.secretArn }}
         - name: brainspace-secrets-vol
@@ -109,15 +120,11 @@ spec:
         - name: local-data
           readOnly: false
           mountPath: /localdata
+        # Secrets Volume Mounts
+        {{- include "secrets.volumes.mounts" . | indent 8 }}
       volumes:
-      {{- if eq .Values.secrets.provider "secrets-store-csi" }}
-      - name: brainspace-secrets-vol
-        csi:
-          driver: secrets-store.csi.k8s.io
-          readOnly: true
-          volumeAttributes:
-            secretProviderClass: "brainspace-secrets"
-      {{- end }}
+      # Secrets Volumes
+      {{- include "secrets.volumes" . | indent 6 }}
       - name: local-data
         {{- if .Values.brains_ana.storage.class }}
         {{- if eq .Values.brains_ana.storage.class "emptyDir" }}

@@ -47,6 +47,18 @@ spec:
         envFrom:
         - configMapRef:
             name: brains-ui-config
+        {{- if .Values.brains_ui.proxyConfig }}
+        volumeMounts:
+          - name: proxy-config
+            mountPath: /run/config
+            readOnly: true
+        {{- end }}
+      {{- if .Values.brains_ui.proxyConfig }}
+      volumes:
+        - name: proxy-config
+          secret:
+            secretName: nginx-config
+      {{- end }}
 
 ---
 apiVersion: v1

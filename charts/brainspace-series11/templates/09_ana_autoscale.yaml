@@ -54,7 +54,7 @@ spec:
               fieldRef:
                 fieldPath: metadata.namespace
           {{- /* env vars for Brainspace secrets (_helpers.tpl) */}}
-          {{- include "resources.env.secrets" . |indent 6 }}
+          {{- include "secrets.env" . |indent 6 }}
         envFrom:
         - configMapRef:
             name: brains-config

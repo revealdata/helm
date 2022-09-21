@@ -4,21 +4,20 @@ global:
   namespace: ""
   # -- Optionally disable the namespace creation as it may already exist
   NoNamespace: false
-  brainspace:
-    # -- Replace the Brainspace license file. 
-    # -- File must reside in the 'license' directory in the root of the helm chart
-    # -- The .helmignore file must not include 'license/'
-    licenseFile: ""
+  # -- Optionally set a service account for the pods
+  serviceAccount:
+    name: ""
+    roleArn: ""
   database:
     # -- Use a PostgreSQL container and dbAccessPointId
     # -- If you are using Brainspace DB container, set secret's 'host' value to 'brains-db'
     # -- false = using an outside database like AWS RDS
     useContainer: false
-    # -- Use an SSL connection to PostgreSQL
+    # -- Use an SSL connection to PostgreSQL .Set to 'false' if using the database container.
     useSsl: true
     # -- PostgreSQL Auth mechanism (md5, scram-sha-256)
     # -- Use 'md5' if using the database container
-    AuthMech: "scram-sha-256"
+    authMech: "scram-sha-256"
   # -- env: An optional list of global environment variables
   env: {}
     #VAR_NAME: "value"
@@ -75,16 +74,9 @@ storage:
 secrets:
   # -- The secrets provider
   # -- Providers:
-  # --- secrets-store-csi: (https://secrets-store-csi-driver.sigs.k8s.io)
   # --- external-secrets: (https://external-secrets.io/v0.5.9/)
   # --- kubernetes: Use kubernetes secret. Add secrets to the 'kubernetes' section below.
   provider: "external-secrets"
-
-  # -- Optionally use a service account with RBAC for obtaining secrets (AWS Only)
-  # -- The IAM Role ARN created by CloudFormation or Terraform
-  # -- Required if using provider: "secrets-store-csi"
-  serviceAccount:
-    roleArn: ""
 
   # -- OPTIONS FOR: 'external-secrets' -- #
   externalSecrets:
@@ -96,33 +88,72 @@ secrets:
     # -- Options for aws (AWS SecretsManager)
     aws:
       # -- Region: The AWS region where the secret resides (default "us-east-1")
-      region: "<ADD VALUE IF USING secrets.provider='external-secrets'>"
-      # -- SecretName: The Secrets Manager Name for the admin and database secrets created by CloudFormation or Terraform
-      secretName: "<ADD VALUE IF USING secrets.provider='external-secrets' and ExternalSecrets.provider='aws'>"
-    # -- Options for azurekv (Azure KeyVault)
-    azurekv:
-      auth: 
-        clientID: "<ADD VALUE IF USING secrets.provider='external-secrets' and ExternalSecrets.provider='azurekv'>"
-        clientSecret: "<ADD VALUE IF USING secrets.provider='external-secrets' and ExternalSecrets.provider='azurekv'>"
-      tennantId: "<ADD VALUE IF USING secrets.provider='external-secrets' and ExternalSecrets.provider='azurekv'>"
-      vaultUrl: "<ADD VALUE IF USING secrets.provider='external-secrets' and ExternalSecrets.provider='azurekv'>"
+      region: "us-east-1"
 
-  # -- OPTIONS FOR: 'secrets-store-csi' (AWS ONLY) -- #
-  secretsStoreCSI:
-    # -- SecretArn: The Secrets Manager ARN for the admin and database secrets created by CloudFormation or Terraform
-    secretArn: "<ADD VALUE IF USING secrets.provider='secrets-store-csi'>"
-
-  # -- OPTIONS FOR: provider: 'kubernetes' -- #
-  kubernetes: {}
-    # -- Brainspace database hostname
-    #brainspace_db_host: ""
-    # -- Brainspace PostgreSQL database name
-    #brainspace_db_name: "brainspace"
-    # -- Brainspace PostgreSQL database username
-    #brainspace_db_user: "brainspace"
-    # -- Brainspace PostgreSQL database password
-    #brainspace_db_password: ""
-    #brainspace_db_port: "5432"
+  # -- A list of secrets to create ('brainspace-secrets' is REQUIRED)
+  secretDefinitions:
+    # -- USAGE INSTRUCTIONS:
+      # -- eksSecretName = The name of the kubernetes secret to create
+    #- eksSecretName: "brainspace-secrets"
+      # -- awsSecretName = The name of the AWS Secret in Secrets Manager (aws only)
+      # awsSecretName: "eks/brainspace/prod"
+      # -- azureTennantId = The Azure KeyVault tennantId (azure only)
+      # azureTennantId: "some-tennant-id"
+      # -- azureVaultUrl = The Azure KeyVault URL (azure only)
+      # azureVaultUrl: "https://some-keyvault.vault.azure.net/"
+      # -- useExistingSecret = Disable the creation of a kubernetes secret if it already exists
+      # useExistingSecret: false
+      # -- data = A list of secrets to create or fetch from external-secrets
+      #data:
+          # -- secretKey = The name of the kubernetes secret item to create
+        #- secretKey: "brainspace_db_host"
+          # -- property (optional) = The name of the secret property to fetch from external-secrets
+          # property: "host"
+          # -- envVar (optional) = Cretae this secret as an environment variable in the pods 
+          # envVar: "POSTGRES_HOST"
+          # -- value (optional) = Set a value for the secret if not using external-secrets
+          # value: "brains-db"
+          # -- mountPath (optional) = Mount the secret as a directory in the pods
+          # mountPath: "/var/secrets"
+    # -- The Required Secret definition for Brainspace
+    # -- DO NOT change the secretKey or envVar values for these secrets
+    - eksSecretName: "brainspace-secrets"
+      awsSecretName: "eks/brainspace/prod"
+      azureTennantId: ""
+      azureVaultUrl: ""
+      useExistingSecret: false
+      data:
+        - secretKey: "brainspace_db_host"
+          property: "host"
+          envVar: "POSTGRES_HOST"
+          # value: "brains-db"
+        - secretKey: "brainspace_db_port"
+          property: "port"
+          envVar: "POSTGRES_PORT"
+          # value: "5432"
+        - secretKey: "brainspace_db_name"
+          property: "database"
+          envVar: "POSTGRES_DB"
+          # value: "brainspace"
+        - secretKey: "brainspace_db_user"
+          property: "brainsDbUsername"
+          envVar: "POSTGRES_USER"
+          # value: "brainspace"
+        - secretKey: "brainspace_db_password"
+          property: "brainsDbPassword"
+          envVar: "POSTGRES_PASSWORD"
+          # value: "brainspace1"
+    # -- Optionally add additional secrets here
+    # -- Example: add a brainspace license secret
+    # -- secretKey, volume and mountPath must be set to the values in this example
+    # - eksSecretName: "brainspace-license"
+    #   awsSecretName: "eks/brainspace/license"
+    #   useExistingSecret: false
+    #   data:
+    #     - secretKey: "brainspace_license.txt"
+    #       property: "license"
+    #       volume: "brainspace-license-vol"
+    #       mountPath: "/var/lib/brains/license"
 
 ingress:
   # -- The ingress class
@@ -142,9 +173,9 @@ brains_db:
   # -- Brainspace database/postgres container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/postgres"
   # -- batch database/postgres container tag
-  tag: "latest"
+  tag: "rev-11.0.0"
   # -- Force a re-deploy when a helm upgrade happens
-  reloadOnUpgrade: true
+  reloadOnUpgrade: false
   # -- Specify a K8s node group for this deployment to run in
   nodeGroup: ""
 
@@ -154,11 +185,13 @@ brains_ui:
   # Brainspace UI container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/ui"
   # Brainspace UI container tag
-  tag: "latest"
+  tag: "rev-11.0.0"
   # -- Force a re-deploy when a helm upgrade happens
-  reloadOnUpgrade: true
+  reloadOnUpgrade: false
   # -- Specify a K8s node group for this deployment to run in
   nodeGroup: ""
+  # -- Specify customizations to the nginx proxy
+  proxyConfig: ""
 
 brains_bt:
     # batch tools container image
@@ -172,21 +205,21 @@ brains_app:
   # -- Brainspace APP container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/application"
   # Brainspace APP container tag
-  tag: "latest"
+  tag: "rev-11.0.0"
   # -- Force a re-deploy when a helm upgrade happens
-  reloadOnUpgrade: true
+  reloadOnUpgrade: false
   # -- Specify a K8s node group for this deployment to run in
   nodeGroup: ""
   plugins:
     # -- Brainspace APP plugins container image
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/plugins"
     # -- Brainspace APP plugins container tag
-    tag: "latest"
+    tag: "rev-11.0.0"
   additionalPlugins:
     # -- Brainspace APP additionsl plugins container image
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/additional-plugins"
     # Brainspace APP additional plugins container tag
-    tag: "latest"
+    tag: "rev-11.0.0"
   # -- logs directory in persistant storage
   logDir: "app"
   # -- Define static resources for the brains_app pods
@@ -202,12 +235,11 @@ brains_app:
     #     key: "linux-large"
     #     operator: "Exists"
 
-
 brains_ana:
   # -- Brainspace ANA (analytics) container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/analytics-server"
   # Brainspace ANA (analytics) container tag
-  tag: "latest"
+  tag: "rev-11.0.0"
   # -- Specify a K8s node group for this deployment to run in
   nodeGroup: ""
   replicas: 0
@@ -245,3 +277,34 @@ brains_ana:
       min: 0
       # -- The maximum number of replicas of the brains_ana deployment
       max: 2
+
+# -- Secret default parameters 
+# -- DO NOT EDIT --
+defaults:
+  secrets:
+    brainspace_db_host:
+      property: "host"
+      value: "brains-db"
+      envVar: "POSTGRES_HOST"
+    brainspace_db_port:
+      property: "port"
+      value: "5432"
+      envVar: "POSTGRES_PORT"
+    brainspace_db_name:
+      property: "database"
+      value: "brainspace"
+      envVar: "POSTGRES_DB"
+    brainspace_db_user: 
+      property: "brainsDbUsername"
+      value: "brainspace"
+      envVar: "POSTGRES_USER"
+    brainspace_db_password:
+      property: "brainsDbPassword"
+      value: "brainspace1"
+      envVar: "POSTGRES_PASSWORD"
+    brainspace_license.txt:
+      property: "license"
+      volume: "brainspace-license-vol"
+      mountPath: "/var/lib/brains/license"
+      optional: true
+      readOnly: true
