@@ -1,0 +1,30 @@
+---
+global:
+  namespace: ""
+  msaNumber: ""
+
+secrets:
+  # -- The secrets provider
+  # -- Providers:
+  # -- external-secrets: (https://external-secrets.io/v0.5.9/)
+  provider: "external-secrets"
+
+  # -- OPTIONS FOR: 'external-secrets' -- #
+  externalSecrets:
+    # -- The external-secrets provider
+    # -- Providers:
+    # -- aws: AWS SecretsManager
+    # -- azurekv: Azure KeyVault
+    provider: aws
+    # -- Options for aws (AWS SecretsManager)
+    aws:
+      # -- Region: The AWS region where the secret resides (default "us-east-1")
+      region: "us-east-1"
+      # -- secretName: The Secrets Manager Name for the admin and database secrets created by CloudFormation or Terraform
+      secretName:
+        SQL_CREDENTIALS: ""
+
+bootstrap:
+  version: ""
+  image: ""
+  tag: ""

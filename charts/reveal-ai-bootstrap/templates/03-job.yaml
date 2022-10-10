@@ -1,0 +1,29 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: reveal-ai-bootstrap-{{ now | unixEpoch }}
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  ttlSecondsAfterFinished: 259200
+  template:
+    spec:
+      containers:
+      - name: reveal-ai-bootstrap
+        image: "{{ .Values.bootstrap.image }}:{{ .Values.bootstrap.tag }}"
+        imagePullPolicy: Always
+        env:
+{{- /* output env vars for Review secrets (_helpers.tpl) */}}
+{{- include "resources.env.secrets" . | indent 4 }}
+      restartPolicy: Never
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: amd64
+      serviceAccountName: msa-secrets-reader
+  backoffLimit: 4
