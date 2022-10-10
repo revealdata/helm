@@ -19,8 +19,7 @@ spec:
         image: "{{ .Values.bootstrap.image }}:{{ .Values.bootstrap.tag }}"
         imagePullPolicy: Always
         env:
-{{- /* output env vars for Review secrets (_helpers.tpl) */}}
-{{- include "resources.env.secrets" . | indent 4 }}
+{{ .Values.bootstrap.env | toYaml | indent 10 }}
       restartPolicy: Never
       nodeSelector:
         kubernetes.io/os: linux

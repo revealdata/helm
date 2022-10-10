@@ -25,6 +25,6 @@ secrets:
         SQL_CREDENTIALS: ""
 
 bootstrap:
-  version: ""
-  image: ""
-  tag: ""
+  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/reveal_ai/bootstrap"
+  tag: "11.00.06"
+  env: {}
