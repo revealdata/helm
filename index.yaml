@@ -51,6 +51,21 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/processing-bootstrap-1.0.2/processing-bootstrap-1.0.2.tgz
     version: 1.0.2
+  reveal-ai-bootstrap:
+  - apiVersion: v2
+    appVersion: 11.0.0
+    created: "2022-10-10T15:53:14.027302416Z"
+    description: reveal-ai-bootstrap
+    digest: 32a90ae4209610f95cc1ee650c1c29f7658a7c58ceee10c98da07cfa978d1b15
+    maintainers:
+    - email: info@revealdata
+      name: Reveal-Brainspace
+      url: https://revealdata.com
+    name: reveal-ai-bootstrap
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-ai-bootstrap-1.0.0/reveal-ai-bootstrap-1.0.0.tgz
+    version: 1.0.0
   reveal-keycloak:
   - apiVersion: v2
     appVersion: 18.0.0
@@ -352,4 +367,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-series11-bootstrap-1.0.0/review-series11-bootstrap-1.0.0.tgz
     version: 1.0.0
-generated: "2022-09-30T18:10:23.120494147Z"
+generated: "2022-10-10T15:53:14.027373417Z"
