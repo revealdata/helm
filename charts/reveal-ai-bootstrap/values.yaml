@@ -1,30 +1,75 @@
 ---
 global:
-  namespace: ""
-  msaNumber: ""
+  namespace: "reveal-ai"
 
 secrets:
-  # -- The secrets provider
-  # -- Providers:
-  # -- external-secrets: (https://external-secrets.io/v0.5.9/)
   provider: "external-secrets"
-
-  # -- OPTIONS FOR: 'external-secrets' -- #
   externalSecrets:
-    # -- The external-secrets provider
-    # -- Providers:
-    # -- aws: AWS SecretsManager
-    # -- azurekv: Azure KeyVault
-    provider: aws
-    # -- Options for aws (AWS SecretsManager)
+    provider: "aws"
     aws:
-      # -- Region: The AWS region where the secret resides (default "us-east-1")
-      region: "us-east-1"
-      # -- secretName: The Secrets Manager Name for the admin and database secrets created by CloudFormation or Terraform
-      secretName:
-        SQL_CREDENTIALS: ""
+      region: ${aws_region}
+      secrets:
+        - targetName: bootstrap-sql-credentials
+          data:
+            - secretKey: sql-username
+              remoteRef:
+                key: ${secrets_externalSecrets_aws_secretName_sql_credentials}
+                property: sql-username
+            - secretKey: sql-password
+              remoteRef:
+                key: ${secrets_externalSecrets_aws_secretName_sql_credentials}
+                property: sql-password
+            - secretKey: sql-hostname
+              remoteRef:
+                key: ${secrets_externalSecrets_aws_secretName_sql_credentials}
+                property: sql-hostname
+            - secretKey: rai-encryption-key
+              remoteRef:
+                key: ${secrets_externalSecrets_aws_secretName_rai_bootstrap_secrets}
+                property: rai-encryption-key
+            - secretKey: brainspace-url
+              remoteRef:
+                key: ${secrets_externalSecrets_aws_secretName_rai_bootstrap_secrets}
+                property: brainspace-url
 
 bootstrap:
-  version: ""
-  image: ""
-  tag: ""
+  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/reveal_ai/bootstrap"
+  tag: "11.00.06"
+  env:
+    - name: "sql-hostname"
+      valueFrom:
+        secretKeyRef:
+          name: bootstrap-sql-credentials
+          key: sql-hostname
+    - name: "sql-username"
+      valueFrom:
+        secretKeyRef:
+          name: bootstrap-sql-credentials
+          key: sql-username
+    - name: "sql-password"
+      valueFrom:
+        secretKeyRef:
+          name: bootstrap-sql-credentials
+          key: sql-password
+    - name: "encryptionKey"
+      valueFrom:
+        secretKeyRef:
+          name: bootstrap-sql-credentials
+          key: rai-encryption-key
+    - name: "BRAINSPACE_URL"
+      valueFrom:
+        secretKeyRef:
+          name: bootstrap-sql-credentials
+          key: brainspace-url
+    - name: "DBN"
+      value: "NexLPAdmin"
+    - name: "AWSRegion"
+      value: "${aws_region}"
+  nodeSelector:
+    kubernetes.io/os: windows
+    kubernetes.io/arch: amd64
+  tolerations:
+    - key: windows_reveal_ai
+      value: execution
+      effect: NoSchedule
+  service_account_role_arn: ""
