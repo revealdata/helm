@@ -12,6 +12,10 @@ data:
   ES_PROTOCOL: "https"
   ARGO_NAMESPACE: "{{ .Values.name }}"
   DATAOPS_TOOLS_IMAGE_TAG: "{{ .Values.ConfigMap.data.dataopsToolsImageTag }}"
+  {{- if .Values.ConfigMap.data.DATAOPS_TOOLS_CLI_IMAGE }}
+  DATAOPS_TOOLS_CLI_IMAGE: "{{ .Values.ConfigMap.data.DATAOPS_TOOLS_CLI_IMAGE }}"
+  {{- end}}
+  AWS_DEFAULT_REGION: "{{ .Values.ConfigMap.data.region | default "us-east-1" }}"
 ---
 apiVersion: v1
 kind: ConfigMap

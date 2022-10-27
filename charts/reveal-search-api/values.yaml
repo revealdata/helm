@@ -3,26 +3,30 @@
 # Declare variables to be passed into your templates.
 name: "reveal-search-api"
 replicaCount: 3
-env: dev
+env: prod
 
-ConfigMap: 
-  data: 
+ConfigMap:
+  data:
     esHost: ""
     eeAuth: ""
     esPort: "9200"
     enableGqlPlayground: "false"
-    dataopsToolsImageTag: ""
+    dataopsToolsImageTag: "PROP-749"
 
 argoWorkflowsArtifactRepository:
   s3bucket: ""
 
 image: 475250404638.dkr.ecr.us-east-1.amazonaws.com/reveal-search-cli
-tag: bf7663649a41b1289507ffc8cf743c88ce3c8a99
+tag: 44a7b9c040e58de08615a99b22204ca1174eb1a8
 args: ["api"]
-port: 
+port:
   containerport: 8080
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -34,7 +38,6 @@ serviceAccount:
   name: reveal-search-api-sa
   irsa: ""
 
-
 service:
   type: NodePort
   port: 80
@@ -42,7 +45,7 @@ service:
 
 ingress:
   enabled: true
-  annotations:    
+  annotations:
     ingress: alb
     scheme: internal
     load_balancer_name: "reveal-search-api"
@@ -83,9 +86,29 @@ affinity: {}
 # https://github.com/bitnami/charts/issues/2061
 
 argo-workflows:
-  postgresql:
-    auth:
-      username: "postgres"
-      password: ""
+  workflows:
+    serviceAccount:
+      name: argo
+      create: false
+      annotations: {}
   controller:
     existingConfigMap: "workflow-controller-configmap"
+
+  server:
+    auth:
+      mode: "server"
+
+spark-operator:
+  serviceAccounts:
+    spark:
+      create: false
+      name: argo
+    sparkoperator:
+      create: false
+      name: argo
+
+PodDisruptionBudgetReveal_search_api:
+  name: PDBreveal-serach-api
+  enabled: true
+  minAvailable: 1
+  maxUnavailable:

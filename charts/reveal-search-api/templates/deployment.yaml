@@ -24,3 +24,20 @@ spec:
           envFrom:
           - configMapRef:
               name: {{ .Values.name }}-config
+{{- if .Values.PodDisruptionBudgetReveal_search_api.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.PodDisruptionBudgetReveal_search_api.name }}
+spec:
+  selector:
+    matchLabels:
+      deployment: reveal-search-api-deployment
+{{- if .Values.PodDisruptionBudgetReveal_search_api.minAvailable }}
+  minAvailable: {{ .Values.PodDisruptionBudgetReveal_search_api.minAvailable }}
+{{- end }}
+{{- if .Values.PodDisruptionBudgetReveal_search_api.maxUnavailable }}
+  maxUnavailable: {{ .Values.PodDisruptionBudgetReveal_search_api.maxUnavailable }}
+{{- end }}
+{{- end -}}
