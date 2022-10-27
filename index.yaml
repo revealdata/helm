@@ -239,6 +239,23 @@ entries:
   reveal-search-api:
   - apiVersion: v2
     appVersion: "1.0"
+    created: "2022-10-27T14:36:50.239668513Z"
+    dependencies:
+    - name: spark-operator
+      repository: https://googlecloudplatform.github.io/spark-on-k8s-operator
+      version: 1.1.20
+    - name: argo-workflows
+      repository: https://charts.bitnami.com/bitnami
+      version: 2.3.10
+    description: Reveal Search API
+    digest: ea1bbe1a202cbb5beb218298381c8216ec54828cf01a922e1040bfd1c363e8b5
+    name: reveal-search-api
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-search-api-0.1.2/reveal-search-api-0.1.2.tgz
+    version: 0.1.2
+  - apiVersion: v2
+    appVersion: "1.0"
     created: "2022-09-21T13:58:30.429295795Z"
     dependencies:
     - name: spark-operator
@@ -381,4 +398,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-series11-bootstrap-1.0.0/review-series11-bootstrap-1.0.0.tgz
     version: 1.0.0
-generated: "2022-10-27T03:10:52.081131795Z"
+generated: "2022-10-27T14:36:50.239765815Z"
