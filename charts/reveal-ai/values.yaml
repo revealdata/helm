@@ -1,0 +1,242 @@
+---
+global:
+  # K8s namespace. The name of the deployment.
+  namespace: "reveal-ai"
+  # Will the site be public?
+  public: false
+  reloadOnUpgrade: false
+
+# Other values are provided by the helm-charts repo values file.
+secrets:
+  provider: "external-secrets"
+  externalSecrets:
+    provider: "aws"
+    aws:
+      region: ${aws_region}
+      secrets:
+        - targetName: sql-credentials
+          data:
+            - secretKey: sql-username
+              remoteRef:
+                key: ${secrets_externalSecrets_aws_secretName_sql_credentials}
+                property: sql-username
+            - secretKey: sql-password
+              remoteRef:
+                key: ${secrets_externalSecrets_aws_secretName_sql_credentials}
+                property: sql-password
+            - secretKey: sql-hostname
+              remoteRef:
+                key: ${secrets_externalSecrets_aws_secretName_sql_credentials}
+                property: sql-hostname
+
+ingress:
+  # -- The ingress class (set per ingress)
+  # -- Options:
+  # -- alb: (AWS Application Load balancer - https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/)
+  # -- nginx: Nginx Ingress (https://kubernetes.github.io/ingress-nginx/)
+  enabled: true
+  # -- Multiple hostnames can be provided if using external DNS, however this may not work for ingress-nginx
+  hostname: "${external_hostname}"
+  class: "alb"
+  # -- sslCertArn is only valid when using the 'alb' class. Leave empty for aut-select
+  sslCertArn: "${ssl_cert}"
+  # -- Uncomment below to add custom annotations for the public ingress
+  annotations: {}
+
+ai:
+  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/reveal_ai/ai_service"
+  tag: "11.00.07"
+  name: "Reveal-AI"
+  env:
+    - name: "servername"
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials
+          key: sql-hostname
+    - name: "username"
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials
+          key: sql-username
+    - name: "password"
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials
+          key: sql-password
+    - name: "DBN"
+      value: "NexLPAdmin"
+  PodDisruptionBudget:
+    name: PDBservices
+    enabled: true
+    minAvailable: 1
+    maxUnavailable:
+  nodeSelector:
+    kubernetes.io/os: windows
+    kubernetes.io/arch: amd64
+  tolerations:
+    - key: windows_reveal_ai
+      value: execution
+      effect: NoSchedule
+
+
+processing:
+  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/reveal_ai/processing_service"
+  tag: "11.00.07"
+  name: "Reveal-AI"
+  env:
+    - name: "servername"
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials
+          key: sql-hostname
+    - name: "username"
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials
+          key: sql-username
+    - name: "password"             # Expect that this gets set by bootstrapping.
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials-encrypted
+          key: sql-password-encrypted
+    - name: "DBN"
+      value: "NexLPAdmin"
+    - name: "brainspaceApiUrl"     # Expect that this gets set by bootstrapping.
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials-encrypted
+          key: brainspace-api-url
+    - name: "brainspaceApiKey"     # Expect that this gets set by bootstrapping.
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials-encrypted
+          key: brainspace-api-key
+  PodDisruptionBudget:
+    name: PDBprocessing
+    enabled: true
+    minAvailable: 2
+    maxUnavailable:
+  nodeSelector:
+    kubernetes.io/os: windows
+    kubernetes.io/arch: amd64
+  tolerations:
+    - key: windows_reveal_ai
+      value: execution
+      effect: NoSchedule
+
+frontend:
+  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/reveal_ai/api"
+  tag: "11.00.07"
+  name: "Reveal-AI"
+  env:
+    - name: "servername"
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials
+          key: sql-hostname
+    - name: "username"
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials
+          key: sql-username
+    - name: "password"
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials
+          key: sql-password
+    - name: "DBN"
+      value: "NexLPAdmin"
+  PodDisruptionBudget:
+    name: PDBfrontend
+    enabled: true
+    minAvailable: 1
+    maxUnavailable:
+  nodeSelector:
+    kubernetes.io/os: windows
+    kubernetes.io/arch: amd64
+  tolerations:
+    - key: windows_reveal_ai
+      value: execution
+      effect: NoSchedule
+
+nia:
+  reloadOnUpgrade: false
+  env:
+    - name: MSSQL_SERVER
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials
+          key: sql-hostname
+    - name: MSSQL_USER
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials
+          key: sql-username
+    - name: MSSQL_PASS
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials
+          key: sql-password
+    - name: NEXLP_USER    # Expect that this gets set by bootstrapping.
+      valueFrom:
+        secretKeyRef:
+          name: "rai-admin"
+          key: RAI_USERNAME
+    - name: NEXLP_PASS    # Expect that this gets set by bootstrapping.
+      valueFrom:
+        secretKeyRef:
+          name: "rai-admin"
+          key: RAI_PASSWORD
+    - name: NEXLP_URL
+      value: "http://service-reveal-ai-api.reveal-ai.svc.cluster.local"
+
+  nia_api:
+    image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/reveal_ai_integration/reveal_ai_integration"
+    tag: "latest"
+    env:
+      - name: "TARGET_SERVICE"
+        value: "NIA_API"
+    storage:
+      class: gp2
+      size: "50Gi"
+    PodDisruptionBudget:
+      name: PDBNiaAPI
+      enabled: true
+      minAvailable: 1
+      maxUnavailable:
+    nodeSelector:
+        kubernetes.io/arch: amd64
+        kubernetes.io/os: linux
+    tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 300
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 300
+
+  nia_worker:
+    image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/reveal_ai_integration/reveal_ai_integration"
+    tag: "latest"
+    env:
+      - name: "TARGET_SERVICE"
+        value: "NIA_WORKER"
+    PodDisruptionBudget:
+      name: PDBNiaWorker
+      enabled: true
+      minAvailable: 1
+      maxUnavailable:
+    nodeSelector:
+        kubernetes.io/arch: amd64
+        kubernetes.io/os: linux
+    tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 300
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 300

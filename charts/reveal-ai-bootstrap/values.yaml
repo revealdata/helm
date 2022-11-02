@@ -31,6 +31,10 @@ secrets:
               remoteRef:
                 key: ${secrets_externalSecrets_aws_secretName_rai_bootstrap_secrets}
                 property: brainspace-url
+            - secretKey: reveal-ai-url
+              remoteRef:
+                key: ${secrets_externalSecrets_aws_secretName_rai_bootstrap_secrets}
+                property: reveal-ai-url
 
 bootstrap:
   image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/reveal_ai/bootstrap"
