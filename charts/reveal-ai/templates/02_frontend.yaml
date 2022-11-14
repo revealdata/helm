@@ -26,6 +26,10 @@ spec:
     spec:
       nodeSelector:
         {{- toYaml .Values.frontend.nodeSelector | nindent 8 }}
+      {{- if .Values.frontend.volumes }}
+      volumes:
+        {{- toYaml .Values.frontend.volumes | nindent 8 }}
+      {{- end }}
       containers:
         - image: {{.Values.frontend.image}}:{{.Values.frontend.tag}}
           ports:
@@ -51,6 +55,10 @@ spec:
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           tty: true
+          {{- if .Values.frontend.volumeMounts }}
+          volumeMounts:
+            {{- toYaml .Values.frontend.volumeMounts | nindent 10 }}
+          {{- end }}
       dnsConfig: {}
       dnsPolicy: ClusterFirst
       restartPolicy: Always

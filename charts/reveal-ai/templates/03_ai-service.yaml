@@ -26,6 +26,10 @@ spec:
     spec:
       nodeSelector:
         {{- toYaml .Values.ai.nodeSelector | nindent 8 }}
+      {{- if .Values.ai.volumes }}
+      volumes:
+        {{- toYaml .Values.ai.volumes | nindent 8 }}
+      {{- end }}
       containers:
         - image: {{.Values.ai.image}}:{{.Values.ai.tag}}
           env:
@@ -49,6 +53,10 @@ spec:
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           tty: true
+          {{- if .Values.ai.volumeMounts }}
+          volumeMounts:
+            {{- toYaml .Values.ai.volumeMounts | nindent 10 }}
+          {{- end }}
       dnsConfig: {}
       dnsPolicy: ClusterFirst
       restartPolicy: Always

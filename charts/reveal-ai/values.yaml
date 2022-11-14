@@ -1,12 +1,11 @@
 ---
 global:
   # K8s namespace. The name of the deployment.
-  namespace: "reveal-ai"
+  namespace: "reveal_ai_series11_dev"
   # Will the site be public?
   public: false
   reloadOnUpgrade: false
 
-# Other values are provided by the helm-charts repo values file.
 secrets:
   provider: "external-secrets"
   externalSecrets:
@@ -29,24 +28,11 @@ secrets:
                 key: ${secrets_externalSecrets_aws_secretName_sql_credentials}
                 property: sql-hostname
 
-ingress:
-  # -- The ingress class (set per ingress)
-  # -- Options:
-  # -- alb: (AWS Application Load balancer - https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/)
-  # -- nginx: Nginx Ingress (https://kubernetes.github.io/ingress-nginx/)
-  enabled: true
-  # -- Multiple hostnames can be provided if using external DNS, however this may not work for ingress-nginx
-  hostname: "${external_hostname}"
-  class: "alb"
-  # -- sslCertArn is only valid when using the 'alb' class. Leave empty for aut-select
-  sslCertArn: "${ssl_cert}"
-  # -- Uncomment below to add custom annotations for the public ingress
-  annotations: {}
-
 ai:
-  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/reveal_ai/ai_service"
-  tag: "11.00.07"
+  image: "326122048023.dkr.ecr.us-east-1.amazonaws.com/reveal_dev/reveal_ai_ai_service"
+  tag: "unified"
   name: "Reveal-AI"
+  replicaCount: 1
   env:
     - name: "servername"
       valueFrom:
@@ -65,6 +51,8 @@ ai:
           key: sql-password
     - name: "DBN"
       value: "NexLPAdmin"
+    - name: "AWSRegion"
+      value: "${aws_region}"
   PodDisruptionBudget:
     name: PDBservices
     enabled: true
@@ -77,12 +65,20 @@ ai:
     - key: windows_reveal_ai
       value: execution
       effect: NoSchedule
+  volumes: []
+#    - name: "rai-data"
+#      persistentVolumeClaim:
+#        claimName: "rai-data-pvc"
+  volumeMounts: []
+#    - name: "rai-data"
+#      mountPath: "C:\rai-data"
 
 
 processing:
-  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/reveal_ai/processing_service"
-  tag: "11.00.07"
+  image: "326122048023.dkr.ecr.us-east-1.amazonaws.com/reveal_dev/reveal_ai_processing_service"
+  tag: "unified"
   name: "Reveal-AI"
+  replicaCount: 1
   env:
     - name: "servername"
       valueFrom:
@@ -101,6 +97,8 @@ processing:
           key: sql-password-encrypted
     - name: "DBN"
       value: "NexLPAdmin"
+    - name: "AWSRegion"
+      value: "${aws_region}"
     - name: "brainspaceApiUrl"     # Expect that this gets set by bootstrapping.
       valueFrom:
         secretKeyRef:
@@ -123,10 +121,17 @@ processing:
     - key: windows_reveal_ai
       value: execution
       effect: NoSchedule
+  volumes: []
+#    - name: "rai-data"
+#      persistentVolumeClaim:
+#        claimName: "rai-data-pvc"
+  volumeMounts: []
+#    - name: "rai-data"
+#      mountPath: "C:\rai-data"
 
 frontend:
-  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/reveal_ai/api"
-  tag: "11.00.07"
+  image: "326122048023.dkr.ecr.us-east-1.amazonaws.com/reveal_dev/reveal_ai_frontend"
+  tag: "pipelineTesting"
   name: "Reveal-AI"
   env:
     - name: "servername"
@@ -146,6 +151,8 @@ frontend:
           key: sql-password
     - name: "DBN"
       value: "NexLPAdmin"
+    - name: "AWSRegion"
+      value: "${aws_region}"
   PodDisruptionBudget:
     name: PDBfrontend
     enabled: true
@@ -158,6 +165,38 @@ frontend:
     - key: windows_reveal_ai
       value: execution
       effect: NoSchedule
+  volumes: []
+#    - name: "rai-data"
+#      persistentVolumeClaim:
+#        claimName: "rai-data-pvc"
+  volumeMounts: []
+#    - name: "rai-data"
+#      mountPath: "C:\rai-data"
+
+persistentVolumes:
+  enabled: false
+  definitions:
+    - name: "rai-data-pvc"
+      storageClass: "gp2"
+      size: "1Ti"
+      accessModes:
+        - ReadWriteMany
+      annotations: {}
+      labels: {}
+
+ingress:
+  # -- The ingress class (set per ingress)
+  # -- Options:
+  # -- alb: (AWS Application Load balancer - https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/)
+  # -- nginx: Nginx Ingress (https://kubernetes.github.io/ingress-nginx/)
+  enabled: true
+  # -- Multiple hostnames can be provided if using external DNS, however this may not work for ingress-nginx
+  hostname: ""
+  class: "alb"
+  # -- sslCertArn is only valid when using the 'alb' class. Leave empty for aut-select
+  sslCertArn: ""
+  # -- Uncomment below to add custom annotations for the public ingress
+  annotations: {}
 
 nia:
   reloadOnUpgrade: false
@@ -205,8 +244,8 @@ nia:
       minAvailable: 1
       maxUnavailable:
     nodeSelector:
-        kubernetes.io/arch: amd64
-        kubernetes.io/os: linux
+      kubernetes.io/arch: amd64
+      kubernetes.io/os: linux
     tolerations:
       - effect: NoExecute
         key: node.kubernetes.io/not-ready
@@ -229,8 +268,8 @@ nia:
       minAvailable: 1
       maxUnavailable:
     nodeSelector:
-        kubernetes.io/arch: amd64
-        kubernetes.io/os: linux
+      kubernetes.io/arch: amd64
+      kubernetes.io/os: linux
     tolerations:
       - effect: NoExecute
         key: node.kubernetes.io/not-ready
