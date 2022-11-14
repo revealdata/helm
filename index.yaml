@@ -85,6 +85,20 @@ entries:
   reveal-ai-bootstrap:
   - apiVersion: v2
     appVersion: 11.0.0
+    created: "2022-11-14T22:34:39.83246692Z"
+    description: reveal-ai-bootstrap
+    digest: 310a99ae718d2edf695d63a3039ee90afea74c3efc7f88f427eae348e99939ca
+    maintainers:
+    - email: info@revealdata
+      name: Reveal-Brainspace
+      url: https://revealdata.com
+    name: reveal-ai-bootstrap
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-ai-bootstrap-1.0.2/reveal-ai-bootstrap-1.0.2.tgz
+    version: 1.0.2
+  - apiVersion: v2
+    appVersion: 11.0.0
     created: "2022-10-27T03:10:52.081016994Z"
     description: reveal-ai-bootstrap
     digest: a1b8f6d0da093623547d00617a622aa7936499e07769aede830d35c5cb9d7d7f
@@ -443,4 +457,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-series11-bootstrap-1.0.0/review-series11-bootstrap-1.0.0.tgz
     version: 1.0.0
-generated: "2022-11-14T16:10:19.216135838Z"
+generated: "2022-11-14T22:34:39.832627522Z"
