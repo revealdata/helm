@@ -37,13 +37,7 @@ spec:
           imagePullPolicy: Always
           name: reveal-ai-processing
           resources:
-            requests:
-              memory: "48Gi"
-              cpu: "8000m"
-            # Expect to run on a node with 32GB of memory. Want to leave a bit for the OS.
-            limits:
-              memory: "60Gi"
-              cpu: "16000m"
+            {{- toYaml .Values.processing.resources | nindent 12 }}
           securityContext:
             allowPrivilegeEscalation: false
             privileged: false

@@ -72,6 +72,14 @@ ai:
   volumeMounts: []
 #    - name: "rai-data"
 #      mountPath: "C:\rai-data"
+  resources:
+    requests:
+      memory: "48Gi"
+      cpu: "8000m"
+    # Expect to run on a node with 32GB of memory. Want to leave a bit for the OS.
+    limits:
+      memory: "60Gi"
+      cpu: "16000m"
 
 
 processing:
@@ -128,6 +136,14 @@ processing:
   volumeMounts: []
 #    - name: "rai-data"
 #      mountPath: "C:\rai-data"
+  resources:
+    requests:
+      memory: "48Gi"
+      cpu: "8000m"
+    # Expect to run on a node with 32GB of memory. Want to leave a bit for the OS.
+    limits:
+      memory: "60Gi"
+      cpu: "16000m"
 
 frontend:
   image: "326122048023.dkr.ecr.us-east-1.amazonaws.com/reveal_dev/reveal_ai_frontend"
@@ -172,6 +188,14 @@ frontend:
   volumeMounts: []
 #    - name: "rai-data"
 #      mountPath: "C:\rai-data"
+  resources:
+    requests:
+      memory: "16Gi"
+      cpu: "8000m"
+    # Expect to run on a node with 32GB of memory. Want to leave a bit for the OS.
+    limits:
+      memory: "30Gi"
+      cpu: "16000m"
 
 persistentVolumes:
   enabled: false
