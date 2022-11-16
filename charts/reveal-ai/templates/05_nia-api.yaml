@@ -52,10 +52,7 @@ spec:
             {{- toYaml . | nindent 8 }}
           {{- end }}
         resources:
-          requests:
-            memory: 500Mi
-          limits:
-            memory: 4000Mi
+          {{- toYaml .Values.nia.nia_api.resources | nindent 10 }}
         imagePullPolicy: Always
         name: nia-api
         securityContext:

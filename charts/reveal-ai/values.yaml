@@ -279,6 +279,11 @@ nia:
         key: node.kubernetes.io/unreachable
         operator: Exists
         tolerationSeconds: 300
+    resources:
+      requests:
+        memory: 500Mi
+      limits:
+        memory: 4000Mi
 
   nia_worker:
     image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/reveal_ai_integration/reveal_ai_integration"
@@ -303,3 +308,8 @@ nia:
         key: node.kubernetes.io/unreachable
         operator: Exists
         tolerationSeconds: 300
+    resources:
+      requests:
+        memory: 500Mi
+      limits:
+        memory: 4000Mi
