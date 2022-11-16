@@ -64,6 +64,16 @@ entries:
   reveal-ai:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2022-11-16T19:26:14.540742734Z"
+    description: A Helm chart for Kubernetes
+    digest: 6f99c9a95ef9b72cab6cca257dbeb50ed40dcdfdf9077b5970866ae762344e31
+    name: reveal-ai
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-ai-0.1.4/reveal-ai-0.1.4.tgz
+    version: 0.1.4
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2022-11-16T19:25:04.857596855Z"
     description: A Helm chart for Kubernetes
     digest: 4bed7f1b0b19b43deb85a54dad73fadc8728539c09fef5661b4186398e6d4d39
@@ -467,4 +477,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-series11-bootstrap-1.0.0/review-series11-bootstrap-1.0.0.tgz
     version: 1.0.0
-generated: "2022-11-16T19:25:04.857843374Z"
+generated: "2022-11-16T19:26:14.540908534Z"
