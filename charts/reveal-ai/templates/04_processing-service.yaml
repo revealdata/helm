@@ -11,10 +11,7 @@ spec:
   replicas: {{ .Values.processing.replicaCount | default 2 }}
   revisionHistoryLimit: 10
   strategy:
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
-    type: RollingUpdate
+    type: Recreate
   template:
     metadata:
       labels:
