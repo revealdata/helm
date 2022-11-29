@@ -12,8 +12,8 @@ data:
   ES_PROTOCOL: "https"
   ARGO_NAMESPACE: "{{ .Values.name }}"
   DATAOPS_TOOLS_IMAGE_TAG: "{{ .Values.ConfigMap.data.dataopsToolsImageTag }}"
-  {{- if .Values.ConfigMap.data.DATAOPS_TOOLS_CLI_IMAGE }}
-  DATAOPS_TOOLS_CLI_IMAGE: "{{ .Values.ConfigMap.data.DATAOPS_TOOLS_CLI_IMAGE }}"
+  {{- if .Values.ConfigMap.data.dataopsToolsImage }}
+  DATAOPS_TOOLS_CLI_IMAGE: "{{ .Values.ConfigMap.data.dataopsToolsImage }}"
   {{- end}}
   AWS_DEFAULT_REGION: "{{ .Values.ConfigMap.data.region | default "us-east-1" }}"
 ---
@@ -27,12 +27,16 @@ metadata:
     app.kubernetes.io/name: argo
   annotations:
     workflows.argoproj.io/default-artifact-repository: default-v1
+{{- if eq .Values.argoWorkflowsArtifactRepository.implementation "custom" }}
+{{.Values.argoWorkflowsArtifactRepository.data | toYaml }}
+{{- else }}
 data:
   artifactRepository: |
     s3:
       bucket: {{ .Values.argoWorkflowsArtifactRepository.s3bucket }}
       endpoint: s3.amazonaws.com      #AWS => s3.amazonaws.com; GCS => storage.googleapis.com
       useSDKCreds: true               #tells argo to use AWS SDK's default provider chain, enable for things like IRSA support
+{{- end}}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -44,9 +48,13 @@ metadata:
     app.kubernetes.io/name: argo
   annotations:
     workflows.argoproj.io/default-artifact-repository: default-v1
+{{- if eq .Values.argoWorkflowsArtifactRepository.implementation "custom" }}
+{{.Values.argoWorkflowsArtifactRepository.data | toYaml }}
+{{- else }}
 data:
   artifactRepository: |
     s3:
       bucket: {{ .Values.argoWorkflowsArtifactRepository.s3bucket }}
       endpoint: s3.amazonaws.com      #AWS => s3.amazonaws.com; GCS => storage.googleapis.com
       useSDKCreds: true               #tells argo to use AWS SDK's default provider chain, enable for things like IRSA support
+{{- end}}
