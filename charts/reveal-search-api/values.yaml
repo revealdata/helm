@@ -44,6 +44,12 @@ serviceAccount:
   name: reveal-search-api-sa
   irsa: ""
 
+PodDisruptionBudgetReveal_search_api:
+  name: PDBreveal-serach-api
+  enabled: true
+  minAvailable: 1
+  maxUnavailable:
+
 service:
   type: NodePort
   port: 80
