@@ -50,7 +50,8 @@ metadata:
   annotations:
     workflows.argoproj.io/default-artifact-repository: default-v1
 {{- if eq .Values.argoWorkflowsArtifactRepository.implementation "custom" }}
-{{.Values.argoWorkflowsArtifactRepository.data | toYaml }}
+data:
+{{.Values.argoWorkflowsArtifactRepository.data | toYaml | indent 2}}
 {{- else }}
 data:
   artifactRepository: |
