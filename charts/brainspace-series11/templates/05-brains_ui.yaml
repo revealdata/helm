@@ -83,3 +83,24 @@ spec:
       protocol: TCP
       port: 443
       targetPort: 443
+
+{{- if .Values.PodDisruptionBudget_ui.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.PodDisruptionBudget_ui.name }}
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels:
+    app.kubernetes.io/part-of: brainspace
+spec:
+  selector:
+    matchLabels:
+      app: deployment-brains-ui
+{{- if .Values.PodDisruptionBudget_ui.minAvailable }}
+  minAvailable: {{ .Values.PodDisruptionBudget_ui.minAvailable }}
+{{- end }}
+{{- if .Values.PodDisruptionBudget_ui.maxUnavailable }}
+  maxUnavailable: {{ .Values.PodDisruptionBudget_ui.maxUnavailable }}
+{{- end }}
+{{- end -}}

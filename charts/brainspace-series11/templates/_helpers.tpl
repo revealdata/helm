@@ -7,8 +7,8 @@
 
 {{- define "resources.values" -}}
 {{/* Generate resource requests for pod templates */}}
-{{- $cpu := 2 -}}
-{{- $memory := 8 -}}
+{{- $cpu := 8 -}}
+{{- $memory := 62 -}}
 
 {{- $res_cpu := dict "cpu" (printf "%d000m" ($cpu | int)) -}}
 {{- $res_mem := dict "memory" (printf "%dGi" ($memory | int)) -}}
@@ -43,37 +43,25 @@
 
 {{- define "java.resources.values" -}}
 {{/* Generate resource requests for pod java env vars */}}
-{{- $memory := 8 -}}
+{{/* Set the memory and cpu values used in calculations */}}
+{{- $memory := .resources.memory | default 62 | int -}}
+{{- $cpu_cores := .resources.cpu | default 8 | int -}}
+
+{{/* Helm only does math on integers so multiply, then divide */}}
+{{/* Catalina memory = container memory less 10% */}}
+{{- $catalina_memory := div (mul $memory 90) 100 -}}
+{{/* BatchTools memory = container memory less 10% with 2G reserved */}}
+{{- $bt_memory := sub  $catalina_memory 2 -}}
 
     {{- if contains "application" .image -}}
-        {{ $env := dict "CATALINA_OPTS" (printf "-XX:MaxMetaspaceSize=256m -Xmx%dg" (sub ($memory | int) 2)) }}
-
-        {{- if .resources -}}
-        {{- if .resources.memory -}}
-        {{ $env := dict "CATALINA_OPTS" (printf "-XX:MaxMetaspaceSize=256m -Xmx%dg" (sub (.resources.memory | int) 2)) }}
-        {{- include "java.resources.values.out" $env }}
-        {{- else -}}
-        {{- include "java.resources.values.out" $env }}
-        {{- end -}}
-        {{- else -}}
+        {{ $env := dict "CATALINA_OPTS" (printf "-XX:MaxMetaspaceSize=256m -Xmx%dg" $catalina_memory) }}
         {{ include "java.resources.values.out" $env }}
-        {{- end -}}
     {{- end -}}
 
     {{- if contains "analytics" .image -}}
-        {{ $env := dict "BT_HEAP_MAX" (printf "%dg" ((sub $memory 1) | int)) }}
-        {{- if .resources -}}
-        {{- if .resources.memory -}}
-        {{ $env := dict "BT_HEAP_MAX" (printf "%dg" ((sub .resources.memory 1) | int)) }}
+        {{ $env := dict "BT_HEAP_MAX" (printf "%dg" $bt_memory) }}
         {{- include "java.resources.values.out" $env }}
-        {{- else -}}
-        {{- include "java.resources.values.out" $env }}
-        {{- end -}}
-        {{- else -}}
-        {{- include "java.resources.values.out" $env }}
-        {{- end -}}
     {{- end -}}
-
 {{- end -}}
 
 {{- define "secrets.env" -}}
