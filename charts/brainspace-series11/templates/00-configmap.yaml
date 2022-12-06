@@ -15,6 +15,8 @@ metadata:
 data:
   BRAINS_HOSTNAME: {{ .Values.ingress.hostname | default "brainspace.localdomain" }}
   DOMAIN: {{ .Values.global.namespace | default .Release.Name }}.svc.cluster.local
+  ANA_TRANSIENT: {{ .Values.brains_app.options.transientAnalytics | quote | default "false" }}
+  KUBERNETES_NAMESPACE: {{ .Values.global.namespace | default .Release.Name }}
   {{- if .Values.global.env }}
   {{ toYaml .Values.global.env }}
   {{- end }}
@@ -45,6 +47,8 @@ metadata:
   namespace: {{ .Values.global.namespace | default .Release.Name }}
 data:
   DOMAIN: {{ .Values.global.namespace | default .Release.Name }}.svc.cluster.local
+  BRAINS_APP_PROP___transient__analytics: {{ .Values.brains_app.options.transientAnalytics | quote | default "false" }}
+  BRAINS_APP_PROP___cache__tdm: {{ .Values.brains_app.options.tdmCache | quote | default "true" }}
 {{- if .Values.global.env }}
 {{ toYaml .Values.global.env | indent 2 }}
 {{- end }}

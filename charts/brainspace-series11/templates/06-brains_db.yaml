@@ -98,4 +98,27 @@ spec:
      protocol: TCP
      port: 5432
      targetPort: 5432
-{{ end }}
+
+
+{{- if .Values.PodDisruptionBudget_db.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.PodDisruptionBudget_db.name }}
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels:
+    app.kubernetes.io/part-of: brainspace
+spec:
+  selector:
+    matchLabels:
+      app: deployment-brains-db
+{{- if .Values.PodDisruptionBudget_db.minAvailable }}
+  minAvailable: {{ .Values.PodDisruptionBudget_db.minAvailable }}
+{{- end }}
+{{- if .Values.PodDisruptionBudget_db.maxUnavailable }}
+  maxUnavailable: {{ .Values.PodDisruptionBudget_db.maxUnavailable }}
+{{- end }}
+{{- end }}
+
+{{- end }}

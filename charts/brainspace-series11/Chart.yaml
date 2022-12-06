@@ -2,7 +2,7 @@ apiVersion: v2
 name: brainspace-series11
 description: A Helm chart for Brainspace with Reveal Series11
 type: application
-version: 1.0.0
+version: 1.1.0
 appVersion: "7.0.0"
 maintainers:
   - name: Reveal-Brainspace

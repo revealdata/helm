@@ -85,3 +85,23 @@ spec:
         operator: Exists
         tolerationSeconds: 300
 {{- end }}
+{{- if .Values.PodDisruptionBudget_ana_autoscale.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.PodDisruptionBudget_ana_autoscale.name }}
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels:
+    app.kubernetes.io/part-of: brainspace
+spec:
+  selector:
+    matchLabels:
+      app: deployment-ana-autoscale
+{{- if .Values.PodDisruptionBudget_ana_autoscale.minAvailable }}
+  minAvailable: {{ .Values.PodDisruptionBudget_ana_autoscale.minAvailable }}
+{{- end }}
+{{- if .Values.PodDisruptionBudget_ana_autoscale.maxUnavailable }}
+  maxUnavailable: {{ .Values.PodDisruptionBudget_ana_autoscale.maxUnavailable }}
+{{- end }}
+{{- end -}}

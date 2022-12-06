@@ -44,9 +44,7 @@ spec:
       {{- end }}{{- end }}
       volumes:
       {{- if or (eq .Values.storage.class "efs-sc") (eq .Values.storage.class "pvc") }}
-      - name: bt-data
-        emptyDir: {}
-      - name: basis-data
+      - name: log-path
         emptyDir: {}
       - name: plugins-data
         emptyDir: {}
@@ -62,6 +60,12 @@ spec:
       - name: shared-logs
         persistentVolumeClaim:
           claimName: {{- if .Values.storage.pvc }} {{ .Values.storage.pvc.sharedLogs }} {{- else }} pvc-shared-logs {{- end }}
+      - name: bt-data
+        persistentVolumeClaim:
+          claimName: {{- if .Values.storage.pvc }} {{ .Values.storage.pvc.BtData }} {{- else }} pvc-bt-data {{- end }}
+      - name: basis-data
+        persistentVolumeClaim:
+          claimName: {{- if .Values.storage.pvc }} {{ .Values.storage.pvc.BasisData }} {{- else }} pvc-basis-data {{- end }}
       {{- else }}
       - name: bt-data
         emptyDir: {}
@@ -84,7 +88,7 @@ spec:
       - name: brains-bt
         image: {{ .Values.brains_bt.image }}:{{ .Values.brains_bt.tag }}
         command: ["/bin/ash"]
-        args: ["-c", "apk add rsync && rsync -av --chown 1604:1604 /usr/data/{{ .Values.brains_bt.basis_dir }}/* /usr/data/vol/{{ .Values.brains_bt.basis_dir }}/ && rsync -av --chown 1604:1604 /usr/data/BatchTools/* /usr/data/vol/BatchTools/"]
+        args: ["-c", "apk add rsync; rsync --delete -av --chown 1604:1604 /usr/data/{{ .Values.brains_bt.basis_dir }}/* /usr/data/vol/{{ .Values.brains_bt.basis_dir }}/ && rsync --delete -av --chown 1604:1604 /usr/data/BatchTools/* /usr/data/vol/BatchTools/"]
         imagePullPolicy: {{ .Values.brains_bt.imagePullPolicy | default "IfNotPresent" }}
         volumeMounts:
           - name: basis-data
@@ -94,7 +98,7 @@ spec:
       - name: brains-plugins
         image: {{ .Values.brains_app.plugins.image }}:{{ .Values.brains_app.plugins.tag }}
         command: ["/bin/ash"]
-        args: ["-c", "apk add rsync && rsync -av --chown 1604:1604 /plugins/* /fs-plugins/"]
+        args: ["-c", "apk add rsync; rsync --delete -av --chown 1604:1604 /plugins/* /fs-plugins/"]
         imagePullPolicy: {{ .Values.brains_app.plugins.imagePullPolicy | default "Always" }}
         volumeMounts:
           - name: plugins-data
@@ -163,6 +167,14 @@ spec:
           subPath: {{ .Values.brains_app.logDir | default "app" }}
         # Secrets Volume Mounts
         {{- include "secrets.volumes.mounts" . | indent 8 }}
+      - name: brainspace-log
+        image: busybox:1.28
+        args: [ /bin/sh, -c, 'tail -n+1 -F /var/log/brainspace.log' ]
+        volumeMounts:
+        - name: shared-logs
+          mountPath: /var/log
+          readOnly: true
+          subPath: {{ .Values.brains_app.logDir | default "app" }}
       schedulerName: default-scheduler
       terminationGracePeriodSeconds: 120
       tolerations:
@@ -201,3 +213,24 @@ spec:
       protocol: TCP
       port: 8080
       targetPort: 8080
+
+{{- if .Values.PodDisruptionBudget_app.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.PodDisruptionBudget_app.name }}
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels:
+    app.kubernetes.io/part-of: brainspace
+spec:
+  selector:
+    matchLabels:
+      app: deployment-brains-app
+{{- if .Values.PodDisruptionBudget_app.minAvailable }}
+  minAvailable: {{ .Values.PodDisruptionBudget_app.minAvailable }}
+{{- end }}
+{{- if .Values.PodDisruptionBudget_app.maxUnavailable }}
+  maxUnavailable: {{ .Values.PodDisruptionBudget_app.maxUnavailable }}
+{{- end }}
+{{- end -}}

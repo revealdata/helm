@@ -31,12 +31,6 @@ Parameters:
     Default: "False"
     AllowedValues: ["True", "False"]
     Description: "Use a Multi AZ RDS Instance. Either True or False."
-  MasterDbPassword:
-    Type: String
-    Default: brainspace1
-    MinLength: 8
-    NoEcho: True
-    Description: "The Brainspace database master 'postgres' password"
   BrainsDbName:
     Type: String
     Default: brainspace
@@ -113,9 +107,9 @@ Resources:
         !Ref DatabaseSubnetGroup
       VPCSecurityGroups:
         - !GetAtt DatabaseSecurityGroup.GroupId
-      DBName: postgres
-      MasterUsername: postgres
-      MasterUserPassword: !Ref MasterDbPassword
+      DBName: !Ref BrainsDbName
+      MasterUsername: !Ref BrainsDbUsername
+      MasterUserPassword: !Ref BrainsDbPassword
       Tags:
         - Key: "CFStackName"
           Value: !Sub "${AWS::StackName}"
@@ -194,6 +188,38 @@ Resources:
       AccessPointTags:
         - Key: Name
           Value: "AppLocalDataAccessPoint"
+  BtDataAccessPoint:
+    Type: 'AWS::EFS::AccessPoint'
+    Properties:
+      FileSystemId: !Ref FileSystemResource
+      PosixUser:
+        Uid: "1604"
+        Gid: "1604"
+      RootDirectory:
+        CreationInfo:
+          OwnerGid: "1604"
+          OwnerUid: "1604"
+          Permissions: "0755"
+        Path: "/bt"
+      AccessPointTags:
+        - Key: Name
+          Value: "BtDataAccessPoint"
+  BasisDataAccessPoint:
+    Type: 'AWS::EFS::AccessPoint'
+    Properties:
+      FileSystemId: !Ref FileSystemResource
+      PosixUser:
+        Uid: "1604"
+        Gid: "1604"
+      RootDirectory:
+        CreationInfo:
+          OwnerGid: "1604"
+          OwnerUid: "1604"
+          Permissions: "0755"
+        Path: "/basis-tech"
+      AccessPointTags:
+        - Key: Name
+          Value: "BasisDataAccessPoint"
   AppPluginsAccessPoint:
     Type: 'AWS::EFS::AccessPoint'
     Properties:
@@ -238,12 +264,12 @@ Resources:
             "SharedLogsAccessPoint": "${SharedLogsAccessPoint.AccessPointId}",
             "SharedDataAccessPoint": "${SharedDataAccessPoint.AccessPointId}",
             "AppLocalDataAccessPoint": "${AppLocalDataAccessPoint.AccessPointId}",
+            "BtDataAccessPoint": "${BtDataAccessPoint.AccessPointId}",
+            "BasisDataAccessPoint": "${BasisDataAccessPoint.AccessPointId}",
             "AppPluginsAccessPoint": "${AppPluginsAccessPoint.AccessPointId}",
             "DatabaseDataAccessPoint": "${DatabaseDataAccessPoint.AccessPointId}",
             "host": "${DatabaseResource.Endpoint.Address}",
             "port": "${DatabaseResource.Endpoint.Port}",
-            "username": "postgres",
-            "password": "${MasterDbPassword}",
             "brainsDbUsername": "${BrainsDbUsername}",
             "brainsDbPassword": "${BrainsDbPassword}",
             "database": "${BrainsDbName}"
@@ -316,6 +342,10 @@ Outputs:
     Value: !GetAtt SharedDataAccessPoint.AccessPointId
   "AppLocalDataAccessPoint":
     Value: !GetAtt AppLocalDataAccessPoint.AccessPointId
+  "BtDataAccessPoint":
+    Value: !GetAtt BtDataAccessPoint.AccessPointId
+  "BasisDataAccessPoint":
+    Value: !GetAtt BasisDataAccessPoint.AccessPointId
   "AppPluginsAccessPoint":
     Value: !GetAtt AppPluginsAccessPoint.AccessPointId
   "DatabaseDataAccessPoint":

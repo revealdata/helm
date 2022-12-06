@@ -20,3 +20,18 @@ helm delete brains70-preprod
 
 ## Values
 The values.yaml includes documentation comments throughout
+
+## Configuration
+### Secrets
+#### Brainspace License
+The Brainspace license can be set via a kubernetes secret. The secret name is set in the values.yaml file. The secret must be created in the same namespace as the helm chart. The secret must contain a key named `brainspace_license.txt` with the license value as the value.
+
+The location and name of the secret can be changed in the values.yaml file using an environment variable.
+`LICENSE_SECRET_FILE` - The location of the secret file. The default is `/mnt/secrets/brainspace/brainspace_license.txt`
+
+#### Brainspace Properties (config)
+The Brainspace properties can be set via a kubernetes secret. The secret name is set in the values.yaml file. The secret must be created in the same namespace as the helm chart. The secret must contain a key named `brainspace.properties` or `analysis.properties` (depending on the server role). with the properties value as the value.
+
+The location and name of the secret can be changed in the values.yaml file using an environment variable.
+`PROPERTIES_SECRET_FILE` - The location of the secret file. The default for the APP role is `/mnt/secrets/brainspace/brainspace.properties`
+`PROPERTIES_SECRET_FILE` - The location of the secret file. The default for the ANALYSIS role is `/mnt/secrets/brainspace/analysis.properties`

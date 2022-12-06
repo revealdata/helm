@@ -43,18 +43,22 @@ storage:
 
   # -- Options for class: efs-sc
   efs:
-    # -- The EFS FileSystemId (storage/cf-efs-storage.yaml: FileSystemId)
+    # -- The EFS FileSystemId
     fileSystemId: ""
-    # -- Shared /data EFS AccessPointId (storage/cf-efs-storage.yaml: SharedDataAccessPoint)
+    # -- Shared /data EFS AccessPointId
     SharedDataAccessPointId: ""
-    # -- Shared /logs EFS AccessPointId (storage/cf-efs-storage.yaml: SharedLogsAccessPoint)
+    # -- Shared /logs EFS AccessPointId
     SharedLogsAccessPointId: ""
-    # -- Brainspace APP /localdata EFS AccessPointId (storage/cf-efs-storage.yaml: AppLocalDataAccessPoint)
+    # -- Brainspace APP /localdata EFS AccessPointId
     AppLocalDataAccessPointId: ""
-    # -- Brainspace APP plugins EFS AccessPointId (storage/cf-efs-storage.yaml: AppPluginsAccessPoint)
+    # -- Brainspace APP plugins EFS AccessPointId
     AppPluginsAccessPointId: ""
-    # -- Brainspace Database EFS AccessPointId (storage/cf-efs-storage.yaml: DatabaseDataAccessPoint)
+    # -- Brainspace Database EFS AccessPointId
     DatabaseDataAccessPointId: ""
+    # -- Brainspace BatchTools EFS AccessPointId
+    BtDataAccessPointId: ""
+    # -- Brainspace Basis-Tech EFS AccessPointId
+    BasisDataAccessPointId: ""
 
   # -- Options for class: pvc
   # -- The following volume claim names must already exist
@@ -68,6 +72,10 @@ storage:
     #appLocalData: "pvc-app-localdata"
     # -- Application Plugins (accessMode: ReadWriteOnce)
     #appPlugins: "pvc-app-plugins"
+    # -- Shared BatchTools (accessMode: ReadWriteMany)
+    #BtData: "pvc-bt-data"
+    # -- Shared BasisTech (accessMode: ReadWriteMany)
+    #BasisData: "pvc-basis-data"
     # -- Database (only required if global.database.useContainer = true) (accessMode: ReadWriteOnce)
     #databaseData: "pv-db-data"
 
@@ -81,7 +89,7 @@ secrets:
   # -- OPTIONS FOR: 'external-secrets' -- #
   externalSecrets:
     # -- The external-secrets provider
-    # -- Providers: 
+    # -- Providers:
     # --- aws: AWS SecretsManager
     # --- azurekv: Azure KeyVault
     provider: aws
@@ -97,8 +105,8 @@ secrets:
     #- eksSecretName: "brainspace-secrets"
       # -- awsSecretName = The name of the AWS Secret in Secrets Manager (aws only)
       # awsSecretName: "eks/brainspace/prod"
-      # -- azureTennantId = The Azure KeyVault tennantId (azure only)
-      # azureTennantId: "some-tennant-id"
+      # -- azureTenantId = The Azure KeyVault tenantId (azure only)
+      # azureTenantId: "some-tenant-id"
       # -- azureVaultUrl = The Azure KeyVault URL (azure only)
       # azureVaultUrl: "https://some-keyvault.vault.azure.net/"
       # -- useExistingSecret = Disable the creation of a kubernetes secret if it already exists
@@ -109,7 +117,7 @@ secrets:
         #- secretKey: "brainspace_db_host"
           # -- property (optional) = The name of the secret property to fetch from external-secrets
           # property: "host"
-          # -- envVar (optional) = Cretae this secret as an environment variable in the pods 
+          # -- envVar (optional) = Cretae this secret as an environment variable in the pods
           # envVar: "POSTGRES_HOST"
           # -- value (optional) = Set a value for the secret if not using external-secrets
           # value: "brains-db"
@@ -119,7 +127,7 @@ secrets:
     # -- DO NOT change the secretKey or envVar values for these secrets
     - eksSecretName: "brainspace-secrets"
       awsSecretName: "eks/brainspace/prod"
-      azureTennantId: ""
+      azureTenantId: ""
       azureVaultUrl: ""
       useExistingSecret: false
       data:
@@ -173,7 +181,7 @@ brains_db:
   # -- Brainspace database/postgres container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/postgres"
   # -- batch database/postgres container tag
-  tag: "rev-11.0.0"
+  tag: "r11.1.1"
   # -- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: false
   # -- Specify a K8s node group for this deployment to run in
@@ -185,7 +193,7 @@ brains_ui:
   # Brainspace UI container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/ui"
   # Brainspace UI container tag
-  tag: "rev-11.0.0"
+  tag: "r11.1.1"
   # -- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: false
   # -- Specify a K8s node group for this deployment to run in
@@ -197,36 +205,42 @@ brains_bt:
     # batch tools container image
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/batch-tools"
     # batch tools container tag
-    tag: "line.7.0-githash-6118f1b"
+    tag: "line.r11.1-githash-dc163fc"
     # basis tech directory
-    basis_dir: "basis-tech-rbl-7.39.0_rex-7.48.0_rli-7.23.2_c63.0_perpetual.4"
+    basis_dir: "basis-tech-rbl-7.39.0_rex-7.48.0_rli-7.23.2_rsent-2.0.0_c63.0_perpetual.0"
 
 brains_app:
   # -- Brainspace APP container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/application"
   # Brainspace APP container tag
-  tag: "rev-11.0.0"
+  tag: "r11.1.1"
   # -- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: false
   # -- Specify a K8s node group for this deployment to run in
   nodeGroup: ""
+  # -- Specify customizations to the Brainspace Application
+  options:
+    # -- Run build jobs as k8s jobs rather than replicasets (default: true)
+    transientAnalytics: false
+    # -- Use the Brainspace TDM Cache (default: false)
+    tdmCache: false
   plugins:
     # -- Brainspace APP plugins container image
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/plugins"
     # -- Brainspace APP plugins container tag
-    tag: "rev-11.0.0"
+    tag: "r11.1.1"
   additionalPlugins:
-    # -- Brainspace APP additionsl plugins container image
+    # -- Brainspace APP additional plugins container image
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/additional-plugins"
     # Brainspace APP additional plugins container tag
-    tag: "rev-11.0.0"
-  # -- logs directory in persistant storage
+    tag: "r11.1.1"
+  # -- logs directory in persistent storage
   logDir: "app"
   # -- Define static resources for the brains_app pods
   resources:
-    memory: 12
-    cpu: 4
-  # -- Optionally set custm environment variables for Brainspace Application
+    memory: 220
+    cpu: 30
+  # -- Optionally set custom environment variables for Brainspace Application
   env: {}
     # ENV_VAR: "value"
   # -- Optionally set custom tolerations
@@ -239,7 +253,7 @@ brains_ana:
   # -- Brainspace ANA (analytics) container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/analytics-server"
   # Brainspace ANA (analytics) container tag
-  tag: "rev-11.0.0"
+  tag: "r11.1.1"
   # -- Specify a K8s node group for this deployment to run in
   nodeGroup: ""
   replicas: 0
@@ -249,15 +263,15 @@ brains_ana:
   storage:
     # -- storage class
     # -- Options:
-    # --- 'gp2'
+    # --- 'gp2' (must specify size in GB)
     # --- 'emptyDir' (node local storage)
-    class: "gp2"
-    size: 400
+    class: "emptyDir"
+    # size: 400
   # -- Define static resources for the brains_ana pods
   resources:
-    memory: 8
-    cpu: 2
-  # -- Optionally set custm environment variables for Brainspace Analytics
+    memory: 220
+    cpu: 30
+  # -- Optionally set custom environment variables for Brainspace Analytics
   env: {}
     # ENV_VAR: "env_value"
   # -- Optionally set custom tolerations
@@ -269,8 +283,8 @@ brains_ana:
   # -- Use the ANA Auto-scaling pod
   autoscale:
     enabled: true
-    image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/brainspace/ana-autoscale
-    tag: "latest"
+    image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/brainspace/ana-autoscale
+    tag: "1.1.0"
     debug: "0"
     thresholds:
       # -- The minimum number of replicas of the brains_ana deployment
@@ -278,7 +292,7 @@ brains_ana:
       # -- The maximum number of replicas of the brains_ana deployment
       max: 2
 
-# -- Secret default parameters 
+# -- Secret default parameters
 # -- DO NOT EDIT --
 defaults:
   secrets:
@@ -294,7 +308,7 @@ defaults:
       property: "database"
       value: "brainspace"
       envVar: "POSTGRES_DB"
-    brainspace_db_user: 
+    brainspace_db_user:
       property: "brainsDbUsername"
       value: "brainspace"
       envVar: "POSTGRES_USER"
@@ -308,3 +322,27 @@ defaults:
       mountPath: "/var/lib/brains/license"
       optional: true
       readOnly: true
+
+PodDisruptionBudget_ana_autoscale:
+  name: PDBana-autoscale
+  enabled: true
+  minAvailable: 1
+  maxUnavailable:
+
+PodDisruptionBudget_app:
+  name: PDBapp
+  enabled: true
+  minAvailable: 1
+  maxUnavailable:
+
+PodDisruptionBudget_db:
+  name: PDBdb
+  enabled: true
+  minAvailable: 1
+  maxUnavailable:
+
+PodDisruptionBudget_ui:
+  name: PDBui
+  enabled: true
+  minAvailable: 1
+  maxUnavailable:

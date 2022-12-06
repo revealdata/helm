@@ -191,4 +191,80 @@ spec:
       storage: 10Gi
 {{- end }}
 
+{{- if .Values.storage.efs.BtDataAccessPointId }}
+---
+## Shared BatchTools Persistent volume
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-bt-data-{{ .Values.global.namespace | default .Release.Name }}
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ .Values.storage.class }}
+  csi:
+    {{- if eq .Values.storage.class "efs-sc" }}
+    driver: efs.csi.aws.com
+    volumeHandle: {{ trim .Values.storage.efs.fileSystemId }}::{{ trim .Values.storage.efs.BtDataAccessPointId }}
+    {{- end }}
+
+---
+## Shared BatchTools Persistent claim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-bt-data
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: {{ .Values.storage.class }}
+  volumeName: pv-bt-data-{{ .Values.global.namespace | default .Release.Name }}
+  resources:
+    requests:
+      storage: 1Gi
+{{- end }}
+
+{{- if .Values.storage.efs.BtDataAccessPointId }}
+---
+## Shared Basis Tech Persistent volume
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-basis-data-{{ .Values.global.namespace | default .Release.Name }}
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ .Values.storage.class }}
+  csi:
+    {{- if eq .Values.storage.class "efs-sc" }}
+    driver: efs.csi.aws.com
+    volumeHandle: {{ trim .Values.storage.efs.fileSystemId }}::{{ trim .Values.storage.efs.BasisDataAccessPointId }}
+    {{- end }}
+
+---
+## Shared Basis Tech Persistent claim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-basis-data
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: {{ .Values.storage.class }}
+  volumeName: pv-basis-data-{{ .Values.global.namespace | default .Release.Name }}
+  resources:
+    requests:
+      storage: 1Gi
+{{- end }}
+
 {{- end }}

@@ -47,20 +47,6 @@ spec:
       {{- if .Values.global.serviceAccount.roleArn }}
       serviceAccountName: {{ .Values.global.serviceAccount.name | default "brainspace-sa" }}
       {{- end }}{{- end }}
-      initContainers:
-      - name: brains-bt
-        image: {{ .Values.brains_bt.image }}:{{ .Values.brains_bt.tag }}
-        command: ["/bin/ash"]
-        # args: ["-c", "while true; do echo -n . && sleep 10; done"]
-        args: ["-c", "apk add rsync && rsync -av --chown 1604:1604 /usr/data/{{ .Values.brains_bt.basis_dir }}/* /usr/data/vol/{{ .Values.brains_bt.basis_dir }}/ && rsync -av --chown 1604:1604 /usr/data/BatchTools/* /usr/data/vol/BatchTools/ && chown 1604:1604 /localdata"]
-        imagePullPolicy: {{ .Values.brains_bt.imagePullPolicy | default "IfNotPresent" }}
-        volumeMounts:
-          - name: basis-data
-            mountPath: /usr/data/vol/{{ .Values.brains_bt.basis_dir }}
-          - name: bt-data
-            mountPath: /usr/data/vol/BatchTools
-          - name: local-data
-            mountPath: /localdata
       containers:
       - name: brains-ana
         image: {{ .Values.brains_ana.image }}:{{ .Values.brains_ana.tag }}
@@ -93,12 +79,14 @@ spec:
                 - "/bin/bash"
                 - "-c"
                 - |
+                  chown -R 1604:1604 /localdata;
                   if [[ -e /var/lib/brains/license/brainspace_license.txt ]]; then
                   cp /var/lib/brains/license/brainspace_license.txt /var/lib/brains/.brainspace/brainspace_license.txt;
                   fi;
                   if [[ -e /var/lib/brains/app/analytics-server/logs/analysisserver.log ]]; then
-                  rm -f /var/lib/brains/app/analytics-server/logs/analysisserver.log; ln -s /dev/stdout /var/lib/brains/app/analytics-server/logs/analysisserver.log;
-                  fi
+                  rm -f /var/lib/brains/app/analytics-server/logs/analysisserver.log;
+                  fi;
+                  ln -s /dev/stdout /var/lib/brains/app/analytics-server/logs/analysisserver.log;
         volumeMounts:
         {{- if .Values.global.secretArn }}
         - name: brainspace-secrets-vol
@@ -119,7 +107,7 @@ spec:
           mountPath: /mnt/localdata
         - name: local-data
           readOnly: false
-          mountPath: /localdata
+          mountPath: /localdata/brainspace
         # Secrets Volume Mounts
         {{- include "secrets.volumes.mounts" . | indent 8 }}
       volumes:
@@ -146,10 +134,6 @@ spec:
         {{- else }}
         emptyDir: {}
         {{- end }}
-      - name: bt-data
-        emptyDir: {}
-      - name: basis-data
-        emptyDir: {}
       {{- if or (eq .Values.storage.class "efs-sc") (eq .Values.storage.class "pvc") }}
       - name: shared-data
         persistentVolumeClaim:
@@ -157,7 +141,17 @@ spec:
       - name: app-localdata
         persistentVolumeClaim:
           claimName: {{- if .Values.storage.pvc }} {{ .Values.storage.pvc.appLocalData }} {{- else }} pvc-app-localdata {{- end }}
+      - name: bt-data
+        persistentVolumeClaim:
+          claimName: {{- if .Values.storage.pvc }} {{ .Values.storage.pvc.BtData }} {{- else }} pvc-bt-data {{- end }}
+      - name: basis-data
+        persistentVolumeClaim:
+          claimName: {{- if .Values.storage.pvc }} {{ .Values.storage.pvc.BasisData }} {{- else }} pvc-basis-data {{- end }}
       {{- else }}
+      - name: bt-data
+        emptyDir: {}
+      - name: basis-data
+        emptyDir: {}
       - name: shared-data
         emptyDir: {}
       - name: app-localdata
