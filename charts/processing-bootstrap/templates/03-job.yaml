@@ -19,9 +19,7 @@ spec:
   template:
     spec:
       tolerations:
-      - key: windows_large
-        value: execution
-        effect: NoSchedule
+        {{- .Values.tolerations | toYaml | nindent 8 }}
       containers:
       - name: processing-bootstrap
         image: "{{ .Values.bootstrap.region.image }}:{{ .Values.bootstrap.region.tag }}"
