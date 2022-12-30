@@ -57,6 +57,16 @@ entries:
   processing-bootstrap:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2022-12-30T17:08:58.337100585Z"
+    description: Bootstraping the processing service for each MSA
+    digest: 5bfa96144c6a7ef5718212182c2f5974f6827b4ffe1a319fa7e05d8e4d8494fc
+    name: processing-bootstrap
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/processing-bootstrap-1.0.5/processing-bootstrap-1.0.5.tgz
+    version: 1.0.5
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2022-12-30T16:55:58.908388045Z"
     description: Bootstraping the processing service for each MSA
     digest: 51bab2483f186239e250ce38a74e17d092501c055c20f2709761366ec5922ddd
@@ -562,4 +572,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-series11-bootstrap-1.0.0/review-series11-bootstrap-1.0.0.tgz
     version: 1.0.0
-generated: "2022-12-30T16:55:58.908454345Z"
+generated: "2022-12-30T17:08:58.337273685Z"
