@@ -33,6 +33,11 @@ spec:
 {{- toYaml $nodeSelector | indent 8 }}
       containers:
       - image: {{.Values.review.api.image}}:{{.Values.review.api.tag}}
+        {{- if .Values.review.api.livenessProbe }}
+        livenessProbe:
+        {{- $livenessProbe := deepCopy .Values.review.api.livenessProbe }}
+{{ toYaml .Values.review.api.livenessProbe | indent 10 }}
+        {{- end }}
         ports:
         - containerPort: 80
         envFrom:
@@ -42,8 +47,7 @@ spec:
 {{- /* output env vars for Review secrets (_helpers.tpl) */}}
 {{- include "resources.env.secrets" . | indent 6 }}
         resources:
-{{ $resources := mergeOverwrite .Values.review.resources .Values.review.api.resources }}
-{{- toYaml $resources | indent 10 }}
+{{ toYaml .Values.review.api.resources | indent 10 }}
         imagePullPolicy: Always
         name: review-api
         securityContext:
@@ -82,3 +86,20 @@ spec:
       protocol: TCP
       port: 80
       targetPort: 80
+{{/*{{- if .Values.review.api.PodDisruptionBudget.enabled | default false }}*/}}
+{{/*---*/}}
+{{/*apiVersion: policy/v1*/}}
+{{/*kind: PodDisruptionBudget*/}}
+{{/*metadata:*/}}
+{{/*  name: {{ .Values.review.api.PodDisruptionBudget.name }}*/}}
+{{/*spec:*/}}
+{{/*  selector:*/}}
+{{/*    matchLabels:*/}}
+{{/*      app: deployment-review-api*/}}
+{{/*{{- if .Values.review.api.PodDisruptionBudget.minAvailable }}*/}}
+{{/*  minAvailable: {{ .Values.review.api.PodDisruptionBudget.minAvailable }}*/}}
+{{/*{{- end }}*/}}
+{{/*{{- if .Values.review.api.PodDisruptionBudget.maxUnavailable }}*/}}
+{{/*  maxUnavailable: {{ .Values.review.api.PodDisruptionBudget.maxUnavailable }}*/}}
+{{/*{{- end }}*/}}
+{{/*{{- end -}}*/}}

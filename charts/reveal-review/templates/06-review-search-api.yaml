@@ -23,8 +23,10 @@ spec:
     metadata:
       labels:
         app: deployment-review-search-api
+      {{- if .Values.review.reloadOnUpgrade }}
       annotations:
         timestamp: {{ now | quote }}
+      {{- end }}
     spec:
       nodeSelector:
 {{ $nodeSelector := mergeOverwrite .Values.review.nodeSelector.linux .Values.review.search_api.nodeSelector }}
@@ -40,8 +42,7 @@ spec:
 {{- /* output env vars for Review secrets (_helpers.tpl) */}}
 {{- include "resources.env.secrets" . | indent 6 }}
         resources:
-{{ $resources := mergeOverwrite .Values.review.resources .Values.review.search_api.resources }}
-{{- toYaml $resources | indent 10 }}
+{{ toYaml .Values.review.search_api.resources | nindent 10 }}
         imagePullPolicy: Always
         name: review-search-api
         securityContext:
@@ -79,3 +80,21 @@ spec:
       protocol: TCP
       port: 80
       targetPort: 80
+
+{{/*{{- if .Values.review.search_api.PodDisruptionBudget.enabled | default false }}*/}}
+{{/*---*/}}
+{{/*apiVersion: policy/v1*/}}
+{{/*kind: PodDisruptionBudget*/}}
+{{/*metadata:*/}}
+{{/*  name: {{ .Values.review.search_api.PodDisruptionBudget.name }}*/}}
+{{/*spec:*/}}
+{{/*  selector:*/}}
+{{/*    matchLabels:*/}}
+{{/*      app: deployment-review-search-api*/}}
+{{/*{{- if .Values.review.search_api.PodDisruptionBudget.minAvailable }}*/}}
+{{/*  minAvailable: {{ .Values.review.search_api.PodDisruptionBudget.minAvailable }}*/}}
+{{/*{{- end }}*/}}
+{{/*{{- if .Values.review.search_api.PodDisruptionBudget.maxUnavailable }}*/}}
+{{/*  maxUnavailable: {{ .Values.review.search_api.PodDisruptionBudget.maxUnavailable }}*/}}
+{{/*{{- end }}*/}}
+{{/*{{- end -}}*/}}

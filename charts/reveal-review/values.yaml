@@ -35,6 +35,10 @@ secrets:
     review-website-decryption-key: ""
     # Needs to be [0-9A-F]{128}
     review-website-validation-key: ""
+    rabbitmq-username: ""
+    rabbitmq-password: ""
+    rabbitmq-amqp: ""
+    rabbitmq-vhost: ""
 
   # -- OPTIONS FOR: 'external-secrets' -- #
   externalSecrets:
@@ -51,6 +55,7 @@ secrets:
       secretName:
         reviewDatabase: ""
         reviewWebEncryption: ""
+        rabbitmq: ""
     # -- Options for azurekv (Azure KeyVault)
     azurekv:
       auth:
@@ -66,6 +71,10 @@ secrets:
         review_user_management_db_keyname: ""
         review_website_decryption_key_keyname: ""
         review_website_validation_key_keyname: ""
+        rabbitmq_username_keyname: ""
+        rabbitmq_password_keyname: ""
+        rabbitmq_amqp_keyname: ""
+        rabbitmq_vhost_keyname: ""
 
 ingress:
   # -- The ingress class (set per ingress)
@@ -136,6 +145,21 @@ review:
     args: []
     labels:
       "reveal.app/review": "publish"
+    PodDisruptionBudget:
+      name: PDBweb
+      enabled: true
+      minAvailable: 1
+      maxUnavailable:
+    livenessProbe:
+      httpGet:
+        path: /reveal/login.aspx
+        port: 443
+        scheme: HTTPS
+      initialDelaySeconds: 900
+      periodSeconds: 60
+      timeoutSeconds: 5
+      successThreshold: 1
+      failureThreshold: 3
 
   api:
     image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/publish_api"
@@ -150,6 +174,20 @@ review:
     args: []
     labels:
       "reveal.app/review": "publish_api"
+    PodDisruptionBudget:
+      name: PDBapi
+      enabled: true
+      minAvailable: 1
+      maxUnavailable:
+    livenessProbe:
+      httpGet:
+        path: /rest/api/version
+        port: 80
+      initialDelaySeconds: 60
+      periodSeconds: 60
+      timeoutSeconds: 5
+      successThreshold: 1
+      failureThreshold: 3
 
   search_api:
     image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/search_api"
@@ -165,6 +203,11 @@ review:
     args: []
     labels:
       "reveal.app/review": "search_api"
+    PodDisruptionBudget:
+      name: PDBsearch
+      enabled: true
+      minAvailable: 1
+      maxUnavailable:
 
   ui:
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/reveal/11series/ui"
@@ -177,8 +220,22 @@ review:
     commandOverride: false
     command: ""
     args: []
+    env: []
     labels:
       "reveal.app/review": "ui"
+    # -- Specify customizations to the nginx proxy
+    proxyConfig:
+      # -- Example:
+      # server:
+      #   dnsrbl:
+      #     blackholes:
+      #       - name: "Reveal-RBL"
+      #         host: "rbl.reveal-rbl.com"
+    PodDisruptionBudget:
+      name: PDBui-assets
+      enabled: true
+      minAvailable: 1
+      maxUnavailable:
 
   review_services:
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/assignment"
@@ -196,6 +253,19 @@ review:
       args: []
       labels:
         "reveal.app/review": "assignment"
+      PodDisruptionBudget:
+        enabled: true
+        minAvailable: 1
+        maxUnavailable:
+      livenessProbe:
+        httpGet:
+          path: /health
+          port: 80
+        initialDelaySeconds: 60
+        periodSeconds: 60
+        timeoutSeconds: 5
+        successThreshold: 1
+        failureThreshold: 3
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/assignmentstatus"
       tag: "reveal-series11-qa"
@@ -211,6 +281,10 @@ review:
       args: []
       labels:
         "reveal.app/review": "assignmentstatus"
+      PodDisruptionBudget:
+        enabled: true
+        minAvailable: 1
+        maxUnavailable:
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/bulktag"
       tag: "reveal-series11-qa"
@@ -227,6 +301,10 @@ review:
       args: []
       labels:
         "reveal.app/review": "bulktag"
+      PodDisruptionBudget:
+        enabled: true
+        minAvailable: 1
+        maxUnavailable:
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/documentloader"
       tag: "reveal-series11-qa"
@@ -243,6 +321,10 @@ review:
       args: []
       labels:
         "reveal.app/review": "documentloader"
+      PodDisruptionBudget:
+        enabled: true
+        minAvailable: 1
+        maxUnavailable:
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/export"
       tag: "reveal-series11-qa"
@@ -259,6 +341,10 @@ review:
       args: []
       labels:
         "reveal.app/review": "export"
+      PodDisruptionBudget:
+        enabled: true
+        minAvailable: 1
+        maxUnavailable:
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/indexbatch"
       tag: "reveal-series11-qa"
@@ -275,6 +361,10 @@ review:
       args: []
       labels:
         "reveal.app/review": "indexbatch"
+      PodDisruptionBudget:
+        enabled: true
+        minAvailable: 1
+        maxUnavailable:
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/indexserver"
       tag: "reveal-series11-qa"
@@ -291,6 +381,31 @@ review:
       args: []
       labels:
         "reveal.app/review": "indexserver"
+      PodDisruptionBudget:
+        enabled: true
+        minAvailable: 1
+        maxUnavailable:
+      extra_environment_variables:
+        - name: "IndexingApp__RabbitMq__Username"
+          valueFrom:
+            secretKeyRef:
+              name: review-secrets
+              key: rabbitmq-username
+        - name: "IndexingApp__RabbitMq__Password"
+          valueFrom:
+            secretKeyRef:
+              name: review-secrets
+              key: rabbitmq-password
+        - name: "IndexingApp__RabbitMq__Url"
+          valueFrom:
+            secretKeyRef:
+              name: review-secrets
+              key: rabbitmq-amqp
+        - name: "IndexingApp__RabbitMq__Vhost"
+          valueFrom:
+            secretKeyRef:
+              name: review-secrets
+              key: rabbitmq-vhost
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/print"
       tag: "reveal-series11-qa"
@@ -307,6 +422,10 @@ review:
       args: []
       labels:
         "reveal.app/review": "print"
+      PodDisruptionBudget:
+        enabled: true
+        minAvailable: 1
+        maxUnavailable:
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/productionserver"
       tag: "reveal-series11-qa"
@@ -323,6 +442,10 @@ review:
       args: []
       labels:
         "reveal.app/review": "productionserver"
+      PodDisruptionBudget:
+        enabled: true
+        minAvailable: 1
+        maxUnavailable:
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/search"
       tag: "reveal-series11-qa"
@@ -339,6 +462,10 @@ review:
       args: []
       labels:
         "reveal.app/review": "search"
+      PodDisruptionBudget:
+        enabled: true
+        minAvailable: 1
+        maxUnavailable:
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/productionclient"
       tag: "reveal-series11-qa"
@@ -354,6 +481,10 @@ review:
       args: []
       labels:
         "reveal.app/review": "production_export"
+      PodDisruptionBudget:
+        enabled: false
+        minAvailable: 1
+        maxUnavailable:
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/indexclient"
       tag: "reveal-series11-qa"
@@ -369,6 +500,49 @@ review:
       args: []
       labels:
         "reveal.app/review": "indexing"
+      PodDisruptionBudget:
+        enabled: false
+        minAvailable: 1
+        maxUnavailable:
+      volumes:
+        - name: local-tmp
+          ephemeral:
+            volumeClaimTemplate:
+              metadata:
+                creationTimestamp: null
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 1024Gi
+                storageClassName: gp3-iops
+                volumeMode: Filesystem
+      volumeMounts:
+        - name: local-tmp
+          readOnly: false
+          mountPath: /tmp
+      extra_environment_variables:
+        - name: "IndexingApp__RabbitMq__Username"
+          valueFrom:
+            secretKeyRef:
+              name: review-secrets
+              key: rabbitmq-username
+        - name: "IndexingApp__RabbitMq__Password"
+          valueFrom:
+            secretKeyRef:
+              name: review-secrets
+              key: rabbitmq-password
+        - name: "IndexingApp__RabbitMq__Url"
+          valueFrom:
+            secretKeyRef:
+              name: review-secrets
+              key: rabbitmq-amqp
+        - name: "IndexingApp__RabbitMq__Vhost"
+          valueFrom:
+            secretKeyRef:
+              name: review-secrets
+              key: rabbitmq-vhost
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/imaging"
       tag: "reveal-series11-qa"
@@ -384,6 +558,10 @@ review:
       args: []
       labels:
         "reveal.app/review": "imaging"
+      PodDisruptionBudget:
+        enabled: false
+        minAvailable: 1
+        maxUnavailable:
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/imaging"
       tag: "reveal-series11-qa"
@@ -402,6 +580,10 @@ review:
       args: []
       labels:
         "reveal.app/review": "imaging_totf"
+      PodDisruptionBudget:
+        enabled: false
+        minAvailable: 1
+        maxUnavailable:
 
   # -- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: false

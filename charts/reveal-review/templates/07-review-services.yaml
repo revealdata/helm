@@ -39,6 +39,11 @@ spec:
 {{- end }}
       containers:
       - image: {{.image}}:{{.tag}}
+        {{- if .livenessProbe }}
+        livenessProbe:
+        {{- $livenessProbe := deepCopy .livenessProbe | mergeOverwrite .livenessProbe }}
+{{ toYaml $livenessProbe | indent 10 }}
+        {{- end }}
         {{- if .has_listening_service }}
         ports:
         - containerPort: 80
@@ -53,8 +58,7 @@ spec:
 {{- /* output env vars for Review secrets (_helpers.tpl) */}}
 {{- include "resources.env.secrets" . | indent 6 }}
         resources:
-{{- $resources := deepCopy $.Values.review.resources |  mergeOverwrite .resources }}
-{{ toYaml $resources | indent 10 }}
+{{ toYaml .resources | indent 10 }}
         imagePullPolicy: Always
         name: {{ .name }}
         securityContext:
@@ -66,6 +70,14 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         tty: true
+{{- if .volumeMounts }}
+        volumeMounts:
+{{ toYaml .volumeMounts | indent 10 }}
+{{- end }}
+{{- if .volumes }}
+      volumes:
+{{ toYaml .volumes | indent 8 }}
+{{- end }}
       dnsConfig: {}
       dnsPolicy: ClusterFirst
       restartPolicy: Always
@@ -98,4 +110,21 @@ spec:
       port: 80
       targetPort: 80
 {{- end }}
+{{/*{{- if .PodDisruptionBudget.enabled | default false }}*/}}
+{{/*---*/}}
+{{/*apiVersion: policy/v1*/}}
+{{/*kind: PodDisruptionBudget*/}}
+{{/*metadata:*/}}
+{{/*  name: PDB-{{.name}}*/}}
+{{/*spec:*/}}
+{{/*  selector:*/}}
+{{/*    matchLabels:*/}}
+{{/*      app: deployment-review-assignment*/}}
+{{/*{{- if .PodDisruptionBudget.minAvailable }}*/}}
+{{/*  minAvailable: {{ .PodDisruptionBudget.minAvailable }}*/}}
+{{/*{{- end }}*/}}
+{{/*{{- if .PodDisruptionBudget.maxUnavailable }}*/}}
+{{/*  maxUnavailable: {{ .PodDisruptionBudget.maxUnavailable }}*/}}
+{{/*{{- end }}*/}}
+{{/*{{- end }}*/}}
 {{- end }}
