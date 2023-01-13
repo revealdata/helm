@@ -73,9 +73,16 @@ spec:
     {{- if eq $ingress_class "nginx" }}
     - host: {{ .Values.ingress.hostname }}
       http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: service-review-series11-ui
+                port:
+                  number: 443
     {{- else }}
     - http:
-    {{- end }}
         paths:
           - path: /
             pathType: Exact
@@ -126,5 +133,7 @@ spec:
                 name: service-review-series11-ui
                 port:
                   number: 443
+
+{{- end }}
 
 {{- end }}
