@@ -212,7 +212,7 @@ keycloak:
         # -- Reference: https://content-security-policy.com
         # -- Optionally disable the CSP header default values (default: true)
         # defaults: false
-        #-- 'all': Source options that will be apllied to all directives under it.
+        # -- 'all': Source options that will be apllied to all directives under it.
         # all:
         #   - "'self'"
         #   - "'unsafe-inline'"
