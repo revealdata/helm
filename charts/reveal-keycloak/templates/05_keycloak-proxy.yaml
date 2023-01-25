@@ -15,7 +15,7 @@ spec:
       app: keycloak-proxy
   progressDeadlineSeconds: 600
   replicas: {{ .Values.keycloak.proxy.replicas | default 1 }}
-  revisionHistoryLimit: 10
+  revisionHistoryLimit: 2
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -37,29 +37,30 @@ spec:
         {{- if .Values.keycloak.proxy.nodegroup }}
         alpha.eksctl.io/nodegroup-name: {{ .Values.keycloak.proxy.nodegroup }}
         {{- end }}
+      
+      volumes:
+        # Keycloak Proxy Security Secret
+        - name: {{ .Values.keycloak.proxy.security.configMapName | default "keycloak-proxy-security" }}-vol
+          secret:
+            secretName: {{ .Values.keycloak.proxy.security.configMapName | default "keycloak-proxy-security" }}
+            optional: true
+
       {{- if .Values.global.ecr.enabled }}
       imagePullSecrets:
       - name: aws-ecr-credentials
       {{- end }}
       containers:
       - name: keycloak
-        image: {{ .Values.keycloak.proxy.image }}:{{ .Values.keycloak.proxy.tag | default "1.1.5" }}
+        image: {{ .Values.keycloak.proxy.image }}:{{ .Values.keycloak.proxy.tag | default "latest" }}
         imagePullPolicy: {{ .Values.keycloak.proxy.imagePullPolicy | default "Always" }}
         {{- if .Values.keycloak.proxy.resources }}
         resources:
-          requests:
-            {{- if .Values.keycloak.proxy.resources.memory }}
-            memory: "{{ .Values.keycloak.proxy.resources.memory }}Gi"
-            {{- end }}
-            {{- if .Values.keycloak.proxy.resources.cpu }}
-            cpu: "{{ .Values.keycloak.proxy.resources.cpu }}000m"
-            {{- end }}
+{{ toYaml .Values.keycloak.proxy.resources | indent 10 }}
         {{- end }}
         ports:
           - name: liveness-port
-            containerPort: 80
-            hostPort: 80
-          - containerPort: 443
+            containerPort: 8080
+          - containerPort: 8443
         startupProbe:
           failureThreshold: 2
           periodSeconds: 10
@@ -72,6 +73,9 @@ spec:
           httpGet:
             path: /
             port: liveness-port
+        volumeMounts:
+          - name: {{ .Values.keycloak.proxy.security.configMapName | default "keycloak-proxy-security" }}-vol
+            mountPath: /run/security
         envFrom:
         - configMapRef:
             name: keycloak-proxy-config
@@ -107,5 +111,24 @@ spec:
   ports:
     - name: http
       protocol: TCP
-      port: 443
-      targetPort: 443
+      port: 8443
+      targetPort: 8443
+---
+
+{{- if .Values.PodDisruptionBudgetkeycloakproxy.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.PodDisruptionBudgetkeycloakproxy.name }}
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: keycloak-proxy
+{{- if .Values.PodDisruptionBudgetkeycloakproxy.minAvailable }}
+  minAvailable: {{ .Values.PodDisruptionBudgetkeycloakproxy.minAvailable }}
+{{- end }}
+{{- if .Values.PodDisruptionBudgetkeycloakproxy.maxUnavailable }}
+  maxUnavailable: {{ .Values.PodDisruptionBudgetkeycloakproxy.maxUnavailable }}
+{{- end }}
+{{- end -}}
