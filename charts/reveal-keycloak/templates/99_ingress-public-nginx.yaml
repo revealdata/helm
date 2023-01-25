@@ -1,0 +1,112 @@
+{{- if .Values.ingress.public.enabled }}
+{{- $ingress_class := (.Values.ingress.public.class | default "alb") -}}
+{{- $service_port := (.Values.ingress.backend.port | default 8443) -}}
+{{- if (contains  "nginx" $ingress_class) }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  name: keycloak-ui
+  annotations:
+    {{- if .Values.ingress.public.hostname }}
+    external-dns.alpha.kubernetes.io/hostname: {{ .Values.ingress.public.hostname }}
+    {{- end }}
+    kubernetes.io/ingress.class: {{ $ingress_class }}
+    # Nginx ingress (nginx)
+    # https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/
+    nginx.ingress.kubernetes.io/service-upstream: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-next-upstream: "http_503"
+    nginx.ingress.kubernetes.io/proxy-next-upstream-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+    nginx.ingress.kubernetes.io/upstream-vhost: {{ quote .Values.ingress.public.hostname }}
+    nginx.ingress.kubernetes.io/default-backend: keycloak-proxy
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    {{- if .Values.ingress.public.annotations }}
+    # Custom annotations
+{{- toYaml .Values.ingress.public.annotations | nindent 4 }}
+    {{- end }}
+spec:
+  rules:
+    - host: {{ .Values.ingress.public.hostname }}
+      http:
+        paths:
+          - path: /(?!admin|health).*
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak-proxy
+                port:
+                  number: {{ $service_port }}
+---
+{{- $adminAllowedCIDRs := "" }}
+{{- if .Values.ingress.public.restrictAdmin.adminAllowedCIDRs }}
+{{- if or (.Values.ingress.public.restrictAdmin.b64Encoded) (eq (typeOf .Values.ingress.public.restrictAdmin.adminAllowedCIDRs) "string") }}
+{{- $adminAllowedCIDRsjson := (cat "{ \"adminAllowedCIDRs\":" (b64dec .Values.ingress.public.restrictAdmin.adminAllowedCIDRs) "}") | fromJson }}
+{{- $adminAllowedCIDRs = ($adminAllowedCIDRsjson.adminAllowedCIDRs) }}
+{{- else }}
+{{- $adminAllowedCIDRs = (.Values.ingress.public.restrictAdmin.adminAllowedCIDRs) }}
+{{- end }}
+{{- end }}
+# {{ join "," $adminAllowedCIDRs }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  name: keycloak-ui-admin
+  annotations:
+    {{- if .Values.ingress.public.hostname }}
+    external-dns.alpha.kubernetes.io/hostname: {{ .Values.ingress.public.hostname }}
+    {{- end }}
+    kubernetes.io/ingress.class: {{ $ingress_class }}
+    # Nginx ingress (nginx)
+    # https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/
+    nginx.ingress.kubernetes.io/service-upstream: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-next-upstream: "http_503"
+    nginx.ingress.kubernetes.io/proxy-next-upstream-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+    nginx.ingress.kubernetes.io/upstream-vhost: {{ quote .Values.ingress.public.hostname }}
+    nginx.ingress.kubernetes.io/default-backend: keycloak-proxy
+    {{- if $adminAllowedCIDRs }}
+    nginx.ingress.kubernetes.io/whitelist-source-range: "{{ join "," $adminAllowedCIDRs }}"
+    {{- end }}
+    {{- if .Values.ingress.admin.annotations }}
+{{- toYaml .Values.ingress.admin.annotations | nindent 4 }}
+    {{- end }}
+spec:
+  defaultBackend:
+    service:
+      name: keycloak-proxy
+      port:
+        number: 8443
+  rules:
+    - host: {{ .Values.ingress.public.hostname }}
+      http:
+        paths:
+          - path: /admin
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak-proxy
+                port:
+                  number: {{ $service_port }}
+{{- end }}
+{{- end }}

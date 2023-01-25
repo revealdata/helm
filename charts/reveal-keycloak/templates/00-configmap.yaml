@@ -6,6 +6,12 @@ metadata:
   name: {{ .Values.global.namespace | default .Release.Name }}
 {{- end }}
 ---
+{{- $admin_hostname := "" }}
+{{- if .Values.ingress.admin.enabled }}
+{{- $admin_hostname = .Values.ingress.admin.hostname }}
+{{- else }}
+{{- $admin_hostname = .Values.ingress.public.hostname }}
+{{- end }}
 # Keycloak Configuration
 apiVersion: v1
 kind: ConfigMap
@@ -13,14 +19,15 @@ metadata:
   name: keycloak-config
   namespace: {{ .Values.global.namespace | default .Release.Name }}
 data:
-  {{- if .Values.ingress.public.enabled }}
   # https://www.keycloak.org/server/hostname
+  KC_HOSTNAME_PORT: "443"
+  KC_HOSTNAME_URL: https://{{ .Values.ingress.public.hostname }}
+  {{- if (hasPrefix "18." .Values.keycloak.tag) }}
   KC_HOSTNAME: {{ .Values.ingress.public.hostname }}
   {{- end }}
-  {{- if .Values.ingress.admin.enabled }}
-  KC_ADMIN_HOSTNAME: {{ .Values.ingress.admin.hostname }}
-  {{- else }}
-  KC_ADMIN_HOSTNAME: {{ .Values.ingress.public.hostname }}
+  KC_HOSTNAME_ADMIN_URL: https://{{ $admin_hostname }}
+  {{- if (hasPrefix "18." .Values.keycloak.tag) }}
+  KC_ADMIN_HOSTNAME: {{ $admin_hostname }}
   {{- end }}
   KC_HOSTNAME_STRICT: "false"
   # https://www.keycloak.org/server/features

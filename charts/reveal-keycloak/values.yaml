@@ -30,7 +30,7 @@ secrets:
   # -- OPTIONS FOR: 'external-secrets' -- #
   externalSecrets:
     # -- The external-secrets provider
-    # -- Providers: 
+    # -- Providers:
     # -- aws: AWS SecretsManager
     # -- azurekv: Azure KeyVault
     provider: aws
@@ -67,32 +67,72 @@ ingress:
   # -- Options:
   # -- alb: (AWS Application Load balancer - https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/)
   # -- nginx: Nginx Ingress (https://kubernetes.github.io/ingress-nginx/)
+  backend:
+    port: 8443
   public:
     enabled: true
-    hostname: "<ADD EXTERNAL HOSTNAME HERE>"
+    hostname: "localhost.localdomain"
     class: "alb"
-    # -- sslCertArn is only valid when using the 'alb' class. Leave empty for aut-select
-    sslCertArn: ""
-    # -- Uncomment below to add custom annotations for the public ingress
+    # -- Options for the 'alb' ingress class
+    class_alb:
+      # -- Enable/Disable IPv6 (dualstack) support (only valid when using the 'alb' class)
+      ipv6: false
+      # -- sslCertArn is only valid when using the 'alb' class. Leave empty for aut-select
+      sslCertArn: ""
+      # -- Add custom attributes for the public ingress
+      # -- See: https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/guide/service/annotations/#attributes
+      attributes: []
+        # - key: "routing.http2.enabled"
+        #   value: "true"
+    # -- Restrict access to the keycloak admin console
+    # -- If set to true, you may add a list of CIDR blocks to the 'allowedCIDRs' section below
+    restrictAdmin:
+      # -- Enable/Disable admin console access IP restrictions
+      enabled: false
+      # -- List of CIDR blocks to allow access to the admin console
+      # -- OR a base64 encoded string of a list of CIDR blocks in json format
+      adminAllowedCIDRs: []
+      #   - "10.0.0.0/8"
+      #   - "172.21.0.0/16"
+      # adminAllowedCIDRs: WyIxMC4wLjAuMC84IiwgIjE3Mi4yMS4wLjAvMTYiLCAiMTcyLjIyLjAuMC8xNiJd
+      # adminAllowedCIDRs: ["10.0.0.0/8", "172.21.0.0/16"]
+      # -- Set to true if the 'adminAllowedCIDRs' is a base64 encoded json string
+      b64Encoded: false
+    # -- Options for the 'nginx' ingress class
+    class_nginx: {}
+    # -- Add custom annotations for the public ingress
     annotations: {}
   admin:
-    enabled: true
-    hostname: "<ADD ADMIN HOSTNAME HERE>"
+    enabled: false
+    hostname: ""
     class: "alb"
-    # -- sslCertArn is only valid when using the 'alb' class. Leave empty for aut-select
-    sslCertArn: ""
+    class_alb:
+      # -- Enable/Disable IPv6 (dualstack) support (only valid when using the 'alb' class)
+      ipv6: false
+      # -- sslCertArn is only valid when using the 'alb' class. Leave empty for aut-select
+      sslCertArn: ""
+      # -- Add custom attributes for the admin ingress
+      # -- See: https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/guide/service/annotations/#attributes
+      attributes: []
+        # - key: "routing.http2.enabled"
+        #   value: "true"
     # -- Uncomment below to add custom annotations for the admin ingress
     annotations: {}
 
 keycloak:
-  image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/reveal/keycloak
-  tag: 18.0.2
+  image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/reveal/keycloak
+  tag: 18.0.2.2
   replicas: 1
   # -- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: false
   # -- Define static resources for the keycloak pods
   resources:
-    memory: 2
+    requests:
+      memory: 1024Mi
+      cpu: 165m
+    limits:
+      memory: 2560Mi
+      cpu: 4000m
   # -- Import CA certificate files in PEM format into the Keycloak Trust Store
   # -- A trusted CA cert is required for the Keycloak pod to communicate with LDAPs
   # -- CA Certificates are added to a secret and mounted to the pod
@@ -118,6 +158,7 @@ keycloak:
     #   - "bar.local"
   env:
     KC_LOG_LEVEL: "INFO"
+    # AWS_REGION: "us-east-1"
     # -- https://www.keycloak.org/server/hostname
     # -- https://www.keycloak.org/server/db
     # -- Uncomment and add values if needed
@@ -129,9 +170,16 @@ keycloak:
     #     key: "linux-large"
     #     operator: "Exists"
   proxy:
-    image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/reveal/ui/base
-    tag: 1.1.6
+    image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/reveal_ui/base
+    tag: 2.1.6
     replicas: 1
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 50m
+      limits:
+        memory: 1024Mi
+        cpu: 1000m
     env: {}
       # TEST: "true" # Only use in testing snd development. Disables security headers.
     # -- Optionally set custom tolerations
@@ -139,3 +187,48 @@ keycloak:
       # - effect: "NoSchedule"
       #     key: "linux-large"
       #     operator: "Exists"
+    # -- Optionally set custom security definitions for the proxy
+    security: {}
+      # -- Use an existing secret for the proxy security
+      # -- The secret must be in the same namespace as the keycloak chart
+      # useExistingSecret: true
+      # secretName: "keycloak-proxy-security"
+      # -- all: should all networks not specified be allowed or denied
+      # -- options: allow, deny (default: allow)
+      # all: allow
+      # -- list of IP addresses or networks to allow and/or deny. Both bare IP addresses and CIDR notation are supported.
+      # -- If an invalid network address is specified, the network will be dropped from the configuration and a WARNING will be in the log.
+      # -- The list can be a mix of strings (single network) or a dictionary object with the following options:
+      # -- options:
+      # --   - network: a.b.c.d(/e)
+      # --     name: name of the network (optional. added to the nginx config as a comment)
+      # --   - a.b.c.d(/e)
+      # deny:
+      #  - name: "known bad actor"
+      #    network: 56.254.25.87
+      # allow:
+      #   - 28.68.52.0/24
+      # content_security_policy:
+        # -- Reference: https://content-security-policy.com
+        # -- Optionally disable the CSP header default values (default: true)
+        # defaults: false
+        # -- 'all': Source options that will be apllied to all directives under it.
+        # all:
+        #   - "'self'"
+        #   - "'unsafe-inline'"
+        #   - "*.example.com"
+        # -- Add CSP directives. The directive name is the key and the value is a list of source options.
+        # img-src:
+        #   - "*.foo.com"
+        # script-src:
+        #   - "*.bar.com"
+
+PodDisruptionBudgetkeycloak:
+  name: pdbkKeyCloak
+  enabled: true
+  minAvailable: 1
+
+PodDisruptionBudgetkeycloakproxy:
+  name: pdbKeyCloakProxy
+  enabled: true
+  minAvailable: 1

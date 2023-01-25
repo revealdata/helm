@@ -15,7 +15,7 @@ spec:
       app: keycloak
   progressDeadlineSeconds: 600
   replicas: {{ .Values.keycloak.replicas | default 1 }}
-  revisionHistoryLimit: 10
+  revisionHistoryLimit: 2
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -60,17 +60,11 @@ spec:
       {{- end }}
       containers:
       - name: keycloak
-        image: {{ .Values.keycloak.image }}:{{ .Values.keycloak.tag | default "18.0.2" }}
+        image: {{ .Values.keycloak.image }}:{{ .Values.keycloak.tag | default "latest" }}
         imagePullPolicy: {{ .Values.keycloak.imagePullPolicy | default "Always" }}
         {{- if .Values.keycloak.resources }}
         resources:
-          requests:
-            {{- if .Values.keycloak.resources.memory }}
-            memory: "{{ .Values.keycloak.resources.memory }}Gi"
-            {{- end }}
-            {{- if .Values.keycloak.resources.cpu }}
-            cpu: "{{ .Values.keycloak.resources.cpu }}000m"
-            {{- end }}
+{{ toYaml .Values.keycloak.resources | indent 10 }}
         {{- end }}
         ports:
           - name: liveness-port
@@ -85,7 +79,6 @@ spec:
           httpGet:
             path: /health/ready
             port: liveness-port
-        {{- if .Values.ingress.admin.enabled }}
         # Runs a script that sets the master realm's Frontend URL to the Admin Hostname
         readinessProbe:
           initialDelaySeconds: 5
@@ -95,7 +88,6 @@ spec:
           timeoutSeconds: 30
           exec:
             command: ["/usr/bin/bash", "-c", "/usr/local/bin/admin_frontend_url.sh", "/tmp/admin_frontend_url.log"]
-        {{- end }}
         livenessProbe:
           initialDelaySeconds: 30
           periodSeconds: 15
@@ -168,5 +160,24 @@ spec:
       name: ping
       protocol: TCP
       targetPort: 4444
-  
+
+---
+
+{{- if .Values.PodDisruptionBudgetkeycloak.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.PodDisruptionBudgetkeycloak.name }}
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: keycloak
+{{- if .Values.PodDisruptionBudgetkeycloak.minAvailable }}
+  minAvailable: {{ .Values.PodDisruptionBudgetkeycloak.minAvailable }}
+{{- end }}
+{{- if .Values.PodDisruptionBudgetkeycloak.maxUnavailable }}
+  maxUnavailable: {{ .Values.PodDisruptionBudgetkeycloak.maxUnavailable }}
+{{- end }}
+{{- end -}}
   
