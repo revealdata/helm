@@ -33,6 +33,7 @@ metadata:
     nginx.ingress.kubernetes.io/use-proxy-protocol: "true"
     nginx.ingress.kubernetes.io/ignore-invalid-headers: "true"
     nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
+    nginx.ingress.kubernetes.io/enable-real-ip: "true"
     {{- if .Values.ingress.public.annotations }}
     # Custom annotations
 {{- toYaml .Values.ingress.public.annotations | nindent 4 }}
@@ -87,6 +88,7 @@ metadata:
     nginx.ingress.kubernetes.io/use-proxy-protocol: "true"
     nginx.ingress.kubernetes.io/ignore-invalid-headers: "true"
     nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
+    nginx.ingress.kubernetes.io/enable-real-ip: "true"
     nginx.ingress.kubernetes.io/upstream-vhost: {{ quote .Values.ingress.public.hostname }}
     nginx.ingress.kubernetes.io/default-backend: keycloak-proxy
     {{- if $adminAllowedCIDRs }}
