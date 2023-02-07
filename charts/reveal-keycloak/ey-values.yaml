@@ -1,0 +1,73 @@
+global:
+  namespace: "keycloak"
+  noNamespace: false
+  ecr:
+    enabled: false
+    account: ""
+    region: ""
+    host: ""
+    password: ""
+secrets:
+  provider: "external-secrets"
+  externalSecrets:
+    provider: azurekv
+    azurekv:
+      auth:
+        ClientID: ""
+        ClientSecret: ""
+      TennantId: ""
+      VaultUrl: ""
+  
+ingress:
+  backend:
+    port: 8443
+  public:
+    enabled: true
+    hostname: "keycloak.reveal-dev2.sbp.eyclienthub.com"
+    class: "nginx"
+    sslCertArn: ""
+    restrictAdmin:
+      enabled: true
+      adminAllowedCIDRs: WyIxMC4yNDQuMC4wLzE2IiwiMTAuMTkuMTU0LjAvMjQiXQ==
+      b64Encoded: true
+    # -- Options for the 'nginx' ingress class
+    class_nginx: {}
+    annotations:
+      nginx.ingress.kubernetes.io/force-ssl-redirect: 'false'
+  admin:
+    enabled: false
+    hostname: ""
+    class: "nginx"
+    sslCertArn: ""
+keycloak:
+    image: "uswdfisrv1acr01.azurecr.io/prod/reveal/keycloak"
+    tag: "18.0.2.2"
+    replicas: 1
+    reloadOnUpgrade: true
+    resources:
+      requests:
+        memory: 1024Mi
+        cpu: 165m
+      limits:
+        memory: 2560Mi
+        cpu: 4000m
+    caTrustStore:
+      useExistingSecret: false
+      secretName: "keycloak-cacerts"
+      cacerts: {}
+    hostAliases: []
+    env:
+      KC_LOG_LEVEL: "INFO"
+      KC_TRANSACTION_XA_ENABLED: "false"
+    tolerations: []
+    proxy:
+      image: "uswdfisrv1acr01.azurecr.io/prod/reveal_ui/base"
+      tag: "2.1.6"
+      replicas: 1
+      resources:
+        requests:
+          memory: 128Mi
+          cpu: 50m
+        limits:
+          memory: 1024Mi
+          cpu: 1000m
