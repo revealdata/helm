@@ -21,10 +21,10 @@ data:
   {{ toYaml .Values.global.env }}
   {{- end }}
   {{- if .Values.global.database.useSsl }}
-  POSTGRES_SSL_FACTORY: "org.postgresql.ssl.NonValidatingFactory"
-  POSTGRES_SSL: "true"
+  POSTGRESQL_SSL_FACTORY: "org.postgresql.ssl.NonValidatingFactory"
+  POSTGRESQL_SSL: "true"
   {{- end }}
-  POSTGRES_HOST_AUTH_METHOD: {{ .Values.global.database.authMech | default "scram-sha-256" }}
+  POSTGRESQL_HOST_AUTH_METHOD: {{ .Values.global.database.authMech | default "scram-sha-256" }}
 
 ---
 # Brainspace Application Configuration

@@ -42,6 +42,7 @@ spec:
       - name: ana-autoscale
         image: {{ .Values.brains_ana.autoscale.image }}:{{ .Values.brains_ana.autoscale.tag | default "latest" }}
         imagePullPolicy: {{ .Values.brains_ana.imagePullPolicy | default "Always" }}
+        terminationMessagePolicy: FallbackToLogsOnError
         env:
           - name: MIN_ANA_PODS
             value: {{ .Values.brains_ana.autoscale.thresholds.min | default 0 | quote }}

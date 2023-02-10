@@ -23,9 +23,11 @@ metadata:
     service.beta.kubernetes.io/aws-load-balancer-scheme: "internal"
     service.beta.kubernetes.io/aws-load-balancer-internal: "true"
     {{- end }}
-    alb.ingress.kubernetes.io/load-balancer-attributes: routing.http2.enabled=true
+    alb.ingress.kubernetes.io/security-groups: "k8s-brainspace-ingress"
+    alb.ingress.kubernetes.io/manage-backend-security-group-rules: "true"
+    alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=4000,routing.http2.enabled=true,routing.http.drop_invalid_header_fields.enabled=true,access_logs.s3.enabled=true,access_logs.s3.prefix=ingress_logs/brains-ui/{{ .Values.global.namespace | default .Release.Name }},access_logs.s3.bucket={{ .Values.ingress.logBucket }}
     alb.ingress.kubernetes.io/target-group-attributes: stickiness.enabled=false
-    alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=4000 # max=4000
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-FS-1-2-Res-2020-10
     #  Health check path annotations
     alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
     alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "15"

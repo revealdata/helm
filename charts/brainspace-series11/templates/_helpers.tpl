@@ -49,7 +49,7 @@
 
 {{/* Helm only does math on integers so multiply, then divide */}}
 {{/* Catalina memory = container memory less 10% */}}
-{{- $catalina_memory := div (mul $memory 90) 100 -}}
+{{- $catalina_memory := div (mul $memory 75) 100 -}}
 {{/* BatchTools memory = container memory less 10% with 2G reserved */}}
 {{- $bt_memory := sub  $catalina_memory 2 -}}
 

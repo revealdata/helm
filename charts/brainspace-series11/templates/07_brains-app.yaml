@@ -15,7 +15,7 @@ spec:
       app: deployment-brains-app
   progressDeadlineSeconds: 600
   replicas: 1
-  revisionHistoryLimit: 10
+  revisionHistoryLimit: 3
   strategy:
     type: Recreate
   template:
@@ -95,6 +95,7 @@ spec:
             mountPath: /usr/data/vol/{{ .Values.brains_bt.basis_dir }}
           - name: bt-data
             mountPath: /usr/data/vol/BatchTools
+        terminationMessagePolicy: FallbackToLogsOnError
       - name: brains-plugins
         image: {{ .Values.brains_app.plugins.image }}:{{ .Values.brains_app.plugins.tag }}
         command: ["/bin/ash"]
@@ -103,6 +104,7 @@ spec:
         volumeMounts:
           - name: plugins-data
             mountPath: /fs-plugins
+        terminationMessagePolicy: FallbackToLogsOnError
       - name: brains-additional-plugins
         image: {{ .Values.brains_app.additionalPlugins.image }}:{{ .Values.brains_app.additionalPlugins.tag }}
         command: ["/bin/ash"]
@@ -111,6 +113,7 @@ spec:
         volumeMounts:
           - name: plugins-additional-data
             mountPath: /fs-plugins
+        terminationMessagePolicy: FallbackToLogsOnError
       containers:
       - name: brains-app
         image: {{ .Values.brains_app.image }}:{{ .Values.brains_app.tag }}
@@ -128,8 +131,15 @@ spec:
         - configMapRef:
             name: brains-app-config
         env:
-          {{- /* env vars for Java Resources (_helpers.tpl) */}}
+          {{- if not .Values.brains_app.jvmMemory.useContainerSupport }}
+          {{- /* env vars for Java Resources (_helpers.tpl) */ -}}
           {{- include "java.resources.values" .Values.brains_app | indent 6 }}
+          {{- else }}
+          - name: CATALINA_OPTS
+            value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage={{ .Values.brains_app.jvmMemory.MaxRAMPercentage }} -XX:MaxMetaspaceSize={{ .Values.brains_app.jvmMemory.MaxMetaspaceSize }}"
+          {{- end }}
+          {{- /* env vars for Brainspace secrets (_helpers.tpl) */}}
+          {{- include "secrets.env" . |indent 6 }}
           {{- /* env vars for Brainspace secrets (_helpers.tpl) */}}
           {{- include "secrets.env" . |indent 6 }}
         lifecycle:
@@ -142,6 +152,7 @@ spec:
                   if [[ -e /var/lib/brains/license/brainspace_license.txt ]]; then
                   cp /var/lib/brains/license/brainspace_license.txt /var/lib/brains/.brainspace/brainspace_license.txt;
                   fi;
+        terminationMessagePolicy: FallbackToLogsOnError
         volumeMounts:
         - name: basis-data
           readOnly: true

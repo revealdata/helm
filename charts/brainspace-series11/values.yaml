@@ -118,7 +118,7 @@ secrets:
           # -- property (optional) = The name of the secret property to fetch from external-secrets
           # property: "host"
           # -- envVar (optional) = Cretae this secret as an environment variable in the pods
-          # envVar: "POSTGRES_HOST"
+          # envVar: "POSTGRESQL_HOST"
           # -- value (optional) = Set a value for the secret if not using external-secrets
           # value: "brains-db"
           # -- mountPath (optional) = Mount the secret as a directory in the pods
@@ -133,23 +133,23 @@ secrets:
       data:
         - secretKey: "brainspace_db_host"
           property: "host"
-          envVar: "POSTGRES_HOST"
+          envVar: "POSTGRESQL_HOST"
           # value: "brains-db"
         - secretKey: "brainspace_db_port"
           property: "port"
-          envVar: "POSTGRES_PORT"
+          envVar: "POSTGRESQL_PORT"
           # value: "5432"
         - secretKey: "brainspace_db_name"
           property: "database"
-          envVar: "POSTGRES_DB"
+          envVar: "POSTGRESQL_DB"
           # value: "brainspace"
         - secretKey: "brainspace_db_user"
           property: "brainsDbUsername"
-          envVar: "POSTGRES_USER"
+          envVar: "POSTGRESQL_USER"
           # value: "brainspace"
         - secretKey: "brainspace_db_password"
           property: "brainsDbPassword"
-          envVar: "POSTGRES_PASSWORD"
+          envVar: "POSTGRESQL_PASSWORD"
           # value: "brainspace1"
     # -- Optionally add additional secrets here
     # -- Example: add a brainspace license secret
@@ -171,7 +171,7 @@ ingress:
   class: "alb"
   # -- Will the ingress use an internal or internet-facing load balancer
   public: false
-  hostname: "<ADD BRAINSPACE HOSTNAME HERE>"
+  hostname: ""
   # -- sslCertArn is only valid when using the 'alb' class
   sslCertArn: ""
   # -- Custom annotations for the ingress
@@ -181,7 +181,7 @@ brains_db:
   # -- Brainspace database/postgres container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/postgres"
   # -- batch database/postgres container tag
-  tag: "r11.1.1"
+  tag: "r11.4"
   # -- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: false
   # -- Specify a K8s node group for this deployment to run in
@@ -193,7 +193,7 @@ brains_ui:
   # Brainspace UI container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/ui"
   # Brainspace UI container tag
-  tag: "r11.1.1"
+  tag: "r11.4"
   # -- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: false
   # -- Specify a K8s node group for this deployment to run in
@@ -205,7 +205,7 @@ brains_bt:
     # batch tools container image
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/batch-tools"
     # batch tools container tag
-    tag: "line.r11.1-githash-dc163fc"
+    tag: "line.r11.4-githash-483b441"
     # basis tech directory
     basis_dir: "basis-tech-rbl-7.39.0_rex-7.48.0_rli-7.23.2_rsent-2.0.0_c63.0_perpetual.0"
 
@@ -213,7 +213,7 @@ brains_app:
   # -- Brainspace APP container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/application"
   # Brainspace APP container tag
-  tag: "r11.1.1"
+  tag: "r11.4"
   # -- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: false
   # -- Specify a K8s node group for this deployment to run in
@@ -224,16 +224,26 @@ brains_app:
     transientAnalytics: false
     # -- Use the Brainspace TDM Cache (default: false)
     tdmCache: false
+  # -- Customize the JVM memory settings for the brains_app pods
+  jvmMemory:
+    # -- Auto calculate the max ram percentages (default: true)
+    # -- If false, then use the MaxRAMPercentage value below
+    # -- https://www.eclipse.org/openj9/docs/xxusecontainersupport/
+    useContainerSupport: false
+    # -- Maximum ram percentage (default: 75)
+    MaxRAMPercentage: "75"
+    # -- Maximum metaspace size (default: 256m)
+    MaxMetaspaceSize: "256m"
   plugins:
     # -- Brainspace APP plugins container image
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/plugins"
     # -- Brainspace APP plugins container tag
-    tag: "r11.1.1"
+    tag: "r11.4"
   additionalPlugins:
     # -- Brainspace APP additional plugins container image
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/additional-plugins"
     # Brainspace APP additional plugins container tag
-    tag: "r11.1.1"
+    tag: "r11.4"
   # -- logs directory in persistent storage
   logDir: "app"
   # -- Define static resources for the brains_app pods
@@ -253,7 +263,7 @@ brains_ana:
   # -- Brainspace ANA (analytics) container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/analytics-server"
   # Brainspace ANA (analytics) container tag
-  tag: "r11.1.1"
+  tag: "r11.4"
   # -- Specify a K8s node group for this deployment to run in
   nodeGroup: ""
   replicas: 0
@@ -284,7 +294,7 @@ brains_ana:
   autoscale:
     enabled: true
     image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/brainspace/ana-autoscale
-    tag: "1.1.0"
+    tag: "11.2.0"
     debug: "0"
     thresholds:
       # -- The minimum number of replicas of the brains_ana deployment
@@ -299,23 +309,23 @@ defaults:
     brainspace_db_host:
       property: "host"
       value: "brains-db"
-      envVar: "POSTGRES_HOST"
+      envVar: "POSTGRESQL_HOST"
     brainspace_db_port:
       property: "port"
       value: "5432"
-      envVar: "POSTGRES_PORT"
+      envVar: "POSTGRESQL_PORT"
     brainspace_db_name:
       property: "database"
       value: "brainspace"
-      envVar: "POSTGRES_DB"
+      envVar: "POSTGRESQL_DATABASE"
     brainspace_db_user:
       property: "brainsDbUsername"
       value: "brainspace"
-      envVar: "POSTGRES_USER"
+      envVar: "POSTGRESQL_USER"
     brainspace_db_password:
       property: "brainsDbPassword"
       value: "brainspace1"
-      envVar: "POSTGRES_PASSWORD"
+      envVar: "POSTGRESQL_PASSWORD"
     brainspace_license.txt:
       property: "license"
       volume: "brainspace-license-vol"
