@@ -171,7 +171,7 @@ keycloak:
     #     operator: "Exists"
   proxy:
     image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/reveal_ui/base
-    tag: 2.1.6
+    tag: 2.1.7
     replicas: 1
     resources:
       requests:
