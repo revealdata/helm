@@ -13,7 +13,7 @@ spec:
       app: deployment-review-web
   progressDeadlineSeconds: 600
   replicas: {{ .Values.review.web.replicas | default 1 }}
-  revisionHistoryLimit: 10
+  revisionHistoryLimit: 2
   strategy:
     rollingUpdate:
       maxSurge: 1

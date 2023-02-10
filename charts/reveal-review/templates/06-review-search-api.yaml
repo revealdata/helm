@@ -13,7 +13,7 @@ spec:
       app: deployment-review-search-api
   progressDeadlineSeconds: 600
   replicas: {{ .Values.review.search_api.replicas | default 1 }}
-  revisionHistoryLimit: 10
+  revisionHistoryLimit: 2
   strategy:
     rollingUpdate:
       maxSurge: 1

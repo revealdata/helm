@@ -40,7 +40,7 @@ metadata:
     alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
     alb.ingress.kubernetes.io/actions.response-403: '{"Type":"fixed-response","FixedResponseConfig":{"ContentType":"text/plain","StatusCode":"403","MessageBody":"403 Forbidden"}}'
     {{- end }}
-
+    
     {{- if eq $ingress_class "nginx" }}
     # Nginx ingress (nginx)
     # https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/
@@ -68,21 +68,14 @@ spec:
     service:
       name: service-review-series11-ui
       port:
-        number: 443
+        number: 8443
   rules:
     {{- if eq $ingress_class "nginx" }}
     - host: {{ .Values.ingress.hostname }}
       http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: service-review-series11-ui
-                port:
-                  number: 443
     {{- else }}
     - http:
+    {{- end }}
         paths:
           - path: /
             pathType: Exact
@@ -132,8 +125,6 @@ spec:
               service:
                 name: service-review-series11-ui
                 port:
-                  number: 443
-
-{{- end }}
+                  number: 8443
 
 {{- end }}

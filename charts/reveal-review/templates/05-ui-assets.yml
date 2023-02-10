@@ -13,7 +13,7 @@ spec:
       app: deployment-review-series11-ui
   progressDeadlineSeconds: 600
   replicas: 2
-  revisionHistoryLimit: 10
+  revisionHistoryLimit: 2
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -33,12 +33,29 @@ spec:
 {{ toYaml $nodeSelector | indent 8 }}
       containers:
       - image: {{.Values.review.ui.image}}:{{.Values.review.ui.tag}}
-        ports:
-        - containerPort: 443
-        resources:
-{{ toYaml .Values.review.ui.resources | indent 10 }}
         imagePullPolicy: Always
         name: review-series11-ui
+        ports:
+          - name: liveness-port
+            containerPort: 8080
+          - containerPort: 8443
+        startupProbe:
+          failureThreshold: 2
+          periodSeconds: 10
+          httpGet:
+            path: /
+            port: liveness-port
+        livenessProbe:
+          initialDelaySeconds: 15
+          periodSeconds: 30
+          exec:
+            command:
+              - "/bin/bash"
+              - "-c"
+              - "[[ -e /usr/local/bin/config_watchdog.sh ]] && /bin/bash /usr/local/bin/config_watchdog.sh || exit 0"
+        resources:
+{{ toYaml .Values.review.ui.resources | indent 10 }}
+        
         securityContext:
           allowPrivilegeEscalation: false
           privileged: false
@@ -57,12 +74,20 @@ spec:
           - name: proxy-config
             mountPath: /run/config
             readOnly: true
+          - name: security-config
+            mountPath: /run/security
+            readOnly: true
         {{- end }}
       {{- if .Values.review.ui.proxyConfig }}
       volumes:
         - name: proxy-config
           secret:
             secretName: nginx-config
+            optional: true
+        - name: security-config
+          secret:
+            secretName: nginx-security-config
+            optional: true
       {{- end }}
       dnsConfig: {}
       dnsPolicy: ClusterFirst
@@ -88,8 +113,8 @@ spec:
   ports:
     - name: https
       protocol: TCP
-      port: 443
-      targetPort: 443
+      port: 8443
+      targetPort: 8443
 {{/*{{- if .Values.review.ui.PodDisruptionBudget.enabled | default false }}*/}}
 {{/*---*/}}
 {{/*apiVersion: policy/v1*/}}

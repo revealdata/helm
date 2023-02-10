@@ -14,7 +14,7 @@ spec:
       app: deployment-{{.name}}
   progressDeadlineSeconds: 600
   replicas: {{ .replicas }}
-  revisionHistoryLimit: 10
+  revisionHistoryLimit: 2
   strategy:
     rollingUpdate:
       maxSurge: 1

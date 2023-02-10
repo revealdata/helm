@@ -2,8 +2,8 @@ apiVersion: v2
 name: reveal-review
 description: Reveal Review
 type: application
-version: 1.0.11
-appVersion: "11.0.0"
+version: 11.3.9
+appVersion: "11.3.0"
 maintainers:
 - name: Reveal-Brainspace
   email: info@revealdata

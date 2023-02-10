@@ -129,8 +129,8 @@ review:
     "reveal.app/msa": ""
 
   web:
-    image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/publish"
-    tag: "reveal-series11-qa"
+    image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/publish"
+    tag: "11.3.9"
     os: "windows"
     tolerations: []
     resources:
@@ -162,8 +162,8 @@ review:
       failureThreshold: 3
 
   api:
-    image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/publish_api"
-    tag: "reveal-series11-qa"
+    image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/publish_api"
+    tag: "11.3.9"
     os: "linux"
     tolerations: []
     resources: {}
@@ -190,8 +190,8 @@ review:
       failureThreshold: 3
 
   search_api:
-    image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/search_api"
-    tag: "reveal-series11-qa"
+    image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/search_api"
+    tag: "11.3.9"
     name: "review-search-api"
     os: "linux"
     tolerations: []
@@ -211,7 +211,7 @@ review:
 
   ui:
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/reveal/11series/ui"
-    tag: "latest"
+    tag: "11.3.6"
     os: "linux"
     tolerations: []
     resources: {}
@@ -238,8 +238,8 @@ review:
       maxUnavailable:
 
   review_services:
-    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/assignment"
-      tag: "reveal-series11-qa"
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/assignment"
+      tag: "11.3.9"
       name: "review-assignment"
       os: "linux"
       has_listening_service: True
@@ -267,8 +267,8 @@ review:
         successThreshold: 1
         failureThreshold: 3
 
-    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/assignmentstatus"
-      tag: "reveal-series11-qa"
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/assignmentstatus"
+      tag: "11.3.9"
       name: "review-assignmentstatus"
       os: "linux"
       has_listening_service: False
@@ -286,8 +286,8 @@ review:
         minAvailable: 1
         maxUnavailable:
 
-    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/bulktag"
-      tag: "reveal-series11-qa"
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/bulktag"
+      tag: "11.3.9"
       name: "review-bulktag"
       os: "linux"
       has_listening_service: True
@@ -306,8 +306,8 @@ review:
         minAvailable: 1
         maxUnavailable:
 
-    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/documentloader"
-      tag: "reveal-series11-qa"
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/documentloader"
+      tag: "11.3.9"
       name: "review-documentloader"
       os: "linux"
       has_listening_service: True
@@ -326,8 +326,8 @@ review:
         minAvailable: 1
         maxUnavailable:
 
-    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/export"
-      tag: "reveal-series11-qa"
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/export"
+      tag: "11.3.9"
       name: "review-export"
       os: "linux"
       has_listening_service: True
@@ -346,8 +346,8 @@ review:
         minAvailable: 1
         maxUnavailable:
 
-    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/indexbatch"
-      tag: "reveal-series11-qa"
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/indexbatch"
+      tag: "11.3.9"
       name: "review-indexbatch"
       os: "linux"
       has_listening_service: True
@@ -366,8 +366,8 @@ review:
         minAvailable: 1
         maxUnavailable:
 
-    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/indexserver"
-      tag: "reveal-series11-qa"
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/indexserver"
+      tag: "11.3.9"
       name: "review-indexserver"
       os: "linux"
       has_listening_service: True
@@ -394,7 +394,7 @@ review:
         - name: "IndexingApp__RabbitMq__Password"
           valueFrom:
             secretKeyRef:
-              name: review-secrets
+              name: review-secrets  
               key: rabbitmq-password
         - name: "IndexingApp__RabbitMq__Url"
           valueFrom:
@@ -407,8 +407,8 @@ review:
               name: review-secrets
               key: rabbitmq-vhost
 
-    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/print"
-      tag: "reveal-series11-qa"
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/print"
+      tag: "11.3.9"
       name: "review-print"
       os: "linux"
       has_listening_service: True
@@ -427,8 +427,8 @@ review:
         minAvailable: 1
         maxUnavailable:
 
-    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/productionserver"
-      tag: "reveal-series11-qa"
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/productionserver"
+      tag: "11.3.9"
       name: "review-productionserver"
       os: "linux"
       has_listening_service: True
@@ -447,8 +447,8 @@ review:
         minAvailable: 1
         maxUnavailable:
 
-    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/search"
-      tag: "reveal-series11-qa"
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/search"
+      tag: "11.3.9"
       name: "review-search"
       os: "linux"
       has_listening_service: True
@@ -467,8 +467,8 @@ review:
         minAvailable: 1
         maxUnavailable:
 
-    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/productionclient"
-      tag: "reveal-series11-qa"
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/productionclient"
+      tag: "11.3.9"
       name: "review-productionclient"
       os: "linux"
       has_listening_service: False
@@ -486,8 +486,8 @@ review:
         minAvailable: 1
         maxUnavailable:
 
-    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/indexclient"
-      tag: "reveal-series11-qa"
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/indexclient"
+      tag: "11.3.9"
       name: "review-indexclient"
       os: "linux"
       has_listening_service: False
@@ -531,7 +531,7 @@ review:
         - name: "IndexingApp__RabbitMq__Password"
           valueFrom:
             secretKeyRef:
-              name: review-secrets
+              name: review-secrets  
               key: rabbitmq-password
         - name: "IndexingApp__RabbitMq__Url"
           valueFrom:
@@ -544,8 +544,8 @@ review:
               name: review-secrets
               key: rabbitmq-vhost
 
-    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/imaging"
-      tag: "reveal-series11-qa"
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/imaging"
+      tag: "11.3.9"
       name: "review-imaging-bulk"
       os: "windows"
       has_listening_service: False
@@ -563,8 +563,8 @@ review:
         minAvailable: 1
         maxUnavailable:
 
-    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/review/imaging"
-      tag: "reveal-series11-qa"
+    - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/imaging"
+      tag: "11.3.9"
       name: "review-imaging-totf"
       os: "windows"
       has_listening_service: False
