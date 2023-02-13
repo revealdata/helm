@@ -89,6 +89,9 @@ ingress:
   sslCertArn: ""
   # -- Uncomment below to add custom annotations for the public ingress
   annotations: {}
+  # -- Set to true to enable the creation of a custom ingress based on values
+  custom: false
+  customIngress: {}
 
 review:
   # -- tolerations for all review containers
@@ -394,7 +397,7 @@ review:
         - name: "IndexingApp__RabbitMq__Password"
           valueFrom:
             secretKeyRef:
-              name: review-secrets  
+              name: review-secrets
               key: rabbitmq-password
         - name: "IndexingApp__RabbitMq__Url"
           valueFrom:
@@ -531,7 +534,7 @@ review:
         - name: "IndexingApp__RabbitMq__Password"
           valueFrom:
             secretKeyRef:
-              name: review-secrets  
+              name: review-secrets
               key: rabbitmq-password
         - name: "IndexingApp__RabbitMq__Url"
           valueFrom:

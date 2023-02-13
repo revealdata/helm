@@ -128,3 +128,7 @@ spec:
                   number: 8443
 
 {{- end }}
+{{- if .Values.ingress.custom }}
+---
+{{- toYaml .Values.ingress.custom | nindent 0 }}
+{{- end }}
