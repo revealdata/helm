@@ -59,6 +59,14 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         tty: true
+        {{- if .Values.review.web.args }}
+        args:
+          {{ toYaml .Values.review.web.args | nindent 8 }}
+        {{- end }}
+        {{- if .Values.review.web.command }}
+        command:
+          {{ toYaml .Values.review.web.command | nindent 8 }}
+        {{- end }}
       dnsConfig: {}
       dnsPolicy: ClusterFirst
       restartPolicy: Always

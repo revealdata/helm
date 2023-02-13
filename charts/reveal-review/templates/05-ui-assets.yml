@@ -65,6 +65,14 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         tty: true
+        {{- if .Values.review.ui.args }}
+        args:
+          {{ toYaml .Values.review.ui.args | nindent 8 }}
+        {{- end }}
+        {{- if .Values.review.ui.command }}
+        command:
+          {{ toYaml .Values.review.ui.command | nindent 8 }}
+        {{- end }}
         {{- if .Values.review.ui.env }}
         env:
 {{ toYaml .Values.review.ui.env | indent 10 }}

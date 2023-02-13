@@ -2,7 +2,7 @@ apiVersion: v2
 name: reveal-review
 description: Reveal Review
 type: application
-version: 11.4.1
+version: 11.4.2
 appVersion: "11.4.1"
 maintainers:
 - name: Reveal-Brainspace

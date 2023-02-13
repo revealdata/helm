@@ -70,6 +70,14 @@ spec:
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         tty: true
+        {{- if .args }}
+        args:
+          {{ toYaml .args | nindent 8 }}
+        {{- end }}
+        {{- if .command }}
+        command:
+          {{ toYaml .command | nindent 8 }}
+        {{- end }}
 {{- if .volumeMounts }}
         volumeMounts:
 {{ toYaml .volumeMounts | indent 10 }}
