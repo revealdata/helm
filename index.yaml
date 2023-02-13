@@ -276,6 +276,20 @@ entries:
     version: 0.7.4
   reveal-review:
   - apiVersion: v2
+    appVersion: 11.4.1
+    created: "2023-02-13T19:34:09.46093043Z"
+    description: Reveal Review
+    digest: 396c7994bf6b7de83af899a7d0fe8145e9bfde6f5d97f13afb3d8dd8c9302885
+    maintainers:
+    - email: info@revealdata
+      name: Reveal-Brainspace
+      url: https://revealdata.com
+    name: reveal-review
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-review-11.4.1/reveal-review-11.4.1.tgz
+    version: 11.4.1
+  - apiVersion: v2
     appVersion: 11.3.0
     created: "2023-02-10T20:55:10.1143786Z"
     description: Reveal Review
@@ -670,4 +684,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-series11-bootstrap-1.0.0/review-series11-bootstrap-1.0.0.tgz
     version: 1.0.0
-generated: "2023-02-10T22:04:49.853267909Z"
+generated: "2023-02-13T19:34:09.461067241Z"
