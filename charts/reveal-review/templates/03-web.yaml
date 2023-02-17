@@ -31,6 +31,10 @@ spec:
       nodeSelector:
 {{ $nodeSelector := mergeOverwrite .Values.review.nodeSelector.windows .Values.review.web.nodeSelector }}
 {{- toYaml $nodeSelector | indent 8 }}
+      {{- if .Values.review.web.volumes }}
+        volumes:
+{{ toYaml .Values.review.web.volumes | indent 8 }}
+      {{- end }}
       containers:
       - image: {{.Values.review.web.image}}:{{.Values.review.web.tag}}
         {{- if .Values.review.web.livenessProbe }}
@@ -67,6 +71,13 @@ spec:
         command:
           {{ toYaml .Values.review.web.command | nindent 8 }}
         {{- end }}
+        {{- if .Values.review.web.volumeMounts }}
+        volumeMounts:
+{{ toYaml .Values.review.web.volumeMounts | indent 8 }}
+        {{- end }}
+      {{- if .Values.review.web.additionalContainers }}
+{{ toYaml .Values.review.web.additionalContainers | indent 6 }}
+      {{- end }}
       dnsConfig: {}
       dnsPolicy: ClusterFirst
       restartPolicy: Always
