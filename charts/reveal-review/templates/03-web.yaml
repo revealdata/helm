@@ -32,7 +32,7 @@ spec:
 {{ $nodeSelector := mergeOverwrite .Values.review.nodeSelector.windows .Values.review.web.nodeSelector }}
 {{- toYaml $nodeSelector | indent 8 }}
       {{- if .Values.review.web.volumes }}
-        volumes:
+      volumes:
 {{ toYaml .Values.review.web.volumes | indent 8 }}
       {{- end }}
       containers:
