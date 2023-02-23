@@ -1,0 +1,29 @@
+---
+reveal_samba:
+  namespace: "reveal-samba"
+  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/samba/samba"
+  tag: "1.0.3"
+  configmap:
+    SHARES: "reviewstore:/shares/reviewstore"
+  shares:
+    - mountPath: "/shares/reviewstore"
+      size: "100Gi"
+      name: "reveal-samba-reviewstore"
+      storageClass: "gp2"
+  resources:
+    requests:
+      cpu: 165m
+      memory: 1024Mi
+    limits:
+      cpu: 4000m
+      memory: 2560Mi
+
+
+# -- Force a re-deploy when a helm upgrade happens
+reloadOnUpgrade: false
+
+PodDisruptionBudgetreveal_samba:
+  name: PDBreveal-samba
+  enabled: true
+  minAvailable: 1
+  maxUnavailable: 1

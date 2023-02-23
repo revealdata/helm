@@ -1,0 +1,99 @@
+global:
+  env:
+    controllerHost: "billingdb.revealdata.com"
+    controllerPort: "443"
+    controllerUser: "billingdb"
+    controllerPass: "THEPASSWORD"
+    AWSregion: ${region}
+    environment: ${environment}
+    service_account_role_arn: ${service_account_role_arn}
+  namespace: "reveal-billing"
+
+secrets:
+  provider: "external-secrets"
+  externalSecrets:
+    provider: "aws"
+    aws:
+      region: ${region}
+      secrets:
+        - targetName: reveal-billing-secret
+          data:
+            - secretKey: aws-access-key-id
+              remoteRef:
+                key: ${aws_credentials}
+                property: "AWS_ACCESS_KEY_ID"
+            - secretKey: aws-secret-access-key
+              remoteRef:
+                key: ${aws_credentials}
+                property: "AWS_SECRET_ACCESS_KEY"
+
+processing:
+  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/billing/processing_billing"
+  tag: "latest"
+  nodeSelector:
+    RevealNodeType: linux_m_class_x
+    kubernetes.io/arch: amd64
+    kubernetes.io/os: linux
+  tolerations:
+    - key: ratio_balanced
+      value: execution
+      effect: NoSchedule
+  resources:
+    requests:
+      cpu: 100m
+      memory: 307Mi
+    limits:
+      cpu: '1'
+      memory: 512Mi
+
+s3billing:
+  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/billing/s3billing"
+  tag: "latest"
+  threadCount: "4"
+  nodeSelector:
+    RevealNodeType: linux_r_class_2x
+    kubernetes.io/arch: amd64
+    kubernetes.io/os: linux
+  tolerations:
+    - key: ratio_balanced
+      value: execution
+      effect: NoSchedule
+  resources:
+    requests:
+      cpu: '7'
+      memory: 58Gi
+    limits:
+      cpu: '7'
+      memory: 58Gi
+
+review:
+  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/billing/review_billing"
+  tag: "latest"
+  threadCount: "4"
+  nodeSelector:
+    RevealNodeType: linux_r_class_2x
+    kubernetes.io/arch: amd64
+    kubernetes.io/os: linux
+  tolerations:
+    - key: ratio_balanced
+      value: execution
+      effect: NoSchedule
+  resources:
+    requests:
+      cpu: '7'
+      memory: 58Gi
+    limits:
+      cpu: '7'
+      memory: 58Gi
+
+sql:
+- targetName: reveal-billing-sql
+  data:
+    - secretKey: username
+      remoteRef:
+        key: eks/sqlcluster-sa/review
+        property: "username"
+    - secretKey: password
+      remoteRef:
+        key: eks/sqlcluster-sa/review
+        property: "password"

@@ -1,0 +1,28 @@
+{{- if .Values.mongodb.ingress.enabled }}
+{{- $ingress_class := (.Values.mongodb.ingress.class | default "nlb") -}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  name: reveal-cloud-ai-monogdb-external-access
+  annotations:
+    {{- if .Values.mongodb.ingress.hostname }}
+    external-dns.alpha.kubernetes.io/hostname: {{ .Values.mongodb.ingress.hostname }}
+    {{- end }}
+    kubernetes.io/ingress.class: {{ $ingress_class }}
+    {{ if .Values.mongodb.ingress.annotations }}
+    {{- toYaml .Values.mongodb.ingress.annotations | nindent 4 }}
+    {{- end }}
+spec:
+  type: LoadBalancer
+  ports:
+  - name: mongodb
+    port: 27017
+    protocol: TCP
+    targetPort: mongodb
+  selector:
+    app.kubernetes.io/component: mongodb
+    app.kubernetes.io/instance: cloud-ai
+    app.kubernetes.io/name: mongodb
+{{- end }}

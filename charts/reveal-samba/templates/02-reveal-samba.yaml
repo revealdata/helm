@@ -1,0 +1,112 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reveal-samba
+  namespace: {{.Values.reveal_samba.namespace}}
+spec:
+  selector:
+    matchLabels:
+      app: deployment-reveal-samba
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 2
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: deployment-reveal-samba
+      {{- if .Values.reloadOnUpgrade }}
+      annotations:
+        timestamp: {{ now | quote }}
+      {{- end }}
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: amd64
+      volumes:
+        {{- range .Values.reveal_samba.shares }}
+        - name: {{.name}}
+          persistentVolumeClaim:
+            claimName: {{.name}}-pvc
+        {{- end }}
+      containers:
+      - image: {{.Values.reveal_samba.image}}:{{.Values.reveal_samba.tag}}
+        ports:
+        - containerPort: 443
+        envFrom:
+        - configMapRef:
+            name: reveal-samba
+        volumeMounts:
+          {{- range .Values.reveal_samba.shares }}
+          - mountPath: {{.mountPath}}
+            name: {{.name}}
+          {{- end }}
+        imagePullPolicy: Always
+        name: reveal-samba
+        resources:
+{{ toYaml .Values.reveal_samba.resources | indent 10 }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: false
+        stdin: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        tty: true
+      - name: count-log-1
+        image: busybox:1.28
+        args: [ /bin/sh, -c, 'tail -n+1 -F /var/log/*/logs/*.log' ]
+        volumeMounts:
+          - name: reveal-samba-reviewstore
+            mountPath: /var/log
+      dnsConfig: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 300
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 300
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-reveal-samba
+  namespace: {{.Values.reveal_samba.namespace}}
+
+spec:
+  selector:
+    app: deployment-reveal-samba
+  ports:
+    - name: http
+      protocol: TCP
+      port: 445
+      targetPort: 445
+
+---
+{{- if .Values.PodDisruptionBudgetreveal_samba.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.PodDisruptionBudgetreveal_samba.name }}
+spec:
+  selector:
+    matchLabels:
+      app: deployment-reveal-samba
+{{- if .Values.PodDisruptionBudgetreveal_samba.minAvailable }}
+  minAvailable: {{ .Values.PodDisruptionBudgetreveal_samba.minAvailable }}
+{{- end }}
+{{- if .Values.PodDisruptionBudgetreveal_samba.maxUnavailable }}
+  maxUnavailable: {{ .Values.PodDisruptionBudgetreveal_samba.maxUnavailable }}
+{{- end }}
+{{- end -}}

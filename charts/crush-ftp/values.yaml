@@ -1,0 +1,86 @@
+# -- Vars:
+# destination_namespace
+# analytics_bucket
+# analytics_role_arn
+# secrets_externalSecrets_aws_secretName_aws_credentials
+---
+global:
+  namespace: "${destination_namespace}"
+  makeNamespace: false
+
+secrets:
+  provider: "external-secrets"
+  externalSecrets:
+    provider: "aws"
+    aws:
+      region: ${aws_region}
+      secretName:
+        # TODO Passthrough from data module.
+        aws_credentials: ${secrets_externalSecrets_aws_secretName_aws_credentials}
+  kubernetes:
+    aws-access-key-id: ""
+    aws-secret-access-key: ""
+
+ingress:
+  # -- The ingress class (set per ingress)
+  # -- Options:
+  # -- alb: (AWS Application Load balancer - https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/)
+  # -- nginx: Nginx Ingress (https://kubernetes.github.io/ingress-nginx/)
+  enabled: false
+  # -- Multiple hostnames can be provided if using external DNS, however this may not work for ingress-nginx
+  hostname: "<ADD EXTERNAL HOSTNAME HERE>,<ADD EXTERNAL HOSTNAME HERE>"
+  class: "alb"
+  # -- Uncomment below to add custom annotations for the public ingress
+  annotations: {}
+  sslCertArn: ""
+
+crushftp:
+  reloadOnUpgrade: false
+  config_values:
+    AWS_DEFAULT_REGION: "${aws_region}"
+    CRUSH_FTP_HOST: '${destination_namespace}-crushftp.${destination_namespace}.svc.cluster.local'
+    CRUSH_ADMIN_PORT: '8080'
+    CRUSH_ADMIN_USER: 'crushadmin'
+    CRUSH_ADMIN_PASSWORD: 'crushadmin'
+    CRUSH_ADMIN_PROTOCOL: 'http'
+
+    # TODO Pass through from data module.
+    awsBucket: '${analytics_bucket}'
+
+    # TODO Pass through from data module.
+    AWSAccessAnalyticsARN: '${analytics_role_arn}'
+
+  services:
+    # -- Global selector, resources, and tolerations.
+    nodeSelector:
+      kubernetes.io/os: linux
+    resources: {}
+    tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 300
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 300
+
+    api:
+      image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/infrastructure/crush-ftp:latest"
+      tag: "latest"
+      name: "crushftp-api"
+      # -- Will be merged with global selector, resources, and tolerations.
+      nodeSelector: {}
+      resources:
+        limits:
+          cpu: 4000m
+          memory: 4096Mi
+        requests:
+          cpu: 165m
+          memory: 1024Mi
+      tolerations: []
+      storage:
+        mountPath: "/mnt/tmp"
+        size: "100Gi"
+        name: "crushftp-api-storage"
+        storageClass: "gp2"

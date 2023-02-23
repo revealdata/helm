@@ -1,0 +1,18 @@
+{{- if .Values.global.makeNamespace }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.global.namespace | default .Release.Name }}
+{{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+data:
+  TempFileLocation: {{ .Values.cloud_ai.services.api.storage.mountPath }}
+  # Note that the indentation here can get quite funky. So be careful with this method of pulling in
+  # the block object from values.yaml
+{{ toYaml .Values.cloud_ai.config_values | indent 2 }}
+metadata:
+  name: "reveal-cloud-ai-env"
+  namespace: {{ .Values.global.namespace | default .Release.Name }}

@@ -1,0 +1,82 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: review-automation
+  namespace: {{.Values.namespace}}
+spec:
+  selector:
+    matchLabels:
+      app: deployment-review-automation
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: deployment-review-automation
+      {{- if .Values.reloadOnUpgrade }}
+      annotations:
+        timestamp: {{ now | quote }}
+      {{- end }}
+    spec:
+      serviceAccountName: "review-automation"
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: amd64
+      containers:
+      - image: {{.Values.image}}:{{.Values.tag}}
+        envFrom:
+        - configMapRef:
+            name: review-automation
+        env:
+          {{- /* output env vars for Review secrets (_helpers.tpl) */}}
+          {{- include "resources.env.secrets" . | nindent 6 }}
+        imagePullPolicy: Always
+        name: review-automation
+        {{- if .Values.resources }}
+        resources: {{- toYaml .Values.resources | nindent 10 }}
+        {{- end }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: false
+        stdin: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        tty: true
+      dnsConfig: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      
+      tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 300
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 300
+{{- if .Values.PodDisruptionBudgetReview_automation.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.PodDisruptionBudgetReview_automation.name }}
+spec:
+  selector:
+    matchLabels:
+      app: deployment-review_automation
+{{- if .Values.PodDisruptionBudgetReview_automation.minAvailable }}
+  minAvailable: {{ .Values.PodDisruptionBudgetReview_automation.minAvailable }}
+{{- end }}
+{{- if .Values.PodDisruptionBudgetReview_automation.maxUnavailable }}
+  maxUnavailable: {{ .Values.PodDisruptionBudgetReview_automation.maxUnavailable }}
+{{- end }}
+{{- end -}}

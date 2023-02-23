@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: reveal-billing-review
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels: 
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  schedule: "0 4 * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata: 
+          labels:
+            app: {{ .Release.Name }}
+        spec:
+          serviceAccountName: msa-secrets-reader
+          containers:
+          - name: reveal-billing-review
+            image: {{ .Values.review.image }}:{{.Values.review.tag}}
+            imagePullPolicy: Always
+            env:
+              - name: BILLING_CONTROLLER_USER
+                valueFrom:
+                  secretKeyRef:
+                    name: reveal-billing-secrets
+                    key: BILLING_CONTROLLER_USER
+              - name: BILLING_CONTROLLER_PASS
+                valueFrom:
+                  secretKeyRef:
+                    name: reveal-billing-secrets
+                    key: BILLING_CONTROLLER_PASS
+              - name: BILLING_CONTROLLER_HOST
+                value: {{ .Values.global.env.controllerHost }}
+              - name: BILLING_CONTROLLER_PORT
+                value: "{{ .Values.global.env.controllerPort }}"
+              - name: AWS_REGION
+                value: {{ .Values.global.env.AWSregion }}
+            args:
+              - python
+              - /app/review_billing/review_billing.py
+            {{- if .Values.review.resources }}
+            resources: {{ toYaml .Values.review.resources | nindent 14 }}
+            {{- end }}
+          restartPolicy: Never
+          {{- if .Values.review.nodeSelector }}
+          nodeSelector: {{ toYaml .Values.review.nodeSelector | nindent 12 }}
+          {{- end }}
+          {{- if .Values.review.tolerations }}
+          tolerations: {{ toYaml .Values.review.tolerations | nindent 12 }}
+          {{- end }}

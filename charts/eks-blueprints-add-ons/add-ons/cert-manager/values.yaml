@@ -1,0 +1,7 @@
+cert-manager:
+  extraArgs:
+  - --enable-certificate-owner-ref=true
+  - --issuer-ambient-credentials=true
+  installCRDs: true
+  serviceAccount:
+    create: false

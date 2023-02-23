@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: reveal-billing-processing
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels: 
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  schedule: "0 0 * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata: 
+          labels:
+            app: {{ .Release.Name }}
+        spec:
+          serviceAccountName: msa-secrets-reader
+          containers:
+          - name: reveal-billing-processing
+            image: {{.Values.processing.image}}:{{.Values.processing.tag}}
+            imagePullPolicy: Always
+            env:
+              - name: BILLING_CONTROLLER_USER
+                valueFrom:
+                  secretKeyRef:
+                    name: reveal-billing-secrets
+                    key: BILLING_CONTROLLER_USER
+              - name: BILLING_CONTROLLER_PASS
+                valueFrom:
+                  secretKeyRef:
+                    name: reveal-billing-secrets
+                    key: BILLING_CONTROLLER_PASS
+              - name: BILLING_CONTROLLER_HOST
+                value: {{ .Values.global.env.controllerHost }}
+              - name: BILLING_CONTROLLER_PORT
+                value: "{{ .Values.global.env.controllerPort }}"
+              - name: AWS_REGION
+                value: {{ .Values.global.env.AWSregion }}
+            args:
+              - python
+              - /app/processing_billing/processing_billing.py
+            {{- if .Values.processing.resources }}
+            resources: {{ toYaml .Values.processing.resources | nindent 14 }}
+            {{- end }}
+          restartPolicy: Never
+          {{- if .Values.processing.nodeSelector }}
+          nodeSelector: {{ toYaml .Values.processing.nodeSelector | nindent 12 }}
+          {{- end }}
+          {{- if .Values.processing.tolerations }}
+          tolerations: {{ toYaml .Values.processing.tolerations | nindent 12 }}
+          {{- end }}
