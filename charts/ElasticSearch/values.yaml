@@ -272,7 +272,8 @@ security:
     secretKey: ""
 
 secrets:
-  aws: {}
+  externalSecrets:
+    aws: {}
   # externalSecrets:
   #   provider: aws
   #   aws:
