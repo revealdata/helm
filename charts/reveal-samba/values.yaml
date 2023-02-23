@@ -26,4 +26,4 @@ PodDisruptionBudgetreveal_samba:
   name: PDBreveal-samba
   enabled: true
   minAvailable: 1
-  maxUnavailable: 
+  maxUnavailable: 1

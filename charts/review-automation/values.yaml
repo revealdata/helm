@@ -32,4 +32,4 @@ PodDisruptionBudgetReview_automation:
   name: PDBreview-automation
   enabled: false
   minAvailable: 1
-  maxUnavailable: 
+  maxUnavailable: 1

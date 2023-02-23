@@ -15,8 +15,8 @@ secrets:
     aws:
       region: ${aws_region}
       secretName:
-          aws_credentials: ${secrets_externalSecrets_aws_secretName_aws_credentials}
-          mongodb_secrets: ${secrets_externalSecrets_aws_secretName_mongodb_secrets}
+        aws_credentials: ${secrets_externalSecrets_aws_secretName_aws_credentials}
+        mongodb_secrets: ${secrets_externalSecrets_aws_secretName_mongodb_secrets}
   kubernetes:
     aws-access-key-id: ""
     aws-secret-access-key: ""
@@ -37,10 +37,10 @@ ingress:
 cloud_ai:
   reloadOnUpgrade: false
   config_values:
-      AWS_DEFAULT_REGION: "${aws_region}"
-      mongoHost: '${destination_namespace}-mongodb.${destination_namespace}.svc.cluster.local'
-      mongoPort: '27017'
-      mongoUser: 'root'
+    AWS_DEFAULT_REGION: "${aws_region}"
+    mongoHost: '${destination_namespace}-mongodb.${destination_namespace}.svc.cluster.local'
+    mongoPort: '27017'
+    mongoUser: 'root'
 
     # TODO Pass through from data module.
       awsBucket: '${analytics_bucket}'
