@@ -65,4 +65,4 @@ PodDisruptionBudgetMSA_Perm:
   name: PDBmas-perm
   enabled: false
   minAvailable: 1
-  maxUnavailable: 
+  maxUnavailable: 1
