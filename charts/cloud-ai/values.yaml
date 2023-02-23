@@ -1,0 +1,209 @@
+# -- Vars:
+# destination_namespace
+# analytics_bucket
+# analytics_role_arn
+# secrets_externalSecrets_aws_secretName_aws_credentials
+---
+global:
+  namespace: "${destination_namespace}"
+  makeNamespace: false
+
+secrets:
+  provider: "external-secrets"
+  externalSecrets:
+    provider: "aws"
+    aws:
+      region: ${aws_region}
+      secretName:
+          aws_credentials: ${secrets_externalSecrets_aws_secretName_aws_credentials}
+          mongodb_secrets: ${secrets_externalSecrets_aws_secretName_mongodb_secrets}
+  kubernetes:
+    aws-access-key-id: ""
+    aws-secret-access-key: ""
+
+ingress:
+  # -- The ingress class (set per ingress)
+  # -- Options:
+  # -- alb: (AWS Application Load balancer - https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/)
+  # -- nginx: Nginx Ingress (https://kubernetes.github.io/ingress-nginx/)
+  enabled: false
+  # -- Multiple hostnames can be provided if using external DNS, however this may not work for ingress-nginx
+  hostname: "<ADD EXTERNAL HOSTNAME HERE>,<ADD EXTERNAL HOSTNAME HERE>"
+  class: "alb"
+  # -- Uncomment below to add custom annotations for the public ingress
+  annotations: {}
+  sslCertArn: ""
+
+cloud_ai:
+  reloadOnUpgrade: false
+  config_values:
+      AWS_DEFAULT_REGION: "${aws_region}"
+      mongoHost: '${destination_namespace}-mongodb.${destination_namespace}.svc.cluster.local'
+      mongoPort: '27017'
+      mongoUser: 'root'
+
+    # TODO Pass through from data module.
+      awsBucket: '${analytics_bucket}'
+
+    # TODO Pass through from data module.
+      AWSAccessAnalyticsARN: '${analytics_role_arn}'
+
+  services:
+    # -- Global selector, resources, and tolerations.
+    nodeSelector:
+      kubernetes.io/os: linux
+    resources: {}
+    tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 300
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 300
+
+    api:
+      image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/cloud_ai/cloud_ai"
+      tag: "latest"
+      name: "cloud-ai-api"
+      # -- Will be merged with global selector, resources, and tolerations.
+      nodeSelector: {}
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 8Gi
+        requests:
+          cpu: 1000m
+          memory: 8Gi
+      tolerations: []
+      storage:
+        mountPath: "/mnt/tmp"
+        size: "100Gi"
+        name: "reveal-cloud-ai-api-storage"
+        storageClass: "gp2"
+      PodDisruptionBudget:
+        name: PDBCloudAPI
+        enabled: true
+        minAvailable: 1
+        maxUnavailable:
+
+
+    transcriptionWorker:
+      image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/cloud_ai/cloud_ai"
+      tag: "latest"
+      name: "cloud-ai-transcription"
+      # -- Will be merged with global selector, resources, and tolerations.
+      nodeSelector: {}
+      resources:
+        limits:
+          cpu: 6000m
+          memory: 48Gi
+        requests:
+          cpu: 6000m
+          memory: 48Gi
+      tolerations: []
+      storage:
+        mountPath: "/mnt/tmp"
+        size: "100Gi"
+        name: "reveal-cloud-ai-transcription-storage"
+        storageClass: "gp2"
+      replicase: 1
+      PodDisruptionBudget:
+        name: PDBCloudTranscription
+        enabled: true
+        minAvailable: 1
+        maxUnavailable:
+
+    labeling:
+      image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/cloud_ai/cloud_ai"
+      tag: "latest"
+      name: "cloud-ai-labeling"
+      # -- Will be merged with global selector, resources, and tolerations.
+      nodeSelector: {}
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 8Gi
+        requests:
+          cpu: 1000m
+          memory: 8Gi
+      tolerations: []
+      storage:
+        mountPath: "/mnt/tmp"
+        size: "100Gi"
+        name: "reveal-cloud-ai-labeling-storage"
+        storageClass: "gp2"
+      replicase: 1
+      PodDisruptionBudget:
+        name: PDBCloudLabeling
+        enabled: true
+        minAvailable: 1
+        maxUnavailable:
+
+    transcriptionFinisher:
+      image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/cloud_ai/cloud_ai"
+      tag: "latest"
+      name: "cloud-ai-transcription-finisher"
+      # -- Will be merged with global selector, resources, and tolerations.
+      nodeSelector: {}
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 8Gi
+        requests:
+          cpu: 1000m
+          memory: 8Gi
+      tolerations: []
+      storage:
+        mountPath: "/mnt/tmp"
+        size: "100Gi"
+        name: "reveal-cloud-ai-transcription-finisher-storage"
+        storageClass: "gp2"
+      replicase: 1
+      PodDisruptionBudget:
+        name: PDBCloudTranscriptionFinisher
+        enabled: true
+        minAvailable: 1
+        maxUnavailable:
+
+    translation:
+      image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/cloud_ai/cloud_ai"
+      tag: "latest"
+      name: "cloud-ai-translation"
+      # -- Will be merged with global selector, resources, and tolerations.
+      nodeSelector: {}
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 8Gi
+        requests:
+          cpu: 1000m
+          memory: 8Gi
+      tolerations: []
+      storage:
+        mountPath: "/mnt/tmp"
+        size: "100Gi"
+        name: "reveal-cloud-ai-translation-storage"
+        storageClass: "gp2"
+      replicase: 1
+      PodDisruptionBudget:
+        name: PDBCloudTranslation
+        enabled: true
+        minAvailable: 1
+        maxUnavailable:
+
+mongodb:
+  auth:
+    existingSecret: "mongodb-secrets"
+  resources:
+    limits:
+      cpu: 500m
+      memory: 3Gi
+    requests:
+      cpu: 333m
+      memory: 2Gi
+  ingress:
+    enabled: false
+  updateStrategy:
+    type: Recreate

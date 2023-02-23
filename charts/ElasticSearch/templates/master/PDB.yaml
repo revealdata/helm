@@ -1,0 +1,20 @@
+{{- if .Values.PodDisruptionBudgetMaster.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.PodDisruptionBudgetMaster.name }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "common.labels.matchLabels" . | nindent 6 }}
+      app.kubernetes.io/component: master
+{{- if .Values.PodDisruptionBudgetMaster.minAvailable }}
+  minAvailable: {{ .Values.PodDisruptionBudgetMaster.minAvailable }}
+{{- end }}
+{{- if .Values.PodDisruptionBudgetMaster.maxUnavailable }}
+  maxUnavailable: {{ .Values.PodDisruptionBudgetMaster.maxUnavailable }}
+{{- end }}
+{{- end -}}

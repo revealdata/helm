@@ -1,0 +1,35 @@
+---
+namespace: review-automation
+secrets:
+  provider: "external-secrets"
+  externalSecrets:
+    provider: aws
+    aws:
+      region: "us-east-1"
+      secretName:
+        review_task_queue_database: ""
+        rabbitmq: ""
+
+configmap:
+  node_selector_label: "Usage"
+  node_selector_linux: "some_label"
+  node_selector_windows: "some_label"
+  DEBUG: "True"
+
+image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/automation/review-automation"
+tag: "latest"
+# -- Force a re-deploy when a helm upgrade happens
+reloadOnUpgrade: false
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1024Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+PodDisruptionBudgetReview_automation:
+  name: PDBreview-automation
+  enabled: false
+  minAvailable: 1
+  maxUnavailable: 

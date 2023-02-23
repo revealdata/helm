@@ -1,0 +1,96 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.cloud_ai.services.transcriptionFinisher.storage.name }}-pvc
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.cloud_ai.services.transcriptionFinisher.storage.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.cloud_ai.services.transcriptionFinisher.storage.size }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reveal-cloud-ai-transcription-finisher
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: deployment-reveal-cloud-ai-transcription-finisher
+  progressDeadlineSeconds: 600
+  replicas: {{ .Values.cloud_ai.services.transcriptionFinisher.replicas }}
+  revisionHistoryLimit: 10
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: deployment-reveal-cloud-ai-transcription-finisher
+      {{- if .Values.cloud_ai.reloadOnUpgrade }}
+      annotations:
+        timestamp: {{ now | quote }}
+      {{- end }}
+    spec:
+      nodeSelector:
+{{ $nodeSelector := mergeOverwrite .Values.cloud_ai.services.nodeSelector .Values.cloud_ai.services.transcriptionFinisher.nodeSelector }}
+{{- toYaml $nodeSelector | indent 8 }}
+      volumes:
+        - name: {{ .Values.cloud_ai.services.transcriptionFinisher.storage.name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.cloud_ai.services.transcriptionFinisher.storage.name }}-pvc
+      containers:
+      - image: {{.Values.cloud_ai.services.transcriptionFinisher.image}}:{{.Values.cloud_ai.services.transcriptionFinisher.tag}}
+        volumeMounts:
+          - mountPath: {{ .Values.cloud_ai.services.transcriptionFinisher.storage.mountPath }}
+            name: {{ .Values.cloud_ai.services.transcriptionFinisher.storage.name }}
+        envFrom:
+        - configMapRef:
+            name: "reveal-cloud-ai-env"
+        env:
+          - name: TARGET_APP
+            value: "transcription-finisher"
+{{- /* output env vars for Review secrets (_helpers.tpl) */}}
+{{- include "resources.env.secrets" . | indent 6 }}
+        resources:
+{{ $resources := mergeOverwrite .Values.cloud_ai.services.resources .Values.cloud_ai.services.transcriptionFinisher.resources }}
+{{- toYaml $resources | indent 10 }}
+        imagePullPolicy: Always
+        name: reveal-cloud-ai-transcription-finisher
+        securityContext:
+          allowPrivilegeEscalation: false
+          privileged: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: false
+        stdin: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        tty: true
+      dnsConfig: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      tolerations:
+{{ $tolerations := concat .Values.cloud_ai.services.tolerations .Values.cloud_ai.services.transcriptionFinisher.tolerations }}
+{{- toYaml $tolerations | indent 8 }}
+{{- if .Values.cloud_ai.services.transcriptionFinisher.PodDisruptionBudget.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.cloud_ai.services.transcriptionFinisher.PodDisruptionBudget.name }}
+spec:
+  selector:
+    matchLabels:
+      app: deployment-reveal-cloud-ai-transcription-finisher
+{{- if .Values.cloud_ai.services.transcriptionFinisher.PodDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.cloud_ai.services.transcriptionFinisher.PodDisruptionBudget.minAvailable }}
+{{- end }}
+{{- if .Values.cloud_ai.services.transcriptionFinisher.PodDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ .Values.cloud_ai.services.transcriptionFinisher.PodDisruptionBudget.maxUnavailable }}
+{{- end }}
+{{- end -}}

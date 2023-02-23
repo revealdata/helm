@@ -1,0 +1,54 @@
+---
+global:
+  namespace: "${destination_namespace}"
+  makeNamespace: false
+
+secrets:
+  provider: "external-secrets"
+  externalSecrets:
+    provider: "aws"
+    aws:
+      region: ${aws_region}
+      secretName:
+          aws_credentials: ${secrets_externalSecrets_aws_secretName_aws_credentials}
+          database_credentials: ${secrets_externalSecrets_aws_secretName_database_credentials}
+  kubernetes:
+    aws-access-key-id: ""
+    aws-secret-access-key: ""
+    database-server: ""
+    database-username: ""
+    database-password: ""
+
+processing_automation:
+  reloadOnUpgrade: false
+  config_values:
+      AWS_DEFAULT_REGION: "${aws_region}"
+      MONITOR_TAG: "${monitor_tag}"
+
+  nodeSelector:
+    kubernetes.io/os: linux
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/automation/processing-automation"
+  tag: "latest"
+
+
+PodDisruptionBudgetProcessing_automation:
+  enabled: false
+  name: PDBprocessing_automation
+  minAvailable: 1
+  maxUnavailable: 

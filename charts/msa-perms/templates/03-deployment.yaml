@@ -1,0 +1,137 @@
+---
+# Deployment: msa_perms
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: msa-perms
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels:
+    app.kubernetes.io/name: msa-perms
+    app.kubernetes.io/component: application
+spec:
+  selector:
+    matchLabels:
+      app: msa-perms
+  progressDeadlineSeconds: 600
+  replicas: {{ .Values.msa_perms.replicas | default 1 }}
+  revisionHistoryLimit: 10
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: msa-perms
+      {{- if .Values.msa_perms.reloadOnUpgrade }}
+      annotations:
+        timestamp: {{ now | quote }}
+      {{- end }}
+    spec:
+      hostname: msa-perms
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: amd64
+        {{- if .Values.msa_perms.nodegroup }}
+        alpha.eksctl.io/nodegroup-name: {{ .Values.msa_perms.nodegroup }}
+        {{- end }}
+      {{- if .Values.msa_perms.serviceAccount }}
+      {{- if .Values.msa_perms.serviceAccount.roleArn }}
+      serviceAccountName: msa-perms-sa
+      {{- end }}{{- end }}
+      {{- if .Values.global.ecr.enabled }}
+      imagePullSecrets:
+      - name: aws-ecr-credentials
+      {{- end }}
+      containers:
+      - name: msa-perms
+        image: {{ .Values.msa_perms.image }}:{{ .Values.msa_perms.tag | default "18.0.2" }}
+        imagePullPolicy: {{ .Values.msa_perms.imagePullPolicy | default "Always" }}
+        resources:
+          requests:
+            memory: "100Mi"
+            cpu: "100m"
+        env:
+          - name: proc_sql_username
+            valueFrom:
+              secretKeyRef:
+                name: msa-perms-secrets
+                key: proc_sql_username
+          - name: proc_sql_password
+            valueFrom:
+              secretKeyRef:
+                name: msa-perms-secrets
+                key: proc_sql_password
+          - name: proc_sql_hostname
+            valueFrom:
+              secretKeyRef:
+                name: msa-perms-secrets
+                key: proc_sql_hostname
+          - name: proc_sql_port
+            value: "1433"
+          - name: review_sql_username
+            valueFrom:
+              secretKeyRef:
+                name: msa-perms-secrets
+                key: review_sql_username
+          - name: review_sql_password
+            valueFrom:
+              secretKeyRef:
+                name: msa-perms-secrets
+                key: review_sql_password
+          - name: review_sql_hostname
+            valueFrom:
+              secretKeyRef:
+                name: msa-perms-secrets
+                key: review_sql_hostname
+          - name: review_sql_port
+            value: "1433"
+          - name: task_queue_sql_username
+            valueFrom:
+              secretKeyRef:
+                name: msa-perms-secrets
+                key: task_queue_sql_username
+          - name: task_queue_sql_password
+            valueFrom:
+              secretKeyRef:
+                name: msa-perms-secrets
+                key: task_queue_sql_password
+          - name: task_queue_sql_hostname
+            valueFrom:
+              secretKeyRef:
+                name: msa-perms-secrets
+                key: task_queue_sql_hostname
+          - name: task_queue_sql_port
+            value: "1433"
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 10
+      tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 300
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 300
+      {{- if .Values.msa_perms.tolerations }}
+{{ toYaml .Values.msa_perms.tolerations | indent 6}}
+      {{- end }}
+{{- if .Values.PodDisruptionBudgetMSA_Perm.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.PodDisruptionBudgetMSA_Perm.name }}
+spec:
+  selector:
+    matchLabels:
+      app: msa-perms
+{{- if .Values.PodDisruptionBudgetMSA_Perm.minAvailable }}
+  minAvailable: {{ .Values.PodDisruptionBudgetMSA_Perm.minAvailable }}
+{{- end }}
+{{- if .Values.PodDisruptionBudgetMSA_Perm.maxUnavailable }}
+  maxUnavailable: {{ .Values.PodDisruptionBudgetMSA_Perm.maxUnavailable }}
+{{- end }}
+{{- end -}}

@@ -1,0 +1,36 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  namespace: reveal-billing
+  name: reveal-billing
+rules:
+  - apiGroups: [ "configmaps", "apps" ]
+    resources: [ "secrets",  "configmaps" ]
+    verbs: [ "*" ]
+  - apiGroups: [ "configmaps", "apps" ]
+    resources: [ "namespaces" ]
+    verbs: [ "get", "list" ]
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: msa-secrets-reader
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    eks.amazonaws.com/role-arn: "{{ .Values.global.env.service_account_role_arn }}"
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  namespace: reveal-billing
+  name: reveal-billingCRB
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: review-automation
+subjects:
+- kind: ServiceAccount
+  name: msa-secrets-reader
+  namespace: "{{ .Values.global.namespace }}"

@@ -1,0 +1,68 @@
+---
+global:
+  # -- Optionally set a namespace value. If empty, the helm release name is used
+  namespace: "msa-perms"
+  # -- Optionally disable the namespace creation as it may already exist
+  noNamespace: false
+  ecr:
+    enabled: false
+
+secrets:
+  # -- The secrets provider
+  # -- Providers:
+  # -- external-secrets: (https://external-secrets.io/v0.5.9/)
+  # -- kubernetes: Use kubernetes secret. Add secrets to the 'kubernetes' section below.
+  provider: "external-secrets"
+
+  # -- OPTIONS FOR: provider: 'kubernetes' -- #
+  kubernetes:
+    proc_sql_username: ""
+    proc_sql_password: ""
+    proc_sql_hostname: ""
+    proc_sql_port: "1433"
+    review_sql_username: ""
+    review_sql_password: ""
+    review_sql_hostname: ""
+    review_sql_port: "1433"
+    task_queue_sql_username: ""
+    task_queue_sql_password: ""
+    task_queue_sql_hostname: ""
+    task_queue_sql_port: "1433"
+
+  # -- OPTIONS FOR: 'external-secrets' -- #
+  externalSecrets:
+    # -- The external-secrets provider
+    # -- Providers: 
+    # -- aws: AWS SecretsManager
+    # -- azurekv: Azure KeyVault
+    provider: aws
+    # -- Options for aws (AWS SecretsManager)
+    aws:
+      # -- Region: The AWS region where the secret resides (default "us-east-1")
+      region: "us-east-1"
+      # -- secretName: The Secrets Manager Name for the admin and database secrets created by CloudFormation or Terraform
+      secretName:
+        taskq: "eks/sqlcluster-sa/taskq"
+        review: "eks/sqlcluster-sa/review"
+        processing: "eks/sqlcluster-sa/processing"
+    # -- Options for azurekv (Azure KeyVault)
+    azurekv:
+      auth:
+        ClientID: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='azurekv'>"
+        ClientSecret: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='azurekv'>"
+      TennantId: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='azurekv'>"
+      VaultUrl: "<ADD VALUE IF USING secrets.provider='external-secrets' and externalSecrets.provider='azurekv'>"
+msa_perms:
+  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/msa_perms/msa_perms"
+  tag: "1.1"
+  # -- Optionally use a service account with RBAC
+  # -- The IAM Role ARN created by CloudFormation or Terraform
+  serviceAccount:
+    roleArn: ""
+
+
+PodDisruptionBudgetMSA_Perm:
+  name: PDBmas-perm
+  enabled: false
+  minAvailable: 1
+  maxUnavailable: 

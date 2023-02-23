@@ -1,0 +1,7 @@
+{{- if not .Values.global.noNamespace }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.global.namespace | default .Release.Name }}
+{{- end }}

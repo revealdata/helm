@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: reveal-billing-s3billing
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels: 
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  schedule: "0 0 * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata: 
+          labels:
+            app: {{ .Release.Name }}
+        spec:
+          serviceAccountName: msa-secrets-reader
+          containers:
+          - name: reveal-billing-s3billing
+            image: {{ .Values.s3billing.image }}:{{.Values.s3billing.tag}}
+            imagePullPolicy: Always
+            env:
+              - name: AWS_ACCESS_KEY_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: reveal-billing-secrets
+                    key: aws_access_key_id
+              - name: AWS_SECRET_ACCESS_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: reveal-billing-secrets
+                    key: aws_secret_access_key
+              - name: THREAD_COUNT
+                value: "{{ .Values.s3billing.threadCount }}"
+              - name: AWS_REGION
+                value: {{ .Values.global.env.AWSregion }}
+              - name: ENVIRONMENT
+                value: "{{ .Values.global.env.environment }}"
+            args:
+              - python
+              - /app/s3billing/s3billing.py
+            {{- if .Values.s3billing.resources }}
+            resources: {{ toYaml .Values.s3billing.resources | nindent 14 }}
+            {{- end }}
+          restartPolicy: Never
+          {{- if .Values.s3billing.nodeSelector }}
+          nodeSelector: {{ toYaml .Values.s3billing.nodeSelector | nindent 12 }}
+          {{- end }}
+          {{- if .Values.s3billing.tolerations }}
+          tolerations: {{ toYaml .Values.s3billing.tolerations | nindent 12 }}
+          {{- end }}

@@ -1,0 +1,10 @@
+apiVersion: v2
+name: msa-perms
+description: A Helm chart that does permissions maintenance for the MSA
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+maintainers:
+- name: Reveal-Brainspace
+  email: info@revealdata.com
+  url: https://revealdata.com

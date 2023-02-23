@@ -1,0 +1,20 @@
+{{- if .Values.PodDisruptionBudgetCoordinating.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.PodDisruptionBudgetCoordinating.name }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels:
+    {{- include "common.labels.standard" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "common.labels.matchLabels" . | nindent 6 }}
+      app.kubernetes.io/component: coordinating-only
+{{- if .Values.PodDisruptionBudgetCoordinating.minAvailable }}
+  minAvailable: {{ .Values.PodDisruptionBudgetCoordinating.minAvailable }}
+{{- end }}
+{{- if .Values.PodDisruptionBudgetCoordinating.maxUnavailable }}
+  maxUnavailable: {{ .Values.PodDisruptionBudgetCoordinating.maxUnavailable }}
+{{- end }}
+{{- end -}}

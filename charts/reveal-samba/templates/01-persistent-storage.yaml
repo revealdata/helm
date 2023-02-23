@@ -1,0 +1,15 @@
+{{- range .Values.reveal_samba.shares }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .name }}-pvc
+  namespace: {{$.Values.reveal_samba.namespace}}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: gp2
+  resources:
+    requests:
+      storage: {{ .size }}
+{{- end}}
