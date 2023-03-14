@@ -10,8 +10,8 @@ secrets:
     aws:
       region: ${aws_region}
       secretName:
-        aws_credentials: ${secrets_externalSecrets_aws_secretName_aws_credentials}
-        database_credentials: ${secrets_externalSecrets_aws_secretName_database_credentials}
+          aws_credentials: ${secrets_externalSecrets_aws_secretName_aws_credentials}
+          database_credentials: ${secrets_externalSecrets_aws_secretName_database_credentials}
   kubernetes:
     aws-access-key-id: ""
     aws-secret-access-key: ""
@@ -22,8 +22,8 @@ secrets:
 processing_automation:
   reloadOnUpgrade: false
   config_values:
-    AWS_DEFAULT_REGION: "${aws_region}"
-    MONITOR_TAG: "${monitor_tag}"
+      AWS_DEFAULT_REGION: "${aws_region}"
+      MONITOR_TAG: "${monitor_tag}"
 
   nodeSelector:
     kubernetes.io/os: linux

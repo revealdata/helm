@@ -15,8 +15,8 @@ secrets:
     aws:
       region: ${aws_region}
       secretName:
-        aws_credentials: ${secrets_externalSecrets_aws_secretName_aws_credentials}
-        mongodb_secrets: ${secrets_externalSecrets_aws_secretName_mongodb_secrets}
+          aws_credentials: ${secrets_externalSecrets_aws_secretName_aws_credentials}
+          mongodb_secrets: ${secrets_externalSecrets_aws_secretName_mongodb_secrets}
   kubernetes:
     aws-access-key-id: ""
     aws-secret-access-key: ""
@@ -37,16 +37,16 @@ ingress:
 cloud_ai:
   reloadOnUpgrade: false
   config_values:
-    AWS_DEFAULT_REGION: "${aws_region}"
-    mongoHost: '${destination_namespace}-mongodb.${destination_namespace}.svc.cluster.local'
-    mongoPort: '27017'
-    mongoUser: 'root'
+      AWS_DEFAULT_REGION: "${aws_region}"
+      mongoHost: '${destination_namespace}-mongodb.${destination_namespace}.svc.cluster.local'
+      mongoPort: '27017'
+      mongoUser: 'root'
 
     # TODO Pass through from data module.
-    awsBucket: '${analytics_bucket}'
+      awsBucket: '${analytics_bucket}'
 
     # TODO Pass through from data module.
-    AWSAccessAnalyticsARN: '${analytics_role_arn}'
+      AWSAccessAnalyticsARN: '${analytics_role_arn}'
 
   services:
     # -- Global selector, resources, and tolerations.
@@ -80,8 +80,6 @@ cloud_ai:
       storage:
         mountPath: "/mnt/tmp"
         size: "100Gi"
-        name: "reveal-cloud-ai-api-storage"
-        storageClass: "gp2"
       PodDisruptionBudget:
         name: PDBCloudAPI
         enabled: true
@@ -106,8 +104,6 @@ cloud_ai:
       storage:
         mountPath: "/mnt/tmp"
         size: "100Gi"
-        name: "reveal-cloud-ai-transcription-storage"
-        storageClass: "gp2"
       replicase: 1
       PodDisruptionBudget:
         name: PDBCloudTranscription
@@ -132,8 +128,6 @@ cloud_ai:
       storage:
         mountPath: "/mnt/tmp"
         size: "100Gi"
-        name: "reveal-cloud-ai-labeling-storage"
-        storageClass: "gp2"
       replicase: 1
       PodDisruptionBudget:
         name: PDBCloudLabeling
@@ -158,8 +152,6 @@ cloud_ai:
       storage:
         mountPath: "/mnt/tmp"
         size: "100Gi"
-        name: "reveal-cloud-ai-transcription-finisher-storage"
-        storageClass: "gp2"
       replicase: 1
       PodDisruptionBudget:
         name: PDBCloudTranscriptionFinisher
@@ -184,8 +176,6 @@ cloud_ai:
       storage:
         mountPath: "/mnt/tmp"
         size: "100Gi"
-        name: "reveal-cloud-ai-translation-storage"
-        storageClass: "gp2"
       replicase: 1
       PodDisruptionBudget:
         name: PDBCloudTranslation

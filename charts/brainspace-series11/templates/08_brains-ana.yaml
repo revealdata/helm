@@ -87,6 +87,7 @@ spec:
                   rm -f /var/lib/brains/app/analytics-server/logs/analysisserver.log;
                   fi;
                   ln -s /dev/stdout /var/lib/brains/app/analytics-server/logs/analysisserver.log;
+        terminationMessagePolicy: FallbackToLogsOnError
         volumeMounts:
         {{- if .Values.global.secretArn }}
         - name: brainspace-secrets-vol

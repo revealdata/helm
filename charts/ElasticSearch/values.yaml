@@ -1,3 +1,5 @@
+
+
 ## @section Global parameters
 ## Global Docker image parameters
 ## Please, note that this will override the image parameters, including dependencies, configured to use the global value
@@ -24,7 +26,9 @@ global:
       ports:
         restAPI: 9200
   kibanaEnabled: false
+
 ## @section Common parameters
+
 ## @param kubeVersion Override Kubernetes version
 ##
 kubeVersion: ""
@@ -49,6 +53,7 @@ extraDeploy: []
 ## @param namespaceOverride String to fully override common.names.namespace
 ##
 namespaceOverride: ""
+
 ## Enable diagnostic mode in the deployment
 ##
 diagnosticMode:
@@ -63,7 +68,9 @@ diagnosticMode:
   ##
   args:
     - infinity
+
 ## @section Elasticsearch cluster Parameters
+
 ## @param clusterName Elasticsearch cluster name
 ##
 clusterName: elastic
@@ -159,6 +166,7 @@ sidecars: []
 ##    command: ['sh', '-c', 'echo "hello world"']
 ##
 initContainers: []
+
 ## Bitnami Elasticsearch image
 ## @param image.registry Elasticsearch image registry
 ## @param image.repository Elasticsearch image repository
@@ -171,7 +179,7 @@ initContainers: []
 image:
   registry: docker.io
   repository: bitnami/elasticsearch
-  tag: 8.3.3-debian-11-r5
+  tag: 7.17.5-debian-11-r18
   digest: ""
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -189,6 +197,7 @@ image:
   ## Enable debug mode
   ##
   debug: false
+
 ## X-Pack security parameters
 ## Note: TLS configuration is required in order to configure password authentication
 ##
@@ -271,9 +280,7 @@ security:
     ##
     secretKey: ""
 
-secrets:
-  externalSecrets:
-    aws: {}
+secrets: 
   # externalSecrets:
   #   provider: aws
   #   aws:
@@ -285,6 +292,7 @@ secrets:
 
 ## @section Traffic Exposure Parameters
 ##
+
 ## Elasticsearch service parameters
 ##
 service:
@@ -342,6 +350,7 @@ service:
   ##     timeoutSeconds: 300
   ##
   sessionAffinityConfig: {}
+
 ## Elasticsearch ingress parameters
 ## ref: http://kubernetes.io/docs/user-guide/ingress/
 ##
@@ -1286,7 +1295,9 @@ coordinating:
     maxReplicas: 11
     targetCPU: ""
     targetMemory: ""
+
 ## @section Ingest-only nodes parameters
+
 ingest:
   ## @param ingest.enabled Enable ingest nodes
   ##

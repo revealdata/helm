@@ -10,7 +10,7 @@ spec:
       app: deployment-nia-worker
   progressDeadlineSeconds: 600
   replicas: 1
-  revisionHistoryLimit: 10
+  revisionHistoryLimit: 3
   strategy:
     type: Recreate
   template:
@@ -36,7 +36,14 @@ spec:
             {{- toYaml . | nindent 8 }}
           {{- end }}
         resources:
-          {{- toYaml .Values.nia.nia_worker.resources | nindent 10 }}
+          {{- if .Values.nia.nia_worker.resources }}
+            {{- toYaml .Values.nia.nia_worker.resources | nindent 12}}
+          {{- else }}
+          requests:
+            memory: 500Mi
+          limits:
+            memory: 4000Mi
+          {{- end }}
         imagePullPolicy: Always
         name: nia-worker
         securityContext:

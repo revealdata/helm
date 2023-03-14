@@ -294,7 +294,7 @@ brains_ana:
   autoscale:
     enabled: true
     image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/brainspace/ana-autoscale
-    tag: "11.2.0"
+    tag: "11.2.3"
     debug: "0"
     thresholds:
       # -- The minimum number of replicas of the brains_ana deployment

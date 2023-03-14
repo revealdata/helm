@@ -402,7 +402,7 @@ review:
         - name: "IndexingApp__RabbitMq__Password"
           valueFrom:
             secretKeyRef:
-              name: review-secrets
+              name: review-secrets  
               key: rabbitmq-password
         - name: "IndexingApp__RabbitMq__Url"
           valueFrom:
@@ -463,7 +463,7 @@ review:
         - name: "RabbitMq__Password"
           valueFrom:
             secretKeyRef:
-              name: review-secrets
+              name: review-secrets  
               key: rabbitmq-password
         - name: "RabbitMq__Url"
           valueFrom:
@@ -523,7 +523,7 @@ review:
         - name: "RabbitMq__Password"
           valueFrom:
             secretKeyRef:
-              name: review-secrets
+              name: review-secrets  
               key: rabbitmq-password
         - name: "RabbitMq__Url"
           valueFrom:
@@ -580,7 +580,7 @@ review:
         - name: "IndexingApp__RabbitMq__Password"
           valueFrom:
             secretKeyRef:
-              name: review-secrets
+              name: review-secrets  
               key: rabbitmq-password
         - name: "IndexingApp__RabbitMq__Url"
           valueFrom:
@@ -620,7 +620,7 @@ review:
         - name: "RabbitMq__Password"
           valueFrom:
             secretKeyRef:
-              name: review-secrets
+              name: review-secrets  
               key: rabbitmq-password
         - name: "RabbitMq__Url"
           valueFrom:
@@ -649,7 +649,7 @@ review:
         - name: "RabbitMq__Password"
           valueFrom:
             secretKeyRef:
-              name: review-secrets
+              name: review-secrets  
               key: rabbitmq-password
         - name: "RabbitMq__Url"
           valueFrom:

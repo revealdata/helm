@@ -1,0 +1,22 @@
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: argo-pdb
+  namespace: argo
+spec:
+  minAvailable: 99999
+  selector:
+    matchLabels:
+      workflows.argoproj.io/completed: "false"
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: spark-pdb
+  namespace: spark
+spec:
+  minAvailable: 99999
+  selector:
+    matchLabels:
+      sparkoperator.k8s.io/launched-by-spark-operator: "true"

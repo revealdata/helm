@@ -9,7 +9,7 @@ spec:
       app: deployment-reveal-ai-api
   progressDeadlineSeconds: 600
   replicas: 1
-  revisionHistoryLimit: 10
+  revisionHistoryLimit: 3
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -35,11 +35,26 @@ spec:
           ports:
             - containerPort: 80
           env:
-            {{- toYaml .Values.frontend.env | nindent 10 }}
+            {{if .Values.frontend.env}}
+            {{- toYaml .Values.frontend.env | nindent 12 }}
+            {{- end }}
+            - name: "hostname"
+              value: "https://{{.Values.ingress.hostname}}"
           imagePullPolicy: Always
           name: reveal-ai-api
+          {{- if .Values.frontend.resources }}
           resources:
             {{- toYaml .Values.frontend.resources | nindent 12 }}
+          {{- else }}
+          # Default resource requests/limits
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 4096Mi
+            limits:
+              cpu: 2000m
+              memory: 8192Mi
+          {{- end }}
           securityContext:
             allowPrivilegeEscalation: false
             privileged: false

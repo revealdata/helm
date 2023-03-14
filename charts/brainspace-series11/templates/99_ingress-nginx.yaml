@@ -22,7 +22,7 @@ spec:
     service:
       name: brains-ui
       port:
-        number: 443
+        number: 8443
   rules:
     - host: {{ .Values.ingress.hostname | default "brainspace.docker.internal" }}
     - http:
@@ -33,5 +33,5 @@ spec:
               service:
                 name: brains-ui
                 port:
-                  number: 443
+                  number: 8443
 {{- end }}

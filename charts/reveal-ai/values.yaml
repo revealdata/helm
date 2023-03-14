@@ -6,6 +6,84 @@ global:
   public: false
   reloadOnUpgrade: false
 
+serviceWatcher:
+  enabled: false
+  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/reveal_ai/servicewatcher"
+  tag: "DEV"
+  replicaCount: 1
+  name: "Reveal-AI"
+  env:
+    - name: "sqlpass"
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials
+          key: sql-password
+    - name: "servername"
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials
+          key: sql-hostname
+    - name: "username"
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials
+          key: sql-username
+    - name: "password"
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials-encrypted
+          key: sql-password-encrypted
+    - name: "DBN"
+      value: "NexLPAdmin"
+  PodDisruptionBudget:
+    name: PDWatcher
+    enabled: true
+    minAvailable: 1
+    maxUnavailable:
+  nodeSelector:
+    kubernetes.io/os: windows
+    kubernetes.io/arch: amd64
+    "RevealNodeType": "windows_r_class_x"
+  tolerations:
+    - key: windows
+      value: execution
+      effect: NoSchedule
+    - key: ratio_balanced
+      value: execution
+      effect: NoSchedule
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "333m"
+    limits:
+      memory: "2Gi"
+      cpu: "333m"
+
+automation:
+  enabled: true
+  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/automation/reveal-ai-automation"
+  tag: "latest"
+  nodeSelector:
+    kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+  tolerations: []
+  env:
+    - name: "rai_sql_host"
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials
+          key: sql-hostname
+    - name: "rai_sql_user"
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials
+          key: sql-username
+    - name: "rai_sql_password"
+      valueFrom:
+        secretKeyRef:
+          name: sql-credentials
+          key: sql-password
+
 secrets:
   provider: "external-secrets"
   externalSecrets:
@@ -66,21 +144,8 @@ ai:
       value: execution
       effect: NoSchedule
   volumes: []
-#    - name: "rai-data"
-#      persistentVolumeClaim:
-#        claimName: "rai-data-pvc"
   volumeMounts: []
-#    - name: "rai-data"
-#      mountPath: "C:\rai-data"
-  resources:
-    requests:
-      memory: "48Gi"
-      cpu: "8000m"
-    # Expect to run on a node with 32GB of memory. Want to leave a bit for the OS.
-    limits:
-      memory: "60Gi"
-      cpu: "16000m"
-
+  resources: {}
 
 processing:
   image: "326122048023.dkr.ecr.us-east-1.amazonaws.com/reveal_dev/reveal_ai_processing_service"
@@ -130,20 +195,8 @@ processing:
       value: execution
       effect: NoSchedule
   volumes: []
-#    - name: "rai-data"
-#      persistentVolumeClaim:
-#        claimName: "rai-data-pvc"
   volumeMounts: []
-#    - name: "rai-data"
-#      mountPath: "C:\rai-data"
-  resources:
-    requests:
-      memory: "48Gi"
-      cpu: "8000m"
-    # Expect to run on a node with 32GB of memory. Want to leave a bit for the OS.
-    limits:
-      memory: "60Gi"
-      cpu: "16000m"
+  resources: {}
 
 frontend:
   image: "326122048023.dkr.ecr.us-east-1.amazonaws.com/reveal_dev/reveal_ai_frontend"
@@ -181,32 +234,15 @@ frontend:
     - key: windows_reveal_ai
       value: execution
       effect: NoSchedule
-  volumes: []
-#    - name: "rai-data"
-#      persistentVolumeClaim:
-#        claimName: "rai-data-pvc"
-  volumeMounts: []
-#    - name: "rai-data"
-#      mountPath: "C:\rai-data"
   resources:
     requests:
-      memory: "16Gi"
-      cpu: "8000m"
-    # Expect to run on a node with 32GB of memory. Want to leave a bit for the OS.
+      cpu: 1000m
+      memory: 4096Mi
     limits:
-      memory: "30Gi"
-      cpu: "16000m"
-
-persistentVolumes:
-  enabled: false
-  definitions:
-    - name: "rai-data-pvc"
-      storageClass: "gp2"
-      size: "1Ti"
-      accessModes:
-        - ReadWriteMany
-      annotations: {}
-      labels: {}
+      cpu: 2000m
+      memory: 8192Mi
+  volumes: []
+  volumeMounts: []
 
 ingress:
   # -- The ingress class (set per ingress)
@@ -268,8 +304,8 @@ nia:
       minAvailable: 1
       maxUnavailable:
     nodeSelector:
+      kubernetes.io/os: windows
       kubernetes.io/arch: amd64
-      kubernetes.io/os: linux
     tolerations:
       - effect: NoExecute
         key: node.kubernetes.io/not-ready
@@ -279,11 +315,6 @@ nia:
         key: node.kubernetes.io/unreachable
         operator: Exists
         tolerationSeconds: 300
-    resources:
-      requests:
-        memory: 500Mi
-      limits:
-        memory: 4000Mi
 
   nia_worker:
     image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/reveal_ai_integration/reveal_ai_integration"
@@ -297,8 +328,8 @@ nia:
       minAvailable: 1
       maxUnavailable:
     nodeSelector:
+      kubernetes.io/os: windows
       kubernetes.io/arch: amd64
-      kubernetes.io/os: linux
     tolerations:
       - effect: NoExecute
         key: node.kubernetes.io/not-ready
@@ -308,8 +339,3 @@ nia:
         key: node.kubernetes.io/unreachable
         operator: Exists
         tolerationSeconds: 300
-    resources:
-      requests:
-        memory: 500Mi
-      limits:
-        memory: 4000Mi

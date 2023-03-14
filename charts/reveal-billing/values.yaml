@@ -46,7 +46,7 @@ processing:
       cpu: '1'
       memory: 512Mi
 
-s3billing:
+s3billing: 
   image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/billing/s3billing"
   tag: "latest"
   threadCount: "4"

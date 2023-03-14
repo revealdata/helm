@@ -74,7 +74,7 @@ spec:
           - containerPort: 4444
         startupProbe:
           initialDelaySeconds: 30
-          failureThreshold: 2
+          failureThreshold: 4
           periodSeconds: 10
           httpGet:
             path: /health/ready
@@ -89,8 +89,9 @@ spec:
           exec:
             command: ["/usr/bin/bash", "-c", "/usr/local/bin/admin_frontend_url.sh", "/tmp/admin_frontend_url.log"]
         livenessProbe:
-          initialDelaySeconds: 30
-          periodSeconds: 15
+          initialDelaySeconds: 60
+          periodSeconds: 60
+          timeoutSeconds: 15
           successThreshold: 1
           httpGet:
             path: /health/ready

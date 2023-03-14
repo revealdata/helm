@@ -3,16 +3,25 @@
 # Declare variables to be passed into your templates.
 name: "reveal-search-api"
 replicaCount: 3
-env: prod
+env: dev
 
-ConfigMap:
-  data:
+ConfigMap: 
+  data: 
     esHost: ""
     eeAuth: ""
     esPort: "9200"
     enableGqlPlayground: "false"
     dataopsToolsImage: "475250404638.dkr.ecr.us-east-1.amazonaws.com/reveal-dataops-tools"
     dataopsToolsImageTag: "11.0.5"
+    onFailureRetries: "3"
+    tolerations: []
+    resources:
+      requests:
+        cpu: 500m
+        memory: 500Mi
+      limits:
+        cpu: 4000m
+        memory: 10Gi
 
 argoWorkflowsArtifactRepository:
   implementation: "standard"
@@ -29,7 +38,7 @@ argoWorkflowsArtifactRepository:
 image: 475250404638.dkr.ecr.us-east-1.amazonaws.com/reveal-search-cli
 tag: 11.0.5
 args: ["api"]
-port:
+port: 
   containerport: 8080
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
@@ -57,7 +66,7 @@ service:
 
 ingress:
   enabled: true
-  annotations:
+  annotations:    
     ingress: alb
     scheme: internal
     load_balancer_name: "reveal-search-api"
@@ -69,24 +78,13 @@ ingress:
   labels:
     component: api
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
-
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
+resources: 
+  requests: 
+    cpu: 165m
+    memory: 256Mi
+  limits: 
+    cpu: 2000m
+    memory: 2046Mi
 
 nodeSelector: {}
 
@@ -104,3 +102,28 @@ argo-workflows:
       password: ""
   controller:
     existingConfigMap: "workflow-controller-configmap"
+    resources: 
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 2000m
+        memory: 1024Mi
+  server:
+    resources: 
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 2000m
+        memory: 1024Mi
+spark-operator:
+  resources: 
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 2000m
+      memory: 1024Mi
+  
+  

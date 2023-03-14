@@ -1,17 +1,4 @@
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: {{ .Values.cloud_ai.services.labeling.storage.name }}-pvc
-  namespace: {{ .Values.global.namespace | default .Release.Name }}
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: {{ .Values.cloud_ai.services.labeling.storage.storageClass }}
-  resources:
-    requests:
-      storage: {{ .Values.cloud_ai.services.labeling.storage.size }}
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -39,14 +26,14 @@ spec:
 {{ $nodeSelector := mergeOverwrite .Values.cloud_ai.services.nodeSelector .Values.cloud_ai.services.labeling.nodeSelector }}
 {{- toYaml $nodeSelector | indent 8 }}
       volumes:
-        - name: {{ .Values.cloud_ai.services.labeling.storage.name }}
-          persistentVolumeClaim:
-            claimName: {{ .Values.cloud_ai.services.labeling.storage.name }}-pvc
+      - name: ephemeral
+        emptyDir:
+          sizeLimit: 100Gi
       containers:
       - image: {{.Values.cloud_ai.services.labeling.image}}:{{.Values.cloud_ai.services.labeling.tag}}
         volumeMounts:
-          - mountPath: {{ .Values.cloud_ai.services.labeling.storage.mountPath }}
-            name: {{ .Values.cloud_ai.services.labeling.storage.name }}
+          - mountPath: {{ .Values.cloud_ai.services.api.storage.mountPath }}
+            name: ephemeral
         envFrom:
         - configMapRef:
             name: "reveal-cloud-ai-env"

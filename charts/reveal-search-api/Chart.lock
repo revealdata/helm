@@ -1,0 +1,9 @@
+dependencies:
+- name: spark-operator
+  repository: https://googlecloudplatform.github.io/spark-on-k8s-operator
+  version: 1.1.20
+- name: argo-workflows
+  repository: https://charts.bitnami.com/bitnami
+  version: 2.3.10
+digest: sha256:96020500ab7fecc607e20951fe770a5b171d3f13740f1098b3e8300014a20e52
+generated: "2022-08-17T15:09:33.009278-05:00"

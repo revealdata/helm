@@ -30,7 +30,7 @@ secrets:
   # -- OPTIONS FOR: 'external-secrets' -- #
   externalSecrets:
     # -- The external-secrets provider
-    # -- Providers:
+    # -- Providers: 
     # -- aws: AWS SecretsManager
     # -- azurekv: Azure KeyVault
     provider: aws
@@ -68,7 +68,7 @@ ingress:
   # -- alb: (AWS Application Load balancer - https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/)
   # -- nginx: Nginx Ingress (https://kubernetes.github.io/ingress-nginx/)
   backend:
-    port: 8443
+      port: 8443
   public:
     enabled: true
     hostname: "localhost.localdomain"
@@ -121,7 +121,7 @@ ingress:
 
 keycloak:
   image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/reveal/keycloak
-  tag: 18.0.2.2
+  tag: 18.0.2.3
   replicas: 1
   # -- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: false
@@ -131,7 +131,7 @@ keycloak:
       memory: 1024Mi
       cpu: 165m
     limits:
-      memory: 2560Mi
+      memory: 4096Mi
       cpu: 4000m
   # -- Import CA certificate files in PEM format into the Keycloak Trust Store
   # -- A trusted CA cert is required for the Keycloak pod to communicate with LDAPs
@@ -171,7 +171,7 @@ keycloak:
     #     operator: "Exists"
   proxy:
     image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/reveal_ui/base
-    tag: 2.1.7
+    tag: 2.1.8
     replicas: 1
     resources:
       requests:
@@ -199,26 +199,26 @@ keycloak:
       # -- list of IP addresses or networks to allow and/or deny. Both bare IP addresses and CIDR notation are supported.
       # -- If an invalid network address is specified, the network will be dropped from the configuration and a WARNING will be in the log.
       # -- The list can be a mix of strings (single network) or a dictionary object with the following options:
-      # -- options:
+      # -- options: 
       # --   - network: a.b.c.d(/e)
       # --     name: name of the network (optional. added to the nginx config as a comment)
       # --   - a.b.c.d(/e)
       # deny:
       #  - name: "known bad actor"
       #    network: 56.254.25.87
-      # allow:
+      # allow: 
       #   - 28.68.52.0/24
       # content_security_policy:
         # -- Reference: https://content-security-policy.com
         # -- Optionally disable the CSP header default values (default: true)
         # defaults: false
-        # -- 'all': Source options that will be apllied to all directives under it.
+        #-- 'all': Source options that will be apllied to all directives under it. 
         # all:
         #   - "'self'"
         #   - "'unsafe-inline'"
         #   - "*.example.com"
         # -- Add CSP directives. The directive name is the key and the value is a list of source options.
-        # img-src:
+        # img-src: 
         #   - "*.foo.com"
         # script-src:
         #   - "*.bar.com"

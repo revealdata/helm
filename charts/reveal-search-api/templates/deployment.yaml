@@ -4,7 +4,8 @@ metadata:
   name: reveal-search-api-deployment
   namespace: {{ .Values.name }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+{{/*  Comment out replicas as it's now controlled by the HPA */}}
+{{/*  replicas: {{ .Values.replicaCount }} */}}
   selector:
     matchLabels:
       deployment: reveal-search-api-deployment
@@ -14,11 +15,26 @@ spec:
         deployment: reveal-search-api-deployment
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name }}
+      {{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 8 }}
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+        {{- end }}
       containers:
         - name: {{ .Values.name }}
           image: {{ .Values.image }}:{{ .Values.tag }}
           args: {{ .Values.args }}
           imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: 1500m
+              memory: 4Gi
+            requests:
+              cpu: 667m
+              memory: 2Gi
           ports:
             - containerPort: {{ .Values.port.containerport }}
           envFrom:

@@ -18,7 +18,6 @@ reveal_samba:
       cpu: 4000m
       memory: 2560Mi
 
-
 # -- Force a re-deploy when a helm upgrade happens
 reloadOnUpgrade: false
 

@@ -65,13 +65,15 @@ spec:
           failureThreshold: 2
           periodSeconds: 10
           httpGet:
-            path: /
+            path: /health/ready
             port: liveness-port
         livenessProbe:
-          initialDelaySeconds: 15
-          periodSeconds: 30
+          initialDelaySeconds: 60
+          periodSeconds: 60
+          timeoutSeconds: 15
+          successThreshold: 1
           httpGet:
-            path: /
+            path: /health/ready
             port: liveness-port
         volumeMounts:
           - name: {{ .Values.keycloak.proxy.security.configMapName | default "keycloak-proxy-security" }}-vol

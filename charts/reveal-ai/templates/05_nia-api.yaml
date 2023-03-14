@@ -1,20 +1,4 @@
 ---
-## NIA Storage Volume claim for scores
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: nia-scores
-  namespace: {{ .Values.global.namespace }}
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: {{ .Values.nia.nia_api.storage.class }}
-  volumeName: nia-scores-pv
-  resources:
-    requests:
-      storage: {{ .Values.nia.nia_api.storage.size }}
-
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,7 +10,7 @@ spec:
       app: deployment-nia-api
   progressDeadlineSeconds: 600
   replicas: 1
-  revisionHistoryLimit: 10
+  revisionHistoryLimit: 3
   strategy:
     type: Recreate
   template:
@@ -52,7 +36,14 @@ spec:
             {{- toYaml . | nindent 8 }}
           {{- end }}
         resources:
-          {{- toYaml .Values.nia.nia_api.resources | nindent 10 }}
+          {{- if .Values.nia.nia_api.resources }}
+            {{- toYaml .Values.nia.nia_api.resources | nindent 12}}
+          {{- else }}
+          requests:
+            memory: 500Mi
+          limits:
+            memory: 4000Mi
+          {{- end }}
         imagePullPolicy: Always
         name: nia-api
         securityContext:

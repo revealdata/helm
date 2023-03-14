@@ -2,8 +2,8 @@ apiVersion: v2
 name: reveal-keycloak
 description: Reveal Keycloak
 type: application
-version: 18.0.2
-appVersion: "18.0.2.2"
+version: 20.0.3
+appVersion: "20.0.3"
 maintainers:
 - name: Reveal-Brainspace
   email: info@revealdata.com

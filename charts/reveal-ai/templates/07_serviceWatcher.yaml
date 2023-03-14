@@ -1,14 +1,16 @@
+{{- if .Values.serviceWatcher.enabled }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: reveal-ai-ai
+  name: reveal-ai-servicewatcher
   namespace: {{.Values.global.namespace}}
 spec:
   selector:
     matchLabels:
       app: deployment-reveal-ai
   progressDeadlineSeconds: 600
-  replicas: {{ .Values.ai.replicaCount | default 2 }}
+  replicas: {{ .Values.serviceWatcher.replicaCount | default 2 }}
   revisionHistoryLimit: 3
   strategy:
     rollingUpdate:
@@ -25,28 +27,25 @@ spec:
       {{- end }}
     spec:
       nodeSelector:
-        {{- toYaml .Values.ai.nodeSelector | nindent 8 }}
+        {{- toYaml .Values.serviceWatcher.nodeSelector | nindent 8 }}
       containers:
-        - image: {{.Values.ai.image}}:{{.Values.ai.tag}}
-          {{- if .Values.ai.volumeMounts }}
-          volumeMounts:
-            {{- toYaml .Values.ai.volumeMounts | nindent 10 }}
-          {{- end }}
+        - image: {{.Values.serviceWatcher.image}}:{{.Values.serviceWatcher.tag}}
           env:
-            {{- toYaml .Values.ai.env | nindent 10 }}
+            {{- toYaml .Values.serviceWatcher.env | nindent 10 }}
           imagePullPolicy: Always
-          name: reveal-ai
+          name: reveal-ai-servicewatcher
+          {{- if .Values.serviceWatcher.resources }}
           resources:
-            {{- if .Values.ai.resources }}
-            {{- toYaml .Values.ai.resources | nindent 12 }}
-            {{- else }}
+              {{- toYaml .Values.serviceWatcher.resources | nindent 12 }}
+          {{- else }}
+          resources:
             requests:
-              memory: "48Gi"
-              cpu: "8000m"
+              memory: "2Gi"
+              cpu: "333m"
             limits:
-              memory: "60Gi"
-              cpu: "16000m"
-            {{- end }}
+              memory: "2Gi"
+              cpu: "333m"
+          {{- end }}
           securityContext:
             allowPrivilegeEscalation: false
             privileged: false
@@ -56,23 +55,19 @@ spec:
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           tty: true
-      {{- if .Values.ai.volumes }}
-      volumes:
-        {{- toYaml .Values.ai.volumes | nindent 8 }}
-      {{- end }}
       dnsConfig: {}
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
       terminationGracePeriodSeconds: 30
       tolerations:
-        {{- toYaml .Values.ai.tolerations | nindent 8 }}
+        {{- toYaml .Values.serviceWatcher.tolerations | nindent 8 }}
 {{- if .Values.ai.PodDisruptionBudget.enabled }}
 ---
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ .Values.ai.PodDisruptionBudget.name }}
+  name: {{ .Values.serviceWatcher.PodDisruptionBudget.name }}
   namespace: {{.Values.global.namespace}}
 spec:
   selector:
@@ -83,5 +78,6 @@ spec:
 {{- end }}
 {{- if .Values.ai.PodDisruptionBudget.maxUnavailable }}
   maxUnavailable: {{ .Values.ai.PodDisruptionBudget.maxUnavailable }}
+{{- end }}
 {{- end }}
 {{- end -}}
