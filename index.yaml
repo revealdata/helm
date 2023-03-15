@@ -13,6 +13,20 @@ entries:
     version: 1.0.0
   brainspace-series11:
   - apiVersion: v2
+    appVersion: 11.4.0
+    created: "2023-03-15T15:43:48.471413926Z"
+    description: A Helm chart for Brainspace with Reveal Series11
+    digest: d29dbccb57e92ea2a3769d12ae9a5b4dd5e5945dbfa9094ca04b96cf0f82e43d
+    maintainers:
+    - email: info@revealdata
+      name: Reveal-Brainspace
+      url: https://revealdata.com
+    name: brainspace-series11
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/brainspace-series11-11.4.2/brainspace-series11-11.4.2.tgz
+    version: 11.4.2
+  - apiVersion: v2
     appVersion: 7.0.0
     created: "2022-12-06T15:42:05.371155203Z"
     description: A Helm chart for Brainspace with Reveal Series11
@@ -54,6 +68,66 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/brainspace-series11-0.3.9/brainspace-series11-0.3.9.tgz
     version: 0.3.9
+  elasticsearch:
+  - annotations:
+      category: Analytics
+    apiVersion: v2
+    appVersion: 8.3.3
+    created: "2023-03-15T15:43:48.652923969Z"
+    dependencies:
+    - condition: global.kibanaEnabled
+      name: kibana
+      repository: https://charts.bitnami.com/bitnami
+      version: 10.x.x
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 1.x.x
+    description: Elasticsearch is a distributed search and analytics engine. It is
+      used for web search, log monitoring, and real-time analytics. Ideal for Big
+      Data applications.
+    digest: 707ee17bba954f152ef917ab6857a1aa5022c6c8d11aaae753b4b152be4311e3
+    home: https://github.com/bitnami/charts/tree/master/bitnami/elasticsearch
+    icon: https://bitnami.com/assets/stacks/elasticsearch/img/elasticsearch-stack-220x234.png
+    keywords:
+    - elasticsearch
+    maintainers:
+    - name: Bitnami
+      url: https://github.com/bitnami/charts
+    name: elasticsearch
+    sources:
+    - https://github.com/bitnami/containers/tree/main/bitnami/elasticsearch
+    - https://www.elastic.co/products/elasticsearch
+    urls:
+    - https://github.com/revealdata/helm/releases/download/elasticsearch-19.1.10/elasticsearch-19.1.10.tgz
+    version: 19.1.10
+  msa-perms:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2023-03-15T15:43:48.826390717Z"
+    description: A Helm chart that does permissions maintenance for the MSA
+    digest: e842848401b23b0e00e43b4f7daecbd388c7170b4bccafb1ff6abf070a4169c6
+    maintainers:
+    - email: info@revealdata.com
+      name: Reveal-Brainspace
+      url: https://revealdata.com
+    name: msa-perms
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/msa-perms-0.1.0/msa-perms-0.1.0.tgz
+    version: 0.1.0
+  processing-automation:
+  - apiVersion: v2
+    appVersion: "1.0"
+    created: "2023-03-15T15:43:48.990728083Z"
+    description: A Helm chart for Kubernetes
+    digest: 98df90dd171bfc9f1d1712e41587a1d234fe8bcf95f37c0290b529e0a644d745
+    name: processing-automation
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/processing-automation-1.0.0/processing-automation-1.0.0.tgz
+    version: 1.0.0
   processing-bootstrap:
   - apiVersion: v2
     appVersion: 1.0.0
@@ -96,6 +170,16 @@ entries:
     - https://github.com/revealdata/helm/releases/download/processing-bootstrap-1.0.2/processing-bootstrap-1.0.2.tgz
     version: 1.0.2
   reveal-ai:
+  - apiVersion: v2
+    appVersion: 11.05.00
+    created: "2023-03-15T15:43:49.180338722Z"
+    description: A Helm chart for Kubernetes
+    digest: b42c3b6834cc46f1e9f775c060faccef7868e70322ebfbae2ce8fb551575b52b
+    name: reveal-ai
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-ai-11.5.0/reveal-ai-11.5.0.tgz
+    version: 11.5.0
   - apiVersion: v2
     appVersion: 1.16.0
     created: "2022-11-17T22:59:14.485633853Z"
@@ -189,7 +273,58 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/reveal-ai-bootstrap-1.0.0/reveal-ai-bootstrap-1.0.0.tgz
     version: 1.0.0
+  reveal-billing:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2023-03-15T15:43:49.374983894Z"
+    description: A Helm chart for Kubernetes
+    digest: c3930fc76f89c20242f7e4cea94e97737b6ed27d52009bae2b06a499365e2cc1
+    name: reveal-billing
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-billing-0.1.0/reveal-billing-0.1.0.tgz
+    version: 0.1.0
+  reveal-cloud-ai:
+  - apiVersion: v2
+    appVersion: "1.0"
+    created: "2023-03-15T15:43:49.553639075Z"
+    dependencies:
+    - name: mongodb
+      repository: https://charts.bitnami.com/bitnami
+      version: 13.1.2
+    description: A Helm chart for Kubernetes
+    digest: 1c33678b350d1ee69ef366b06e56b6ea2593bd02f45040a688fdcecf70c2abaa
+    name: reveal-cloud-ai
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-cloud-ai-1.0.1/reveal-cloud-ai-1.0.1.tgz
+    version: 1.0.1
+  reveal-crushftp:
+  - apiVersion: v2
+    appVersion: "1.0"
+    created: "2023-03-15T15:43:49.760774885Z"
+    description: A Helm chart for Kubernetes
+    digest: 8860a99a55b995c81386a28c5225abd03eb680747d67a99986666abf0e82579f
+    name: reveal-crushftp
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-crushftp-0.0.1/reveal-crushftp-0.0.1.tgz
+    version: 0.0.1
   reveal-keycloak:
+  - apiVersion: v2
+    appVersion: 20.0.3
+    created: "2023-03-15T15:43:50.003323236Z"
+    description: Reveal Keycloak
+    digest: 6f62bc998cc71def544d6fa53cd5dd28bc1e6c4e4658e01bc29b7ee3a99ad55e
+    maintainers:
+    - email: info@revealdata.com
+      name: Reveal-Brainspace
+      url: https://revealdata.com
+    name: reveal-keycloak
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-keycloak-20.0.3/reveal-keycloak-20.0.3.tgz
+    version: 20.0.3
   - apiVersion: v2
     appVersion: 18.0.2.2
     created: "2023-02-10T21:06:53.212956073Z"
@@ -275,6 +410,20 @@ entries:
     - https://github.com/revealdata/helm/releases/download/reveal-keycloak-0.7.4/reveal-keycloak-0.7.4.tgz
     version: 0.7.4
   reveal-review:
+  - apiVersion: v2
+    appVersion: 11.4.6
+    created: "2023-03-15T15:43:50.227995619Z"
+    description: Reveal Review
+    digest: 68af49aaed9bd878c195503476b6f13081d7fd21efa6d841256bf2ab8a815293
+    maintainers:
+    - email: info@revealdata
+      name: Reveal-Brainspace
+      url: https://revealdata.com
+    name: reveal-review
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-review-11.4.6/reveal-review-11.4.6.tgz
+    version: 11.4.6
   - apiVersion: v2
     appVersion: 11.4.1
     created: "2023-02-21T16:13:05.6685011Z"
@@ -485,7 +634,35 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/reveal-review-1.0.0/reveal-review-1.0.0.tgz
     version: 1.0.0
+  reveal-samba:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2023-03-15T15:43:50.46901419Z"
+    description: A Helm chart for Samba with Reveal Series11
+    digest: 30059f142f1163805ffcfe5336cd1624a434e3c3507474d2ee15bde209cea04a
+    name: reveal-samba
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-samba-0.0.1/reveal-samba-0.0.1.tgz
+    version: 0.0.1
   reveal-search-api:
+  - apiVersion: v2
+    appVersion: "1.0"
+    created: "2023-03-15T15:43:50.650581832Z"
+    dependencies:
+    - name: spark-operator
+      repository: https://googlecloudplatform.github.io/spark-on-k8s-operator
+      version: 1.1.20
+    - name: argo-workflows
+      repository: https://charts.bitnami.com/bitnami
+      version: 2.3.10
+    description: Reveal Search API
+    digest: dfd1121dd0ce819ec76c9bddbf1e75085a0cd7a665f92cb877902f08a2995478
+    name: reveal-search-api
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-search-api-0.1.6/reveal-search-api-0.1.6.tgz
+    version: 0.1.6
   - apiVersion: v2
     appVersion: "1.0"
     created: "2022-11-30T23:57:40.979845934Z"
@@ -571,6 +748,17 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/reveal-search-api-0.1.1/reveal-search-api-0.1.1.tgz
     version: 0.1.1
+  review-automation:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2023-03-15T15:43:50.80097918Z"
+    description: A Helm chart for Review Automation with Reveal Series11
+    digest: 5a3527bbfdb7177fbfee50e905e8597f561d40891fb3d371c3f9e756fcb780d6
+    name: review-automation
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/review-automation-0.0.1/review-automation-0.0.1.tgz
+    version: 0.0.1
   review-series11-bootstrap:
   - apiVersion: v2
     appVersion: 11.0.0
@@ -726,4 +914,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-series11-bootstrap-1.0.0/review-series11-bootstrap-1.0.0.tgz
     version: 1.0.0
-generated: "2023-02-21T16:13:05.668712721Z"
+generated: "2023-03-15T15:43:50.801199577Z"
