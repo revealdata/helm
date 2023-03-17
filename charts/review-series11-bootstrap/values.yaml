@@ -25,9 +25,9 @@ secrets:
         GIT_SSH_KEY: ""
 
 bootstrap:
-  version: ""
-  image: ""
-  tag: ""
+  version: "11.4.12"
+  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/infrastructure/msa-environment-tool"
+  tag: "11.4.12"
   service_account_role_arn: ""
   env:
     # Path inside the github repo to use as a base environment file.

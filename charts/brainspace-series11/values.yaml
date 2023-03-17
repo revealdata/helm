@@ -181,7 +181,7 @@ brains_db:
   # -- Brainspace database/postgres container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/postgres"
   # -- batch database/postgres container tag
-  tag: "r11.5"
+  tag: "r11.4"
   # -- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: false
   # -- Specify a K8s node group for this deployment to run in
@@ -193,7 +193,7 @@ brains_ui:
   # Brainspace UI container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/ui"
   # Brainspace UI container tag
-  tag: "r11.5"
+  tag: "r11.4"
   # -- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: false
   # -- Specify a K8s node group for this deployment to run in
@@ -205,7 +205,7 @@ brains_bt:
     # batch tools container image
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/batch-tools"
     # batch tools container tag
-    tag: "line.r11.5-githash-b9edce2"
+    tag: "line.r11.4-githash-483b441"
     # basis tech directory
     basis_dir: "basis-tech-rbl-7.39.0_rex-7.48.0_rli-7.23.2_rsent-2.0.0_c63.0_perpetual.0"
 
@@ -213,7 +213,7 @@ brains_app:
   # -- Brainspace APP container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/application"
   # Brainspace APP container tag
-  tag: "r11.5"
+  tag: "r11.4"
   # -- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: false
   # -- Specify a K8s node group for this deployment to run in
@@ -238,12 +238,12 @@ brains_app:
     # -- Brainspace APP plugins container image
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/plugins"
     # -- Brainspace APP plugins container tag
-    tag: "r11.5"
+    tag: "r11.4"
   additionalPlugins:
     # -- Brainspace APP additional plugins container image
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/additional-plugins"
     # Brainspace APP additional plugins container tag
-    tag: "r11.5"
+    tag: "r11.4"
   # -- logs directory in persistent storage
   logDir: "app"
   # -- Define static resources for the brains_app pods
@@ -263,7 +263,7 @@ brains_ana:
   # -- Brainspace ANA (analytics) container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/analytics-server"
   # Brainspace ANA (analytics) container tag
-  tag: "r11.5"
+  tag: "r11.4"
   # -- Specify a K8s node group for this deployment to run in
   nodeGroup: ""
   replicas: 0
@@ -294,7 +294,7 @@ brains_ana:
   autoscale:
     enabled: true
     image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/brainspace/ana-autoscale
-    tag: "11.2.4"
+    tag: "11.2.3"
     debug: "0"
     thresholds:
       # -- The minimum number of replicas of the brains_ana deployment
