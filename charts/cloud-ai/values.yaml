@@ -64,8 +64,8 @@ cloud_ai:
         tolerationSeconds: 300
 
     api:
-      image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/cloud_ai/cloud_ai"
-      tag: "latest"
+      image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/cloud_ai/cloud_ai"
+      tag: "11.3.0"
       name: "cloud-ai-api"
       # -- Will be merged with global selector, resources, and tolerations.
       nodeSelector: {}
@@ -88,8 +88,8 @@ cloud_ai:
 
 
     transcriptionWorker:
-      image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/cloud_ai/cloud_ai"
-      tag: "latest"
+      image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/cloud_ai/cloud_ai"
+      tag: "11.3.0"
       name: "cloud-ai-transcription"
       # -- Will be merged with global selector, resources, and tolerations.
       nodeSelector: {}
@@ -112,8 +112,8 @@ cloud_ai:
         maxUnavailable:
 
     labeling:
-      image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/cloud_ai/cloud_ai"
-      tag: "latest"
+      image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/cloud_ai/cloud_ai"
+      tag: "11.3.0"
       name: "cloud-ai-labeling"
       # -- Will be merged with global selector, resources, and tolerations.
       nodeSelector: {}
@@ -136,8 +136,8 @@ cloud_ai:
         maxUnavailable:
 
     transcriptionFinisher:
-      image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/cloud_ai/cloud_ai"
-      tag: "latest"
+      image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/cloud_ai/cloud_ai"
+      tag: "11.3.0"
       name: "cloud-ai-transcription-finisher"
       # -- Will be merged with global selector, resources, and tolerations.
       nodeSelector: {}
@@ -160,8 +160,8 @@ cloud_ai:
         maxUnavailable:
 
     translation:
-      image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/cloud_ai/cloud_ai"
-      tag: "latest"
+      image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/cloud_ai/cloud_ai"
+      tag: "11.3.0"
       name: "cloud-ai-translation"
       # -- Will be merged with global selector, resources, and tolerations.
       nodeSelector: {}

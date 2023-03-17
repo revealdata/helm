@@ -107,8 +107,8 @@ secrets:
                 property: sql-hostname
 
 ai:
-  image: "326122048023.dkr.ecr.us-east-1.amazonaws.com/reveal_dev/reveal_ai_ai_service"
-  tag: "unified"
+  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/reveal_ai/ai_service"
+  tag: "11.04.15"
   name: "Reveal-AI"
   replicaCount: 1
   env:
@@ -148,8 +148,8 @@ ai:
   resources: {}
 
 processing:
-  image: "326122048023.dkr.ecr.us-east-1.amazonaws.com/reveal_dev/reveal_ai_processing_service"
-  tag: "unified"
+  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/reveal_ai/processing_service"
+  tag: "11.04.15"
   name: "Reveal-AI"
   replicaCount: 1
   env:
@@ -199,8 +199,8 @@ processing:
   resources: {}
 
 frontend:
-  image: "326122048023.dkr.ecr.us-east-1.amazonaws.com/reveal_dev/reveal_ai_frontend"
-  tag: "pipelineTesting"
+  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/reveal_ai/api"
+  tag: "11.04.14"
   name: "Reveal-AI"
   env:
     - name: "servername"
@@ -304,8 +304,8 @@ nia:
       minAvailable: 1
       maxUnavailable:
     nodeSelector:
-      kubernetes.io/os: windows
       kubernetes.io/arch: amd64
+      kubernetes.io/os: linux
     tolerations:
       - effect: NoExecute
         key: node.kubernetes.io/not-ready
@@ -328,8 +328,8 @@ nia:
       minAvailable: 1
       maxUnavailable:
     nodeSelector:
-      kubernetes.io/os: windows
       kubernetes.io/arch: amd64
+      kubernetes.io/os: linux
     tolerations:
       - effect: NoExecute
         key: node.kubernetes.io/not-ready

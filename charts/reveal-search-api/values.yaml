@@ -12,7 +12,7 @@ ConfigMap:
     esPort: "9200"
     enableGqlPlayground: "false"
     dataopsToolsImage: "475250404638.dkr.ecr.us-east-1.amazonaws.com/reveal-dataops-tools"
-    dataopsToolsImageTag: "11.0.5"
+    dataopsToolsImageTag: "11.2.3.7"
     onFailureRetries: "3"
     tolerations: []
     resources:
@@ -36,7 +36,7 @@ argoWorkflowsArtifactRepository:
   s3bucket: "argo-artifacts"
 
 image: 475250404638.dkr.ecr.us-east-1.amazonaws.com/reveal-search-cli
-tag: 11.0.5
+tag: 11.2.3.7
 args: ["api"]
 port: 
   containerport: 8080

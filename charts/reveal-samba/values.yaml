@@ -2,7 +2,7 @@
 reveal_samba:
   namespace: "reveal-samba"
   image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/samba/samba"
-  tag: "1.0.3"
+  tag: "1.0.5"
   configmap:
     SHARES: "reviewstore:/shares/reviewstore"
   shares:

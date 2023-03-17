@@ -16,8 +16,8 @@ configmap:
   node_selector_windows: "some_label"
   DEBUG: "True"
 
-image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/automation/review-automation"
-tag: "latest"
+image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/automation/review-automation"
+tag: "11.2.14.1"
 # -- Force a re-deploy when a helm upgrade happens
 reloadOnUpgrade: false
 resources:
