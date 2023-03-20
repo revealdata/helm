@@ -281,14 +281,14 @@ security:
     secretKey: ""
 
 secrets: 
-  # externalSecrets:
-  #   provider: aws
-  #   aws:
-  #     # -- Region: The AWS region where the secret resides
-  #     region: "${secrets_aws_region}"
-  #     # -- SecretName: The Secrets Manager Name for the ES secret
-  #     secretName: "eks/region_elasticsearch_password"
-  #     secretKey: elasticsearch-password
+ externalSecrets:
+   provider: aws
+   aws:
+     # -- Region: The AWS region where the secret resides
+     region: "${secrets_aws_region}"
+     # -- SecretName: The Secrets Manager Name for the ES secret
+     secretName: "eks/region_elasticsearch_password"
+     secretKey: elasticsearch-password
 
 ## @section Traffic Exposure Parameters
 ##
