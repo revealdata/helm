@@ -73,6 +73,39 @@ entries:
       category: Analytics
     apiVersion: v2
     appVersion: 8.3.3
+    created: "2023-03-21T15:49:45.991406223Z"
+    dependencies:
+    - condition: global.kibanaEnabled
+      name: kibana
+      repository: https://charts.bitnami.com/bitnami
+      version: 10.x.x
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 1.x.x
+    description: Elasticsearch is a distributed search and analytics engine. It is
+      used for web search, log monitoring, and real-time analytics. Ideal for Big
+      Data applications.
+    digest: 96d87542aab3d1d432888d1a9b230873caf21dedb099b9d5c4c18c073341ada1
+    home: https://github.com/bitnami/charts/tree/master/bitnami/elasticsearch
+    icon: https://bitnami.com/assets/stacks/elasticsearch/img/elasticsearch-stack-220x234.png
+    keywords:
+    - elasticsearch
+    maintainers:
+    - name: Bitnami
+      url: https://github.com/bitnami/charts
+    name: elasticsearch
+    sources:
+    - https://github.com/bitnami/containers/tree/main/bitnami/elasticsearch
+    - https://www.elastic.co/products/elasticsearch
+    urls:
+    - https://github.com/revealdata/helm/releases/download/elasticsearch-19.1.11/elasticsearch-19.1.11.tgz
+    version: 19.1.11
+  - annotations:
+      category: Analytics
+    apiVersion: v2
+    appVersion: 8.3.3
     created: "2023-03-15T15:43:48.652923969Z"
     dependencies:
     - condition: global.kibanaEnabled
@@ -914,4 +947,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-series11-bootstrap-1.0.0/review-series11-bootstrap-1.0.0.tgz
     version: 1.0.0
-generated: "2023-03-15T15:43:50.801199577Z"
+generated: "2023-03-21T15:49:45.991648825Z"
