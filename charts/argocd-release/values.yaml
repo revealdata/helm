@@ -6,6 +6,8 @@ project: "default"
 
 # Source config for the Application
 source:
+  # Chart name !!!!! Do not use if using a Git Repo !!!!! Only use when using a Helm Repo.
+  chart: ""
 
   # Git Repo the Application points to.
   repoUrl: ""

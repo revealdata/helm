@@ -8,6 +8,9 @@ metadata:
 spec:
   project: {{ .Values.project }}
   source:
+    {{- if .Values.source.chart }}
+    chart: {{ .Values.source.chart }}
+    {{- end }}
     repoURL: {{ .Values.source.repoUrl }}
     targetRevision: {{ .Values.source.targetRevision }}
     path: {{ .Values.source.path }}
