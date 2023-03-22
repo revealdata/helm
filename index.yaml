@@ -3,6 +3,16 @@ entries:
   argo-application:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2023-03-22T22:22:59.969600481Z"
+    description: A Helm chart that installs an ArgoCD Application resource.
+    digest: 9c5238ca9aa45587ff02de04e5e6595918fd47b50305492d8a7ea1383a1ff37f
+    name: argo-application
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/argo-application-1.0.2/argo-application-1.0.2.tgz
+    version: 1.0.2
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2022-09-13T21:44:05.503770251Z"
     description: A Helm chart that installs an ArgoCD Application resource.
     digest: 91172208ab1e5186005253c9e2afd5872c6e977befe6bb5c0a746e9f2dec6e77
@@ -980,4 +990,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-series11-bootstrap-1.0.0/review-series11-bootstrap-1.0.0.tgz
     version: 1.0.0
-generated: "2023-03-21T15:53:46.074709568Z"
+generated: "2023-03-22T22:22:59.969750981Z"
