@@ -218,6 +218,38 @@ entries:
       licenses: Apache-2.0
     apiVersion: v2
     appVersion: 3.11.10
+    created: "2023-03-23T00:40:38.416378781Z"
+    dependencies:
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 2.x.x
+    description: RabbitMQ is an open source general-purpose message broker that is
+      designed for consistent, highly-available messaging scenarios (both synchronous
+      and asynchronous).
+    digest: 6b920027369c5202da599f183b419772cf7696535c37eee1a4314c26a63dadcb
+    home: https://github.com/bitnami/charts/tree/main/bitnami/rabbitmq
+    icon: https://bitnami.com/assets/stacks/rabbitmq/img/rabbitmq-stack-220x234.png
+    keywords:
+    - rabbitmq
+    - message queue
+    - AMQP
+    maintainers:
+    - name: Bitnami
+      url: https://github.com/bitnami/charts
+    name: rabbitmq
+    sources:
+    - https://github.com/bitnami/containers/tree/main/bitnami/rabbitmq
+    - https://www.rabbitmq.com
+    urls:
+    - https://github.com/revealdata/helm/releases/download/rabbitmq-11.10.5/rabbitmq-11.10.5.tgz
+    version: 11.10.5
+  - annotations:
+      category: Infrastructure
+      licenses: Apache-2.0
+    apiVersion: v2
+    appVersion: 3.11.10
     created: "2023-03-21T15:53:46.07457717Z"
     dependencies:
     - name: common
@@ -990,4 +1022,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-series11-bootstrap-1.0.0/review-series11-bootstrap-1.0.0.tgz
     version: 1.0.0
-generated: "2023-03-22T22:22:59.969750981Z"
+generated: "2023-03-23T00:40:38.41666088Z"
