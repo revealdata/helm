@@ -17,13 +17,17 @@ spec:
       app: deployment-ana-autoscale
   progressDeadlineSeconds: 600
   replicas: 1
-  revisionHistoryLimit: 10
+  revisionHistoryLimit: 3
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
         app: deployment-ana-autoscale
+      {{- if .Values.brains_ana.autoscale.reloadOnUpgrade }}
+      annotations:
+        timestamp: {{ now | quote }}
+      {{- end }}
     spec:
       nodeSelector:
         kubernetes.io/os: linux
@@ -59,14 +63,14 @@ spec:
         envFrom:
         - configMapRef:
             name: brains-config
-        {{- if eq .Values.secrets.provider "secrets-store-csi" }}
         volumeMounts:
+        {{- if eq .Values.secrets.provider "secrets-store-csi" }}
           - name: brainspace-secrets-vol
             mountPath: "/mnt/brainspace-secrets"
             readOnly: true
         {{- end }}
-      {{- if eq .Values.secrets.provider "secrets-store-csi" }}
       volumes:
+      {{- if eq .Values.secrets.provider "secrets-store-csi" }}
         - name: brainspace-secrets-vol
           csi:
             driver: secrets-store.csi.k8s.io

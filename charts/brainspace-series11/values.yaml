@@ -141,7 +141,7 @@ secrets:
           # value: "5432"
         - secretKey: "brainspace_db_name"
           property: "database"
-          envVar: "POSTGRESQL_DB"
+          envVar: "POSTGRESQL_DATABASE"
           # value: "brainspace"
         - secretKey: "brainspace_db_user"
           property: "brainsDbUsername"
@@ -161,7 +161,7 @@ secrets:
     #     - secretKey: "brainspace_license.txt"
     #       property: "license"
     #       volume: "brainspace-license-vol"
-    #       mountPath: "/var/lib/brains/license"
+    #       mountPath: "/run/secrets/brainspace/license"
 
 ingress:
   # -- The ingress class
@@ -179,9 +179,9 @@ ingress:
 
 brains_db:
   # -- Brainspace database/postgres container image
-  image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/postgres"
+  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/ecr-public/bitnami/postgresql"
   # -- batch database/postgres container tag
-  tag: "r11.4"
+  tag: "13.10.0"
   # -- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: false
   # -- Specify a K8s node group for this deployment to run in
@@ -193,9 +193,9 @@ brains_ui:
   # Brainspace UI container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/ui"
   # Brainspace UI container tag
-  tag: "r11.4"
+  tag: "r11.5"
   # -- Force a re-deploy when a helm upgrade happens
-  reloadOnUpgrade: false
+  reloadOnUpgrade: true
   # -- Specify a K8s node group for this deployment to run in
   nodeGroup: ""
   # -- Specify customizations to the nginx proxy
@@ -205,15 +205,21 @@ brains_bt:
     # batch tools container image
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/batch-tools"
     # batch tools container tag
-    tag: "line.r11.4-githash-483b441"
+    tag: "line.r11.5-githash-b9edce2"
     # basis tech directory
-    basis_dir: "basis-tech-rbl-7.39.0_rex-7.48.0_rli-7.23.2_rsent-2.0.0_c63.0_perpetual.0"
+    basis_dir: "basis-tech-rbl-7.46.1_rex-7.55.5_rli-7.23.7_rsent-2.0.3_c68.0_perpetual.0"
 
 brains_app:
   # -- Brainspace APP container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/application"
-  # Brainspace APP container tag
-  tag: "r11.4"
+  # -- Brainspace APP container tag
+  tag: "r11.5"
+  # -- Brainspace home directory - DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING
+  brainspaceHome: "/opt/bitnami/apache-tomcat"
+  # -- Brainspace Logs directory - DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING
+  brainspaceLogs: "/opt/bitnami/apache-tomcat/logs"
+  # -- Brainspace license file from secret - DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING
+  brainspaceLicenseFile: "/run/secrets/brainspace/license/brainspace_license.txt"
   # -- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: false
   # -- Specify a K8s node group for this deployment to run in
@@ -221,7 +227,7 @@ brains_app:
   # -- Specify customizations to the Brainspace Application
   options:
     # -- Run build jobs as k8s jobs rather than replicasets (default: true)
-    transientAnalytics: false
+    transientAnalytics: true
     # -- Use the Brainspace TDM Cache (default: false)
     tdmCache: false
   # -- Customize the JVM memory settings for the brains_app pods
@@ -238,12 +244,12 @@ brains_app:
     # -- Brainspace APP plugins container image
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/plugins"
     # -- Brainspace APP plugins container tag
-    tag: "r11.4"
+    tag: "r11.5"
   additionalPlugins:
     # -- Brainspace APP additional plugins container image
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/additional-plugins"
     # Brainspace APP additional plugins container tag
-    tag: "r11.4"
+    tag: "r11.5"
   # -- logs directory in persistent storage
   logDir: "app"
   # -- Define static resources for the brains_app pods
@@ -263,7 +269,11 @@ brains_ana:
   # -- Brainspace ANA (analytics) container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/analytics-server"
   # Brainspace ANA (analytics) container tag
-  tag: "r11.4"
+  tag: "11.5"
+  # -- Brainspace home directory - DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING
+  brainspaceHome: "/opt/bitnami/java"
+  # -- Brainspace Logs directory - DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING
+  brainspaceLogs: "/opt/bitnami/java/app/analytics-server/logs"
   # -- Specify a K8s node group for this deployment to run in
   nodeGroup: ""
   replicas: 0
@@ -295,6 +305,7 @@ brains_ana:
     enabled: true
     image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/brainspace/ana-autoscale
     tag: "11.2.3"
+    reloadOnUpgrade: true
     debug: "0"
     thresholds:
       # -- The minimum number of replicas of the brains_ana deployment
@@ -329,7 +340,7 @@ defaults:
     brainspace_license.txt:
       property: "license"
       volume: "brainspace-license-vol"
-      mountPath: "/var/lib/brains/license"
+      mountPath: "/run/secrets/brainspace/license"
       optional: true
       readOnly: true
 

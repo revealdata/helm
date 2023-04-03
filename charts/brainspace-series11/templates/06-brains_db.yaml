@@ -17,7 +17,7 @@ spec:
       app: deployment-brains-db
   progressDeadlineSeconds: 600
   replicas: 1
-  revisionHistoryLimit: 10
+  revisionHistoryLimit: 3
   strategy:
     type: Recreate
   template:
@@ -56,12 +56,15 @@ spec:
         env:
           {{- /* env vars for Brainspace secrets (_helpers.tpl) */}}
           {{- include "secrets.env" . |indent 5 }}
+          {{- if .Values.brains_db.env }}
+          {{- toYaml .Values.brains_db.env | nindent 9 }}
+          {{- end }}
         envFrom:
         - configMapRef:
             name: brains-config
         volumeMounts:
         - name: db-data
-          mountPath: /var/lib/postgresql/data
+          mountPath: /bitnami/postgresql/data
       volumes:
       {{- if or (eq .Values.storage.class "efs-sc") (eq .Values.storage.class "pvc") }}
       - name: db-data

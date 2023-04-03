@@ -140,8 +140,6 @@ spec:
           {{- end }}
           {{- /* env vars for Brainspace secrets (_helpers.tpl) */}}
           {{- include "secrets.env" . |indent 6 }}
-          {{- /* env vars for Brainspace secrets (_helpers.tpl) */}}
-          {{- include "secrets.env" . |indent 6 }}
         lifecycle:
           postStart:
             exec:
@@ -149,17 +147,17 @@ spec:
                 - "/bin/bash"
                 - "-c"
                 - |
-                  if [[ -e /var/lib/brains/license/brainspace_license.txt ]]; then
-                  cp /var/lib/brains/license/brainspace_license.txt /var/lib/brains/.brainspace/brainspace_license.txt;
+                  if [[ -e {{ .Values.brains_app.brainspaceLicenseFile }} ]]; then
+                  cp {{ .Values.brains_app.brainspaceLicenseFile }} {{ .Values.brains_app.brainspaceHome }}/.brainspace/brainspace_license.txt;
                   fi;
         terminationMessagePolicy: FallbackToLogsOnError
         volumeMounts:
         - name: basis-data
           readOnly: true
-          mountPath: /var/lib/brains/.brainspace/{{ .Values.brains_bt.basis_dir }}
+          mountPath: {{ .Values.brains_app.brainspaceHome }}/.brainspace/{{ .Values.brains_bt.basis_dir }}
         - name: bt-data
           readOnly: true
-          mountPath: /var/lib/brains/.brainspace/BatchTools
+          mountPath: {{ .Values.brains_app.brainspaceHome }}/.brainspace/BatchTools
         - name: shared-data
           readOnly: false
           mountPath: /data
@@ -168,13 +166,13 @@ spec:
           mountPath: /localdata
         - name: plugins-data
           readOnly: false
-          mountPath: /var/lib/brains/.brainspace/plugins/default
+          mountPath: {{ .Values.brains_app.brainspaceHome }}/.brainspace/plugins/default
         - name: plugins-additional-data
           readOnly: false
-          mountPath: /var/lib/brains/.brainspace/plugins/additional
+          mountPath: {{ .Values.brains_app.brainspaceHome }}/.brainspace/plugins/additional
         - name: shared-logs
           readOnly: false
-          mountPath: /usr/local/tomcat/logs
+          mountPath: {{ .Values.brains_app.brainspaceLogs }}
           subPath: {{ .Values.brains_app.logDir | default "app" }}
         # Secrets Volume Mounts
         {{- include "secrets.volumes.mounts" . | indent 8 }}
