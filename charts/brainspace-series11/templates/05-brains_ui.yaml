@@ -16,7 +16,7 @@ spec:
       app: deployment-brains-ui
   progressDeadlineSeconds: 600
   replicas: {{ .Values.brains_ui.replicas | default 1 }}
-  revisionHistoryLimit: 10
+  revisionHistoryLimit: 3
   strategy:
     type: RollingUpdate
     rollingUpdate:

@@ -15,7 +15,7 @@ spec:
       app: deployment-brains-ana
   progressDeadlineSeconds: 600
   replicas: {{ .Values.brains_ana.replicas | default 0 }}
-  revisionHistoryLimit: 10
+  revisionHistoryLimit: 3
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -72,21 +72,7 @@ spec:
           {{- include "java.resources.values" .Values.brains_ana | indent 6 }}
           {{- /* env vars for Brainspace secrets (_helpers.tpl) */}}
           {{- include "secrets.env" . |indent 6 }}
-        lifecycle:
-          postStart:
-            exec:
-              command: 
-                - "/bin/bash"
-                - "-c"
-                - |
-                  chown -R 1604:1604 /localdata;
-                  if [[ -e /var/lib/brains/license/brainspace_license.txt ]]; then
-                  cp /var/lib/brains/license/brainspace_license.txt /var/lib/brains/.brainspace/brainspace_license.txt;
-                  fi;
-                  if [[ -e /var/lib/brains/app/analytics-server/logs/analysisserver.log ]]; then
-                  rm -f /var/lib/brains/app/analytics-server/logs/analysisserver.log;
-                  fi;
-                  ln -s /dev/stdout /var/lib/brains/app/analytics-server/logs/analysisserver.log;
+        lifecycle: {}
         terminationMessagePolicy: FallbackToLogsOnError
         volumeMounts:
         {{- if .Values.global.secretArn }}
@@ -96,10 +82,10 @@ spec:
         {{- end }}
         - name: basis-data
           readOnly: true
-          mountPath: /var/lib/brains/.brainspace/{{ .Values.brains_bt.basis_dir }}
+          mountPath: {{ .Values.brains_ana.brainspaceHome }}/.brainspace/{{ .Values.brains_bt.basis_dir }}
         - name: bt-data
           readOnly: true
-          mountPath: /var/lib/brains/.brainspace/BatchTools
+          mountPath: {{ .Values.brains_ana.brainspaceHome }}/.brainspace/BatchTools
         - name: shared-data
           readOnly: false
           mountPath: /data
