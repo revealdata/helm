@@ -25,7 +25,11 @@ data:
   {{- if .Values.ConfigMap.data.nodeSelector }}
   ETL_NODESELECTOR_JSON: {{ toJson .Values.ConfigMap.data.nodeSelector | quote }}
   {{- end }}
-
+  {{- if .Values.ConfigMap.data.extraEnv }}
+  {{- range $key, $value := .Values.ConfigMap.data.extraEnv }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
 ---
 apiVersion: v1
 kind: ConfigMap

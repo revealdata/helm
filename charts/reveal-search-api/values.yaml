@@ -22,6 +22,7 @@ ConfigMap:
       limits:
         cpu: 4000m
         memory: 10Gi
+    extraEnv: []
 
 argoWorkflowsArtifactRepository:
   implementation: "standard"
