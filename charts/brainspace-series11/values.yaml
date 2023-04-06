@@ -269,7 +269,7 @@ brains_ana:
   # -- Brainspace ANA (analytics) container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/analytics-server"
   # Brainspace ANA (analytics) container tag
-  tag: "11.5"
+  tag: "r11.5"
   # -- Brainspace home directory - DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING
   brainspaceHome: "/opt/bitnami/java"
   # -- Brainspace Logs directory - DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING
