@@ -145,7 +145,7 @@ secrets:
           # value: "brainspace"
         - secretKey: "brainspace_db_user"
           property: "brainsDbUsername"
-          envVar: "POSTGRESQL_USER"
+          envVar: "POSTGRESQL_USERNAME"
           # value: "brainspace"
         - secretKey: "brainspace_db_password"
           property: "brainsDbPassword"
@@ -332,7 +332,7 @@ defaults:
     brainspace_db_user:
       property: "brainsDbUsername"
       value: "brainspace"
-      envVar: "POSTGRESQL_USER"
+      envVar: "POSTGRESQL_USERNAME"
     brainspace_db_password:
       property: "brainsDbPassword"
       value: "brainspace1"
