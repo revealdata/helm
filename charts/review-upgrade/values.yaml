@@ -6,7 +6,7 @@ global:
 
 upgrade:
   # -- The container image to use for the upgrade job
-  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/infrastructure/msa-environment-tool"
+  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/database_upgrade"
   # -- The container image tag to use for the upgrade job
   tag: "11.4.12"
   # -- The host and port we expect the launcher and docker daemon to be able to communicate on.
