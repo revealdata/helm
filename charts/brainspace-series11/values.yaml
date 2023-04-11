@@ -145,7 +145,7 @@ secrets:
           # value: "brainspace"
         - secretKey: "brainspace_db_user"
           property: "brainsDbUsername"
-          envVar: "POSTGRESQL_USER"
+          envVar: "POSTGRESQL_USERNAME"
           # value: "brainspace"
         - secretKey: "brainspace_db_password"
           property: "brainsDbPassword"
@@ -269,7 +269,7 @@ brains_ana:
   # -- Brainspace ANA (analytics) container image
   image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/brainspace/analytics-server"
   # Brainspace ANA (analytics) container tag
-  tag: "11.5"
+  tag: "r11.5"
   # -- Brainspace home directory - DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING
   brainspaceHome: "/opt/bitnami/java"
   # -- Brainspace Logs directory - DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING
@@ -304,7 +304,7 @@ brains_ana:
   autoscale:
     enabled: true
     image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/brainspace/ana-autoscale
-    tag: "11.2.3"
+    tag: "11.5.0"
     reloadOnUpgrade: true
     debug: "0"
     thresholds:
@@ -332,7 +332,7 @@ defaults:
     brainspace_db_user:
       property: "brainsDbUsername"
       value: "brainspace"
-      envVar: "POSTGRESQL_USER"
+      envVar: "POSTGRESQL_USERNAME"
     brainspace_db_password:
       property: "brainsDbPassword"
       value: "brainspace1"
