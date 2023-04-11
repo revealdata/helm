@@ -1081,4 +1081,15 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-series11-bootstrap-1.0.0/review-series11-bootstrap-1.0.0.tgz
     version: 1.0.0
-generated: "2023-04-10T18:14:03.686388718Z"
+  review-upgrade:
+  - apiVersion: v2
+    appVersion: 11.5.1
+    created: "2023-04-11T20:14:33.918974219Z"
+    description: A chart for deploying the review upgrade tool.
+    digest: 474e5b93ac3e60e1bb7287207ec67e5d1567a772ce870fd44a0be722bd18edfc
+    name: review-upgrade
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/review-upgrade-11.5.1/review-upgrade-11.5.1.tgz
+    version: 11.5.1
+generated: "2023-04-11T20:14:33.919205822Z"
