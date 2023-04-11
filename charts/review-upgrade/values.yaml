@@ -1,0 +1,82 @@
+---
+# -- Global variables that get passed to all components
+global:
+  # -- Namespace to deploy to
+  namespace: "default"
+
+upgrade:
+  # -- The container image to use for the upgrade job
+  image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/infrastructure/msa-environment-tool"
+  # -- The container image tag to use for the upgrade job
+  tag: "11.4.12"
+  # -- The host and port we expect the launcher and docker daemon to be able to communicate on.
+  docker_host: "tcp://localhost"
+  docker_port: "2375"
+  # -- The container image to use for the docker daemon
+  dind_image: "docker:dind"
+  env:
+    # -- The target review database version to upgrade to. Should be of the form `11.6.3`
+    TARGET_VERSION: ""
+    # -- The number of threads to use for upgrading the databases. Expects a value like `4`
+    UPGRADE_THREADS: ""
+    # -- The CPU limit to set for each upgrade thread. Expects a value like `100000` to mean 1 CPU.
+    UPGRADE_THREAD_CPU_QUOTA: ""
+    # -- The memory limit to set for each upgrade thread. Expects a value like `100Mi`
+    UPGRADE_THREAD_MEMORY_LIMIT: ""
+    # -- Whether we should upgrade all MSAs or just a single MSA. If `all`, we will upgrade all MSAs. If not set to `all`, we will upgrade the MSA namespace specified here. In that case it should be of the form `review-12345678`.
+    UPGRADE_ALL_OR_SINGLE_MSA: ""
+    # -- The image to use for the Redgate SQL Compare container.
+    REDGATE_IMAGE: "redgate/sqlcompare:14"
+    # -- If set to `true`, the script will exit with an error whenever a database upgrade fails. If not set, the script will continue to upgrade other databases.
+    # FAIL_MODE: ""
+    # -- If set to `false`, the script will not run the sync script. If not set, the script will run the sync script.
+    # RUN_SYNC: "false"
+    # -- The path to the top of our database scripts. If not set, assumes `/usr/app/database-scripts/`
+    # DATABASE_SCRIPT_TOP: "/usr/app/database-scripts/"
+    # -- A comma-separated list of namespaces to skip. If not set, no namespaces will be skipped.
+    # SKIP_NAMESPACES: ""
+    # -- Extra arguments to pass to the Redgate SQL Compare container when comparing the UMDB. If not set, no extra arguments will be passed.
+    # -- See redgate documentation for more information: https://documentation.red-gate.com/sc/using-the-command-line
+    # REDGATE_UMDB_EXTRA_ARGS: ""
+    # -- Extra arguments to pass to the Redgate SQL Compare container when comparing the case database. If not set, no extra arguments will be passed.
+    # -- See redgate documentation for more information: https://documentation.red-gate.com/sc/using-the-command-line
+    # REDGATE_CASE_EXTRA_ARGS: ""
+  # -- Below are extra configurables that we wouldn't expect to change often, but may be altered based
+  #    on the environment we're deploying to
+  # -- Name of the service account, cluster role, and cluster role binding to use for the upgrade job
+  #    These will be created if they don't already exist
+  service_account_name: "review-database-upgrade"
+  # -- The amount of time for a job to live in the kubernetes API after it has finished. Expects a value like `259200` (3 days)
+  job_ttl_seconds_after_finished: "259200"
+  # -- Extra labels to add to the upgrade job components
+  #    Expected to be of the form `{"key": "value"}`
+  extra_labels: {}
+  # -- Extra annotations to add to the upgrade job components
+  #    Expected to be of the form `{"key": "value"}`
+  extra_annotations: {}
+  # -- Node selector for the upgrade job components
+  #    Expected to be of the form `{"key": "value"}`
+  nodeSelector:
+    kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+  # -- Tolerations for the upgrade job components
+  #    Expected to be of the form `[ {"key": "value"} ]`
+  tolerations: []
+  launcher:
+    # -- Resources for the launcher component of the upgrade mechanism.
+    resources: {}
+#      limits:
+#        cpu: "1000m"
+#        memory: "1Gi"
+#      requests:
+#        cpu: "100m"
+#        memory: "100Mi"
+  dind:
+    # -- Resources for the docker-in-docker component of the upgrade mechanism.
+    resources: {}
+#      limits:
+#        cpu: "1000m"
+#        memory: "1Gi"
+#      requests:
+#        cpu: "100m"
+#        memory: "100Mi"

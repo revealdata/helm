@@ -1,0 +1,117 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: review-database-upgrade-{{ now | unixEpoch }}
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+    {{- if .Values.upgrade.extra_annotations }}
+    {{- range $key, $value := .Values.upgrade.extra_annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+    {{- end }}
+  {{- if .Values.upgrade.extra_labels }}
+  labels:
+      {{- range $key, $value := .Values.upgrade.extra_labels }}
+      {{ $key }}: {{ $value | quote }}
+      {{- end }}
+  {{- end }}
+spec:
+  ttlSecondsAfterFinished: {{ .Values.upgrade.job_ttl_seconds_after_finished | default "259200" }}
+  template:
+    metadata:
+      name: review-database-upgrade
+      {{- if .Values.upgrade.extra_annotations }}
+      annotations:
+        {{- range $key, $value := .Values.upgrade.extra_annotations }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.upgrade.extra_labels }}
+      labels:
+        {{- range $key, $value := .Values.upgrade.extra_labels }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+      {{- end }}
+    spec:
+      volumes:
+        - name: launcher-storage
+          emptyDir: {}
+      containers:
+      - name: review-database-upgrade-launcher
+        image: "{{ .Values.upgrade.image }}:{{ .Values.upgrade.tag }}"
+        imagePullPolicy: Always
+        env:
+          {{- range $key, $value := .Values.upgrade.env }}
+          - name: {{ $key }}
+            value: {{ $value | quote }}
+          {{- end }}
+          - name: DOCKER_HOST
+            value: "{{ .Values.upgrade.docker_host | default "tcp://localhost" }}:{{ .Values.upgrade.docker_port | default "2375" }}"
+        {{- if .Values.upgrade.launcher.resources }}
+        resources:
+            {{- toYaml .Values.upgrade.launcher.resources | nindent 8 }}
+        {{- end }}
+        volumeMounts:
+          - name: launcher-storage
+            mountPath: /opt/launcher_storage
+            subPath: launcher_storage
+        lifecycle:
+          preStop:
+            exec:
+              command:
+                - /bin/sh
+                - '-c'
+                - sleep 20
+        securityContext: {}
+      - name: dind
+        image: "{{ .Values.upgrade.dind_image }}"
+        command:
+          - dockerd
+          - "--host"
+          - "tcp://127.0.0.1:{{ .Values.upgrade.docker_port | default "2375" }}"
+        env:
+          - name: DOCKER_HOST
+            value: "{{ .Values.upgrade.docker_host | default "tcp://localhost" }}:{{ .Values.upgrade.docker_port | default "2375" }}"
+        {{- if .Values.upgrade.launcher.resources }}
+        resources:
+            {{- toYaml .Values.upgrade.launcher.resources | nindent 8 }}
+        {{- end }}
+        volumeMounts:
+          - name: launcher-storage
+            mountPath: /var/lib/docker
+            subPath: docker
+          - name: launcher-storage
+            mountPath: /opt/launcher_storage
+            subPath: launcher_storage
+        lifecycle:
+          preStop:
+            exec:
+              command:
+                - /bin/sh
+                - '-c'
+                - while [ ! -z $(docker ps -q) ]; do sleep 1; done;
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true
+      restartPolicy: Never
+      {{- if .Values.upgrade.nodeSelector }}
+      nodeSelector:
+          {{- range $key, $value := .Values.upgrade.nodeSelector }}
+          {{ $key }}: {{ $value | quote }}
+          {{- end }}
+      {{- end }}
+      {{- if .Values.upgrade.tolerations }}
+      tolerations:
+          {{- range $key, $value := .Values.upgrade.tolerations }}
+          {{ $key }}: {{ $value | quote }}
+          {{- end }}
+      {{- end }}
+      serviceAccountName: {{ .Values.upgrade.service_account_name }}
+      securityContext: {}
+  backoffLimit: 4
