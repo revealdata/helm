@@ -1084,6 +1084,16 @@ entries:
   review-upgrade:
   - apiVersion: v2
     appVersion: 11.5.1
+    created: "2023-04-11T21:04:43.495078829Z"
+    description: A chart for deploying the review upgrade tool.
+    digest: 4edaa74866a7c23bf1e0c6b47b9b96dfde4e09c98093d27744e5a77f18cb5ad2
+    name: review-upgrade
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/review-upgrade-11.5.2/review-upgrade-11.5.2.tgz
+    version: 11.5.2
+  - apiVersion: v2
+    appVersion: 11.5.1
     created: "2023-04-11T20:14:33.918974219Z"
     description: A chart for deploying the review upgrade tool.
     digest: 474e5b93ac3e60e1bb7287207ec67e5d1567a772ce870fd44a0be722bd18edfc
@@ -1092,4 +1102,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-upgrade-11.5.1/review-upgrade-11.5.1.tgz
     version: 11.5.1
-generated: "2023-04-11T20:14:33.919205822Z"
+generated: "2023-04-11T21:04:43.495220532Z"
