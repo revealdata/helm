@@ -21,7 +21,7 @@ upgrade:
     UPGRADE_THREADS: ""
     # -- The CPU limit to set for each upgrade thread. Expects a value like `100000` to mean 1 CPU.
     UPGRADE_THREAD_CPU_QUOTA: ""
-    # -- The memory limit to set for each upgrade thread. Expects a value like `100Mi`
+    # -- The memory limit to set for each upgrade thread. Expects a value like `100m` for 100 megabytes.
     UPGRADE_THREAD_MEMORY_LIMIT: ""
     # -- Whether we should upgrade all MSAs or just a single MSA. If `all`, we will upgrade all MSAs. If not set to `all`, we will upgrade the MSA namespace specified here. In that case it should be of the form `review-12345678`.
     UPGRADE_ALL_OR_SINGLE_MSA: ""

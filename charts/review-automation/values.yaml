@@ -17,7 +17,7 @@ configmap:
   DEBUG: "True"
 
 image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/automation/review-automation"
-tag: "11.2.14.1"
+tag: "11.5.5"
 # -- Force a re-deploy when a helm upgrade happens
 reloadOnUpgrade: false
 resources:

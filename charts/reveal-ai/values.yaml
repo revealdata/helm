@@ -108,7 +108,7 @@ secrets:
 
 ai:
   image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/reveal_ai/ai_service"
-  tag: "11.04.15"
+  tag: "11.05.05"
   name: "Reveal-AI"
   replicaCount: 1
   env:
@@ -149,7 +149,7 @@ ai:
 
 processing:
   image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/reveal_ai/processing_service"
-  tag: "11.04.15"
+  tag: "11.05.05"
   name: "Reveal-AI"
   replicaCount: 1
   env:
@@ -200,7 +200,7 @@ processing:
 
 frontend:
   image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/dev/reveal_ai/api"
-  tag: "11.04.14"
+  tag: "11.05.04"
   name: "Reveal-AI"
   env:
     - name: "servername"

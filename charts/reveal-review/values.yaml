@@ -150,7 +150,7 @@ review:
 
   web:
     image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/publish"
-    tag: "11.5.12"
+    tag: "11.5.8"
     os: "windows"
     tolerations: []
     resources:
@@ -186,7 +186,7 @@ review:
 
   api:
     image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/publish_api"
-    tag: "11.5.12"
+    tag: "11.5.8"
     os: "linux"
     tolerations: []
     resources: {}
@@ -214,7 +214,7 @@ review:
 
   search_api:
     image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/search_api"
-    tag: "11.5.12"
+    tag: "11.5.8"
     name: "review-search-api"
     os: "linux"
     tolerations: []
@@ -234,7 +234,7 @@ review:
 
   ui:
     image: "249718226835.dkr.ecr.us-east-1.amazonaws.com/reveal/11series/ui"
-    tag: "11.5.9"
+    tag: "11.5.4"
     os: "linux"
     tolerations: []
     resources: {}
@@ -262,7 +262,7 @@ review:
 
   review_services:
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/assignment"
-      tag: "11.5.12"
+      tag: "11.5.8"
       name: "review-assignment"
       os: "linux"
       has_listening_service: True
@@ -291,7 +291,7 @@ review:
         failureThreshold: 3
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/assignmentstatus"
-      tag: "11.5.12"
+      tag: "11.5.8"
       name: "review-assignmentstatus"
       os: "linux"
       has_listening_service: False
@@ -310,7 +310,7 @@ review:
         maxUnavailable:
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/bulktag"
-      tag: "11.5.12"
+      tag: "11.5.8"
       name: "review-bulktag"
       os: "linux"
       has_listening_service: True
@@ -330,7 +330,7 @@ review:
         maxUnavailable:
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/documentloader"
-      tag: "11.5.12"
+      tag: "11.5.8"
       name: "review-documentloader"
       os: "linux"
       has_listening_service: True
@@ -350,7 +350,7 @@ review:
         maxUnavailable:
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/export"
-      tag: "11.5.12"
+      tag: "11.5.8"
       name: "review-export"
       os: "linux"
       has_listening_service: True
@@ -370,7 +370,7 @@ review:
         maxUnavailable:
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/indexbatch"
-      tag: "11.5.12"
+      tag: "11.5.8"
       name: "review-indexbatch"
       os: "linux"
       has_listening_service: True
@@ -390,7 +390,7 @@ review:
         maxUnavailable:
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/indexserver"
-      tag: "11.5.12"
+      tag: "11.5.8"
       name: "review-indexserver"
       os: "linux"
       has_listening_service: True
@@ -431,7 +431,7 @@ review:
               key: rabbitmq-vhost
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/print"
-      tag: "11.5.12"
+      tag: "11.5.8"
       name: "review-print"
       os: "linux"
       has_listening_service: True
@@ -451,7 +451,7 @@ review:
         maxUnavailable:
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/productionserver"
-      tag: "11.5.12"
+      tag: "11.5.8"
       name: "review-productionserver"
       os: "linux"
       has_listening_service: True
@@ -492,7 +492,7 @@ review:
               key: rabbitmq-vhost
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/search"
-      tag: "11.5.12"
+      tag: "11.5.8"
       name: "review-search"
       os: "linux"
       has_listening_service: True
@@ -512,7 +512,7 @@ review:
         maxUnavailable:
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/productionclient"
-      tag: "11.5.12"
+      tag: "11.5.8"
       name: "review-productionclient"
       os: "linux"
       has_listening_service: False
@@ -551,7 +551,7 @@ review:
               name: review-secrets
               key: rabbitmq-vhost
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/indexclient"
-      tag: "11.5.12"
+      tag: "11.5.8"
       name: "review-indexclient"
       os: "linux"
       has_listening_service: False
@@ -609,7 +609,7 @@ review:
               key: rabbitmq-vhost
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/imaging"
-      tag: "11.5.12"
+      tag: "11.5.8"
       name: "review-imaging-bulk"
       os: "windows"
       has_listening_service: False
@@ -649,7 +649,7 @@ review:
               key: rabbitmq-vhost
 
     - image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/review/imaging"
-      tag: "11.5.12"
+      tag: "11.5.8"
       name: "review-imaging-totf"
       os: "windows"
       has_listening_service: False
