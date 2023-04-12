@@ -1396,6 +1396,16 @@ entries:
   selenium:
   - apiVersion: v2
     appVersion: 3.141.59
+    created: "2023-04-12T21:00:01.251685036Z"
+    description: Selenium Grid
+    digest: d50dbb7629184376d61c12fd8e11ac13598a8950fb2ee9bf07d782e71760e4a9
+    name: selenium
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/selenium-1.0.1/selenium-1.0.1.tgz
+    version: 1.0.1
+  - apiVersion: v2
+    appVersion: 3.141.59
     created: "2023-04-12T20:28:49.212683414Z"
     description: Selenium Grid
     digest: 363f064a2c0da42d4a6558f0aa9d012e33bbd20d0464413670b329a092d25cfd
@@ -1404,4 +1414,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/selenium-1.0.0/selenium-1.0.0.tgz
     version: 1.0.0
-generated: "2023-04-12T20:28:49.212937115Z"
+generated: "2023-04-12T21:00:01.251882038Z"
