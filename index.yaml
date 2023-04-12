@@ -330,6 +330,16 @@ entries:
   processing-bootstrap:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2023-04-12T18:51:14.102198Z"
+    description: Bootstraping the processing service for each MSA
+    digest: 23926cf9241c809e6262e8c017ed9316bc22ce681bfea5a94f2c6490b3d60b2f
+    name: processing-bootstrap
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/processing-bootstrap-1.0.6/processing-bootstrap-1.0.6.tgz
+    version: 1.0.6
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2022-12-30T17:08:58.337100585Z"
     description: Bootstraping the processing service for each MSA
     digest: 5bfa96144c6a7ef5718212182c2f5974f6827b4ffe1a319fa7e05d8e4d8494fc
@@ -436,6 +446,16 @@ entries:
   reveal-ai:
   - apiVersion: v2
     appVersion: 11.05.00
+    created: "2023-04-12T18:51:14.286979292Z"
+    description: A Helm chart for Kubernetes
+    digest: 775d971678d5edf17bce7e085c1463af435f04e7bf6642f3b18854a0de443c9b
+    name: reveal-ai
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-ai-11.5.3/reveal-ai-11.5.3.tgz
+    version: 11.5.3
+  - apiVersion: v2
+    appVersion: 11.05.00
     created: "2023-04-12T14:44:30.936269495Z"
     description: A Helm chart for Kubernetes
     digest: 38c665e0974564717b8c4d713b94444b3c2d83d55fdae28b44c047d841e6f9ef
@@ -505,6 +525,20 @@ entries:
     - https://github.com/revealdata/helm/releases/download/reveal-ai-0.1.1/reveal-ai-0.1.1.tgz
     version: 0.1.1
   reveal-ai-bootstrap:
+  - apiVersion: v2
+    appVersion: 11.0.0
+    created: "2023-04-12T18:51:14.472842433Z"
+    description: reveal-ai-bootstrap
+    digest: 677e823f7daba6b617bd9910c476923fb9f7804e3276cbf22c048c47ddb1863d
+    maintainers:
+    - email: info@revealdata
+      name: Reveal-Brainspace
+      url: https://revealdata.com
+    name: reveal-ai-bootstrap
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-ai-bootstrap-1.0.3/reveal-ai-bootstrap-1.0.3.tgz
+    version: 1.0.3
   - apiVersion: v2
     appVersion: 11.0.0
     created: "2022-11-14T22:34:39.83246692Z"
@@ -718,6 +752,20 @@ entries:
     - https://github.com/revealdata/helm/releases/download/reveal-keycloak-0.7.4/reveal-keycloak-0.7.4.tgz
     version: 0.7.4
   reveal-review:
+  - apiVersion: v2
+    appVersion: 11.5.0
+    created: "2023-04-12T18:51:14.668451323Z"
+    description: Reveal Review
+    digest: 6f5e2a7b195d8af7b44c88c5eaec3b58a2a04994ff76e97801e3171fccdad096
+    maintainers:
+    - email: info@revealdata
+      name: Reveal-Brainspace
+      url: https://revealdata.com
+    name: reveal-review
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-review-11.5.1/reveal-review-11.5.1.tgz
+    version: 11.5.1
   - apiVersion: v2
     appVersion: 11.5.0
     created: "2023-04-12T14:44:31.638288013Z"
@@ -1117,6 +1165,16 @@ entries:
   review-automation:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2023-04-12T18:51:14.82745313Z"
+    description: A Helm chart for Review Automation with Reveal Series11
+    digest: b5b412f3d7cc47015ce7bedbb9839bcd5591ca1b0eae005a42458ef4927682aa
+    name: review-automation
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/review-automation-0.0.4/review-automation-0.0.4.tgz
+    version: 0.0.4
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2023-04-12T14:44:32.110602545Z"
     description: A Helm chart for Review Automation with Reveal Series11
     digest: e72cd585885a849343df16eb66a0976c65a2513b1ed30a044814bb9c53e175d1
@@ -1136,6 +1194,20 @@ entries:
     - https://github.com/revealdata/helm/releases/download/review-automation-0.0.1/review-automation-0.0.1.tgz
     version: 0.0.1
   review-series11-bootstrap:
+  - apiVersion: v2
+    appVersion: 11.0.0
+    created: "2023-04-12T18:51:15.009945817Z"
+    description: review-series11-bootstrap
+    digest: ac5bcb142e0d1a7aca603f081e4a71940e66abfdcf9e2624a8ec215a52fb873a
+    maintainers:
+    - email: info@revealdata
+      name: Reveal-Brainspace
+      url: https://revealdata.com
+    name: review-series11-bootstrap
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/review-series11-bootstrap-1.0.12/review-series11-bootstrap-1.0.12.tgz
+    version: 1.0.12
   - apiVersion: v2
     appVersion: 11.0.0
     created: "2023-02-10T22:04:49.85314091Z"
@@ -1293,6 +1365,16 @@ entries:
   review-upgrade:
   - apiVersion: v2
     appVersion: 11.5.1
+    created: "2023-04-12T18:51:15.185657592Z"
+    description: A chart for deploying the review upgrade tool.
+    digest: f1c039bdef20bfd6a7bee851469c79eff5e5f7f51fe6fe9808f51712fd70a9a6
+    name: review-upgrade
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/review-upgrade-11.5.3/review-upgrade-11.5.3.tgz
+    version: 11.5.3
+  - apiVersion: v2
+    appVersion: 11.5.1
     created: "2023-04-11T21:04:43.495078829Z"
     description: A chart for deploying the review upgrade tool.
     digest: 4edaa74866a7c23bf1e0c6b47b9b96dfde4e09c98093d27744e5a77f18cb5ad2
@@ -1311,4 +1393,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-upgrade-11.5.1/review-upgrade-11.5.1.tgz
     version: 11.5.1
-generated: "2023-04-12T18:34:41.685372248Z"
+generated: "2023-04-12T18:51:15.186288521Z"
