@@ -1,5 +1,6 @@
 global:
   namespace: actions-runner-controller
+  NoNamespace: false
   
   runners:
     # Applied to all runners
