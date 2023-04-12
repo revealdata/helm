@@ -3,6 +3,16 @@ entries:
   argo-application:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2023-04-12T18:34:41.499157778Z"
+    description: A Helm chart that installs an ArgoCD Application resource.
+    digest: 37ac963269ce2825ddbbbc7ca8cd60751a07ed028fa85dbdd2bd68b8bd53720b
+    name: argo-application
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/argo-application-1.0.3/argo-application-1.0.3.tgz
+    version: 1.0.3
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2023-03-22T22:22:59.969600481Z"
     description: A Helm chart that installs an ArgoCD Application resource.
     digest: 9c5238ca9aa45587ff02de04e5e6595918fd47b50305492d8a7ea1383a1ff37f
@@ -235,6 +245,22 @@ entries:
     - https://github.com/revealdata/helm/releases/download/elasticsearch-19.1.10/elasticsearch-19.1.10.tgz
     version: 19.1.10
   github-actions-controller:
+  - annotations:
+      category: Operations
+    apiVersion: v2
+    appVersion: 0.22.0
+    created: "2023-04-12T18:34:41.685177649Z"
+    dependencies:
+    - name: actions-runner-controller
+      repository: https://actions-runner-controller.github.io/actions-runner-controller
+      version: 0.22.0
+    description: A Helm chart for ephemeral GitHub Actions runners
+    digest: 0f3a72a4f4006bc5a09bd4760d2b963de2df7bd299572e2ef68e5c35afbb8f63
+    name: github-actions-controller
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/github-actions-controller-1.0.1/github-actions-controller-1.0.1.tgz
+    version: 1.0.1
   - annotations:
       category: Operations
     apiVersion: v2
@@ -1285,4 +1311,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-upgrade-11.5.1/review-upgrade-11.5.1.tgz
     version: 11.5.1
-generated: "2023-04-12T15:37:36.275569072Z"
+generated: "2023-04-12T18:34:41.685372248Z"
