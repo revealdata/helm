@@ -1393,4 +1393,15 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-upgrade-11.5.1/review-upgrade-11.5.1.tgz
     version: 11.5.1
-generated: "2023-04-12T18:51:15.186288521Z"
+  selinium:
+  - apiVersion: v2
+    appVersion: 3.141.59
+    created: "2023-04-12T18:57:55.72976099Z"
+    description: Selenium Grid
+    digest: c09dfbcd91f7bcc34d210e160418c1ba0484d06be943bc5b80e95905ff95bc9a
+    name: selinium
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/selinium-1.0.0/selinium-1.0.0.tgz
+    version: 1.0.0
+generated: "2023-04-12T18:57:55.729949888Z"
