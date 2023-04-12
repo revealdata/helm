@@ -234,6 +234,23 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/elasticsearch-19.1.10/elasticsearch-19.1.10.tgz
     version: 19.1.10
+  github-actions-controller:
+  - annotations:
+      category: Operations
+    apiVersion: v2
+    appVersion: 0.22.0
+    created: "2023-04-12T15:37:36.275387268Z"
+    dependencies:
+    - name: actions-runner-controller
+      repository: https://actions-runner-controller.github.io/actions-runner-controller
+      version: 0.22.0
+    description: A Helm chart for ephemeral GitHub Actions runners
+    digest: 40b8028e78c3db029e2397f55240e715cc7228db8f1317c88fc065702cc77f36
+    name: github-actions-controller
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/github-actions-controller-1.0.0/github-actions-controller-1.0.0.tgz
+    version: 1.0.0
   msa-perms:
   - apiVersion: v2
     appVersion: 1.0.0
@@ -1268,4 +1285,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-upgrade-11.5.1/review-upgrade-11.5.1.tgz
     version: 11.5.1
-generated: "2023-04-12T14:44:32.110994346Z"
+generated: "2023-04-12T15:37:36.275569072Z"
