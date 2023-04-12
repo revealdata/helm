@@ -30,6 +30,7 @@ jobs:
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo add spark-operator https://googlecloudplatform.github.io/spark-on-k8s-operator
+          helm repo add actions-runner-controller https://actions-runner-controller.github.io/actions-runner-controller
 
       - name: Build chart dependencies
         run: |
