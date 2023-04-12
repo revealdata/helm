@@ -15,8 +15,8 @@ secrets:
     aws:
       region: ${aws_region}
       secretName:
-          # TODO Passthrough from data module.
-          aws_credentials: ${secrets_externalSecrets_aws_secretName_aws_credentials}
+        # TODO Passthrough from data module.
+        aws_credentials: ${secrets_externalSecrets_aws_secretName_aws_credentials}
   kubernetes:
     aws-access-key-id: ""
     aws-secret-access-key: ""
@@ -37,19 +37,18 @@ ingress:
 crushftp:
   reloadOnUpgrade: false
   config_values:
-      AWS_DEFAULT_REGION: "${aws_region}"
-      CRUSH_FTP_HOST: '${destination_namespace}-crushftp.${destination_namespace}.svc.cluster.local'
-      CRUSH_ADMIN_PORT: '8080'
-      CRUSH_ADMIN_USER: 'crushadmin'
-      CRUSH_ADMIN_PASSWORD: 'crushadmin'
-      CRUSH_ADMIN_PROTOCOL: 'http'
-      
+    AWS_DEFAULT_REGION: "${aws_region}"
+    CRUSH_FTP_HOST: '${destination_namespace}-crushftp.${destination_namespace}.svc.cluster.local'
+    CRUSH_ADMIN_PORT: '8080'
+    CRUSH_ADMIN_USER: 'crushadmin'
+    CRUSH_ADMIN_PASSWORD: 'crushadmin'
+    CRUSH_ADMIN_PROTOCOL: 'http'
 
     # TODO Pass through from data module.
-      awsBucket: '${analytics_bucket}'
+    awsBucket: '${analytics_bucket}'
 
     # TODO Pass through from data module.
-      AWSAccessAnalyticsARN: '${analytics_role_arn}'
+    AWSAccessAnalyticsARN: '${analytics_role_arn}'
 
   services:
     # -- Global selector, resources, and tolerations.
@@ -85,4 +84,3 @@ crushftp:
         size: "100Gi"
         name: "crushftp-api-storage"
         storageClass: "gp2"
-

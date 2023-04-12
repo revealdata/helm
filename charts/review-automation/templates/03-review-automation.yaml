@@ -34,6 +34,12 @@ spec:
         env:
           {{- /* output env vars for Review secrets (_helpers.tpl) */}}
           {{- include "resources.env.secrets" . | nindent 6 }}
+          {{- if .Values.env }}
+          {{- range $key, $value := .Values.env }}
+          - name: {{ $key }}
+            value: {{ $value | quote }}
+          {{- end }}
+          {{- end }}
         imagePullPolicy: Always
         name: review-automation
         {{- if .Values.resources }}

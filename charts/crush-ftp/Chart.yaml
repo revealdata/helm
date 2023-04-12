@@ -23,7 +23,7 @@ version: 0.0.1
 # It is recommended to use it with quotes.
 appVersion: "1.0"
 
-#dependencies:
+# dependencies:
 #  - name: CrushFtp
 #    version: 10.3.0
 #    repository: https://www.crushftp.com/early10/CrushFTP10.zip

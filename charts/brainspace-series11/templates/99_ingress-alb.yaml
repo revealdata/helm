@@ -31,7 +31,7 @@ metadata:
     alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=4000,routing.http2.enabled=true,routing.http.drop_invalid_header_fields.enabled=true
     {{- end }}
     alb.ingress.kubernetes.io/target-group-attributes: stickiness.enabled=false
-    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-FS-1-2-Res-2020-10
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS13-1-2-Res-2021-06
     #  Health check path annotations
     alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
     alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "15"

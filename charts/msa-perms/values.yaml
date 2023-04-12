@@ -32,7 +32,7 @@ secrets:
   # -- OPTIONS FOR: 'external-secrets' -- #
   externalSecrets:
     # -- The external-secrets provider
-    # -- Providers: 
+    # -- Providers:
     # -- aws: AWS SecretsManager
     # -- azurekv: Azure KeyVault
     provider: aws

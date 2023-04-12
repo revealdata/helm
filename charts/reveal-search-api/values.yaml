@@ -79,13 +79,20 @@ ingress:
   labels:
     component: api
 
-resources: 
+resources:
   requests: 
     cpu: 165m
     memory: 256Mi
   limits: 
     cpu: 2000m
     memory: 2046Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
 
 nodeSelector: {}
 
@@ -126,5 +133,3 @@ spark-operator:
     limits:
       cpu: 2000m
       memory: 1024Mi
-  
-  

@@ -1,5 +1,6 @@
 {{- if .Values.ingress.enabled }}
 {{- $ingress_class := (.Values.ingress.class | default "alb") -}}
+{{- if eq $ingress_class "alb" }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -11,71 +12,53 @@ metadata:
     external-dns.alpha.kubernetes.io/hostname: {{ .Values.ingress.hostname }}
     {{- end }}
     kubernetes.io/ingress.class: {{ $ingress_class }}
-
-    {{- if eq $ingress_class "alb" }}
     # AWS ALB ingress (alb)
     # https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/guide/ingress/annotations/
     alb.ingress.kubernetes.io/target-type: ip
+    {{- if .Values.ingress.class_alb.ipv6 }}
     alb.ingress.kubernetes.io/ip-address-type: dualstack
+    {{- end }}
+    {{- if .Values.ingress.class_alb.public }}
     alb.ingress.kubernetes.io/scheme: "internet-facing"
-    alb.ingress.kubernetes.io/wafv2-acl-arn: {{ .Values.ingress.wafARN }}
-    alb.ingress.kubernetes.io/shield-advanced-protection: "true"
-    alb.ingress.kubernetes.io/security-groups: "k8s-reveal11-ingress"
-    alb.ingress.kubernetes.io/manage-backend-security-group-rules: "true"
-    alb.ingress.kubernetes.io/load-balancer-attributes: routing.http2.enabled=true,idle_timeout.timeout_seconds=4000,routing.http.drop_invalid_header_fields.enabled=true,access_logs.s3.enabled=true,access_logs.s3.prefix=ingress_logs/review-ingress/{{ .Values.global.namespace }},access_logs.s3.bucket={{ .Values.ingress.logBucket }}
-    alb.ingress.kubernetes.io/target-group-attributes: stickiness.enabled=false
-    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-FS-1-2-Res-2020-10
+    {{- else }}
+    alb.ingress.kubernetes.io/scheme: "internal"
+    {{- end }}
     #  Health check path annotations
     alb.ingress.kubernetes.io/healthcheck-interval-seconds: "15"
     alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "5"
     alb.ingress.kubernetes.io/success-codes: "200"
     alb.ingress.kubernetes.io/healthy-threshold-count: "2"
     alb.ingress.kubernetes.io/unhealthy-threshold-count: "4"
-    {{- if .Values.ingress.sslCertArn }}
+    {{- if .Values.ingress.class_alb.sslCertArn }}
     # The ARN of your SSL certificate.
-    alb.ingress.kubernetes.io/certificate-arn: {{ .Values.ingress.sslCertArn }}
+    alb.ingress.kubernetes.io/certificate-arn: {{ .Values.ingress.class_alb.sslCertArn }}
     {{- end }}
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}, {"HTTP":80}]'
     # SSL Redirect Setting
     alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
     alb.ingress.kubernetes.io/actions.response-403: '{"Type":"fixed-response","FixedResponseConfig":{"ContentType":"text/plain","StatusCode":"403","MessageBody":"403 Forbidden"}}'
+
+    {{- if .Values.ingress.class_alb.attributes -}}
+    {{- $attributes := list }}
+    {{- range .Values.ingress.class_alb.attributes }}
+    {{- $attributes = append $attributes (printf "%s=%s" .key .value) }}
     {{- end }}
-    
-    {{- if eq $ingress_class "nginx" }}
-    # Nginx ingress (nginx)
-    # https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/
-    nginx.ingress.kubernetes.io/service-upstream: "true"
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    # nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "180"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
-    nginx.ingress.kubernetes.io/proxy-next-upstream: "http_503"
-    nginx.ingress.kubernetes.io/proxy-next-upstream-timeout: "180"
-    nginx.ingress.kubernetes.io/proxy-buffering: "off"
-    nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
-    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
-    nginx.ingress.kubernetes.io/upstream-vhost: {{ quote .Values.ingress.hostname }}
+    # Load-balancer Attributes
+    alb.ingress.kubernetes.io/load-balancer-attributes: "{{ join "," $attributes }}"
     {{- end }}
-    {{ if .Values.ingress.annotations }}
-    {{- toYaml .Values.ingress.annotations }}
+
+    {{- if .Values.ingress.annotations }}
+    # Custom annotations
+{{- toYaml .Values.ingress.annotations | nindent 4}}
     {{- end }}
 spec:
   defaultBackend:
     service:
       name: service-review-series11-ui
       port:
-        number: 8443
+        number: {{ .Values.ingress.backend.port | default 8443 }}
   rules:
-    {{- if eq $ingress_class "nginx" }}
-    - host: {{ .Values.ingress.hostname }}
-      http:
-    {{- else }}
     - http:
-    {{- end }}
         paths:
         {{- if ne .Values.ingress.disableSSLRedirect true}}
           - path: /
@@ -127,8 +110,9 @@ spec:
               service:
                 name: service-review-series11-ui
                 port:
-                  number: 8443
+                  number: {{ .Values.ingress.backend.port | default 8443 }}
 
+{{- end }}
 {{- end }}
 {{- if .Values.ingress.custom }}
 ---
