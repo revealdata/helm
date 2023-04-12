@@ -35,6 +35,7 @@ global:
 authSecret:
   name: controller-manager
   key: eks/github
+  region: us-east-1
 
 githubWebhookServer:
   ingress:

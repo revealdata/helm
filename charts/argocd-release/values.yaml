@@ -24,6 +24,7 @@ source:
     valueFiles: []
     automatedPrune: true
     automatedSelfHeal: true
+    syncReplace: false
 
 # Destination cluster.
 destination:
