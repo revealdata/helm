@@ -1,0 +1,74 @@
+## Using a custom ingress since the default chart has limitations
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: actions-runner-controller-github-webhook-server
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/target-type: ip
+    external-dns.alpha.kubernetes.io/hostname: "{{ .Values.githubWebhookServer.ingress.hostname }}"
+    alb.ingress.kubernetes.io/scheme: "internet-facing"
+    alb.ingress.kubernetes.io/target-group-attributes: stickiness.enabled=false
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-FS-1-2-Res-2020-10
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}, {"HTTP":80}]'
+    alb.ingress.kubernetes.io/certificate-arn: "{{ .Values.githubWebhookServer.ingress.sslCertArn }}"
+    #  Health check path annotations
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "15"
+    alb.ingress.kubernetes.io/success-codes: "200"
+    alb.ingress.kubernetes.io/healthy-threshold-count: "2"
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: "4"
+    alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
+    {{- if .Values.githubWebhookServer.ingress.AllowedCIDRBlocks }}
+    {{- $adminAllowedCIDRs := "[\"10.0.0.0/8\"]" }}
+    {{- $adminAllowedCIDRs = (.Values.githubWebhookServer.ingress.AllowedCIDRBlocks | toJson) }}
+    alb.ingress.kubernetes.io/actions.response-403: '{"Type":"fixed-response","FixedResponseConfig":{"ContentType":"text/plain","StatusCode":"403","MessageBody":"403 Forbidden"}}'
+    alb.ingress.kubernetes.io/actions.allow-github: '{"type":"forward","forwardConfig":{"targetGroups":[{"serviceName":"actions-runner-controller-github-webhook-server","servicePort":"80","weight":20}],"targetGroupStickinessConfig":{"enabled":true,"durationSeconds":200}}}'
+    alb.ingress.kubernetes.io/conditions.allow-github: '[{"field":"source-ip","sourceIpConfig":{"values":{{$adminAllowedCIDRs}}}}]'
+    {{- end }}
+    {{- with .Values.githubWebhookServer.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  defaultBackend:
+    service:
+      name: actions-runner-controller-github-webhook-server
+      port:
+        number: 80
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ssl-redirect
+                port:
+                  name: use-annotation
+          {{- if .Values.githubWebhookServer.ingress.AllowedCIDRBlocks }}
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: allow-github
+                port:
+                  name: use-annotation
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: response-403
+                port:
+                  name: use-annotation
+          {{- else }}
+          - path: /
+                pathType: Prefix
+                backend:
+                  service:
+                    name: actions-runner-controller-webhook
+                    port:
+                      number: 80
+          {{- end }}
+

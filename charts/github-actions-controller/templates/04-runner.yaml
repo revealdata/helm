@@ -1,0 +1,71 @@
+{{- range .Values.runners }}
+{{- if .enabled }}
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: {{ .name | lower }}-runner
+  namespace: {{ $.Release.Namespace }}
+spec:
+  template:
+    spec:
+      ephemeral: true
+      {{- if and (.autoscaler) ( not .autoscaler.enabled) (.replicas) }}
+      replicas: {{ .replicas | default 1 }}
+      {{- end }}
+      {{- if and (.enterprise) (not .organization) }}
+      enterprise: {{ .enterprise }}
+      {{- end }}
+      {{- if and (.organization) (not .enterprise) }}
+      organization: {{ .organization }}
+      {{- else if .repository }}
+      repository: {{ .repository }}
+      {{- end }}
+      labels:
+        - "self-hosted"
+        {{- range $.Values.global.runners.labels }}
+        - {{ . | quote }}
+        {{- end }}
+        {{- range .labels }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- if .template }}
+      {{- toYaml .template | nindent 6 }}
+      {{- else }}
+      {{- toYaml $.Values.global.runners.template | nindent 6 }}
+      {{- end }}
+
+
+{{- if and (.autoscaler) (.autoscaler.enabled) }}
+---
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: HorizontalRunnerAutoscaler
+metadata:
+  name: {{ .name | lower }}-runner-autoscaler
+  namespace: {{ $.Release.Namespace }}
+spec:
+  # Runners in the targeted RunnerDeployment won't be scaled down
+  # for 5 minutes instead of the default 10 minutes now
+  scaleDownDelaySecondsAfterScaleOut: 300
+  scaleTargetRef:
+    kind: RunnerDeployment
+    name: {{ .name | lower }}-runner
+  minReplicas: {{ .autoscaler.minReplicas | default $.Values.global.runners.autoscaler.minReplicas }}
+  maxReplicas: {{ .autoscaler.maxReplicas | default $.Values.global.runners.autoscaler.maxReplicas }}
+  scaleUpTriggers:
+    {{- if .autoscaler.scaleUpTriggers }}
+    {{- toYaml .autoscaler.scaleUpTriggers | nindent 4 }}
+    {{- else if $.Values.global.runners.autoscaler.scaleUpTriggers }}
+    {{- toYaml $.Values.global.runners.autoscaler.scaleUpTriggers | nindent 4 }}
+    {{- end }}
+  {{- if .autoscaler.metrics }}
+  metrics:
+  {{- toYaml .autoscaler.metrics | nindent 4 }}
+  {{- else if $.Values.global.runners.autoscaler.metrics }}
+  metrics:
+  {{- toYaml $.Values.global.runners.autoscaler.metrics | nindent 4 }}
+  {{- end }}
+
+{{- end }}
+{{- end }}
+{{- end }}
