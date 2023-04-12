@@ -24,6 +24,20 @@ entries:
   brainspace-series11:
   - apiVersion: v2
     appVersion: 11.5.0
+    created: "2023-04-12T14:44:30.361147122Z"
+    description: A Helm chart for Brainspace with Reveal Series11
+    digest: d9bfea35d8e373812a44299898a8ebb60c45a4472e2551889aa96b56966b721b
+    maintainers:
+    - email: info@revealdata
+      name: Reveal-Brainspace
+      url: https://revealdata.com
+    name: brainspace-series11
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/brainspace-series11-11.5.3/brainspace-series11-11.5.3.tgz
+    version: 11.5.3
+  - apiVersion: v2
+    appVersion: 11.5.0
     created: "2023-04-10T18:14:03.686216705Z"
     description: A Helm chart for Brainspace with Reveal Series11
     digest: 0023cd8839899848d8d4d78abfd739427a924740eacc1e1a3bdb4ae33656fead
@@ -125,6 +139,39 @@ entries:
       category: Analytics
     apiVersion: v2
     appVersion: 8.3.3
+    created: "2023-04-12T14:44:30.519637303Z"
+    dependencies:
+    - condition: global.kibanaEnabled
+      name: kibana
+      repository: https://charts.bitnami.com/bitnami
+      version: 10.x.x
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 1.x.x
+    description: Elasticsearch is a distributed search and analytics engine. It is
+      used for web search, log monitoring, and real-time analytics. Ideal for Big
+      Data applications.
+    digest: 9d54bd6e1480bcc18ed8c44830e32f98bf63e2d2b381bcfe958d6e320d95fb0c
+    home: https://github.com/bitnami/charts/tree/master/bitnami/elasticsearch
+    icon: https://bitnami.com/assets/stacks/elasticsearch/img/elasticsearch-stack-220x234.png
+    keywords:
+    - elasticsearch
+    maintainers:
+    - name: Bitnami
+      url: https://github.com/bitnami/charts
+    name: elasticsearch
+    sources:
+    - https://github.com/bitnami/containers/tree/main/bitnami/elasticsearch
+    - https://www.elastic.co/products/elasticsearch
+    urls:
+    - https://github.com/revealdata/helm/releases/download/elasticsearch-19.1.12/elasticsearch-19.1.12.tgz
+    version: 19.1.12
+  - annotations:
+      category: Analytics
+    apiVersion: v2
+    appVersion: 8.3.3
     created: "2023-03-21T15:49:45.991406223Z"
     dependencies:
     - condition: global.kibanaEnabled
@@ -207,6 +254,20 @@ entries:
   msa-perms:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2023-04-12T14:44:30.659094703Z"
+    description: A Helm chart that does permissions maintenance for the MSA
+    digest: f61290bde762735ed27136070994a15ce9954f98011c04fb400b28d74c95beec
+    maintainers:
+    - email: info@revealdata.com
+      name: Reveal-Brainspace
+      url: https://revealdata.com
+    name: msa-perms
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/msa-perms-0.1.1/msa-perms-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2023-03-15T15:43:48.826390717Z"
     description: A Helm chart that does permissions maintenance for the MSA
     digest: e842848401b23b0e00e43b4f7daecbd388c7170b4bccafb1ff6abf070a4169c6
@@ -220,6 +281,16 @@ entries:
     - https://github.com/revealdata/helm/releases/download/msa-perms-0.1.0/msa-perms-0.1.0.tgz
     version: 0.1.0
   processing-automation:
+  - apiVersion: v2
+    appVersion: "1.0"
+    created: "2023-04-12T14:44:30.773360694Z"
+    description: A Helm chart for Kubernetes
+    digest: 351d0a5909666e970bcaa4c7eb22de1f56755cea12baffb7e99a5f6c7943c599
+    name: processing-automation
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/processing-automation-1.0.1/processing-automation-1.0.1.tgz
+    version: 1.0.1
   - apiVersion: v2
     appVersion: "1.0"
     created: "2023-03-15T15:43:48.990728083Z"
@@ -339,6 +410,16 @@ entries:
   reveal-ai:
   - apiVersion: v2
     appVersion: 11.05.00
+    created: "2023-04-12T14:44:30.936269495Z"
+    description: A Helm chart for Kubernetes
+    digest: 38c665e0974564717b8c4d713b94444b3c2d83d55fdae28b44c047d841e6f9ef
+    name: reveal-ai
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-ai-11.5.2/reveal-ai-11.5.2.tgz
+    version: 11.5.2
+  - apiVersion: v2
+    appVersion: 11.05.00
     created: "2023-03-15T15:43:49.180338722Z"
     description: A Helm chart for Kubernetes
     digest: b42c3b6834cc46f1e9f775c060faccef7868e70322ebfbae2ce8fb551575b52b
@@ -443,6 +524,16 @@ entries:
   reveal-billing:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2023-04-12T14:44:31.103276713Z"
+    description: A Helm chart for Kubernetes
+    digest: 7f01918fad50a230c95f31ba6f9046e19825302c3fd40b9bef60a3ae06e8e779
+    name: reveal-billing
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-billing-0.1.1/reveal-billing-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2023-03-15T15:43:49.374983894Z"
     description: A Helm chart for Kubernetes
     digest: c3930fc76f89c20242f7e4cea94e97737b6ed27d52009bae2b06a499365e2cc1
@@ -452,6 +543,20 @@ entries:
     - https://github.com/revealdata/helm/releases/download/reveal-billing-0.1.0/reveal-billing-0.1.0.tgz
     version: 0.1.0
   reveal-cloud-ai:
+  - apiVersion: v2
+    appVersion: "1.0"
+    created: "2023-04-12T14:44:31.277612063Z"
+    dependencies:
+    - name: mongodb
+      repository: https://charts.bitnami.com/bitnami
+      version: 13.1.2
+    description: A Helm chart for Kubernetes
+    digest: fb2285e18bb0fdc8c8a9b85fb0c94f4618a2e6b88a48768e9501f514e5fe1966
+    name: reveal-cloud-ai
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-cloud-ai-1.0.3/reveal-cloud-ai-1.0.3.tgz
+    version: 1.0.3
   - apiVersion: v2
     appVersion: "1.0"
     created: "2023-03-15T15:43:49.553639075Z"
@@ -467,6 +572,16 @@ entries:
     - https://github.com/revealdata/helm/releases/download/reveal-cloud-ai-1.0.1/reveal-cloud-ai-1.0.1.tgz
     version: 1.0.1
   reveal-crushftp:
+  - apiVersion: v2
+    appVersion: "1.0"
+    created: "2023-04-12T14:44:31.448458597Z"
+    description: A Helm chart for Kubernetes
+    digest: 888c697e5e76949bf1361a15a08011702ebf4cd78af23e9301a1efd9d90f2f53
+    name: reveal-crushftp
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-crushftp-0.0.2/reveal-crushftp-0.0.2.tgz
+    version: 0.0.2
   - apiVersion: v2
     appVersion: "1.0"
     created: "2023-03-15T15:43:49.760774885Z"
@@ -577,6 +692,20 @@ entries:
     - https://github.com/revealdata/helm/releases/download/reveal-keycloak-0.7.4/reveal-keycloak-0.7.4.tgz
     version: 0.7.4
   reveal-review:
+  - apiVersion: v2
+    appVersion: 11.5.0
+    created: "2023-04-12T14:44:31.638288013Z"
+    description: Reveal Review
+    digest: 9c83ac0890bc989cc10d019bf825d40c3757c69fb8eee291d8d5ac55884b4f4d
+    maintainers:
+    - email: info@revealdata
+      name: Reveal-Brainspace
+      url: https://revealdata.com
+    name: reveal-review
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-review-11.5.0/reveal-review-11.5.0.tgz
+    version: 11.5.0
   - apiVersion: v2
     appVersion: 11.4.6
     created: "2023-03-15T15:43:50.227995619Z"
@@ -804,6 +933,16 @@ entries:
   reveal-samba:
   - apiVersion: v2
     appVersion: 1.0.0
+    created: "2023-04-12T14:44:31.797062796Z"
+    description: A Helm chart for Samba with Reveal Series11
+    digest: 4c3b7a9c34a32bd5de4f9114bc6e36d84b33f636a163875c1d2a1daf65305574
+    name: reveal-samba
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-samba-0.0.3/reveal-samba-0.0.3.tgz
+    version: 0.0.3
+  - apiVersion: v2
+    appVersion: 1.0.0
     created: "2023-03-15T15:43:50.46901419Z"
     description: A Helm chart for Samba with Reveal Series11
     digest: 30059f142f1163805ffcfe5336cd1624a434e3c3507474d2ee15bde209cea04a
@@ -813,6 +952,23 @@ entries:
     - https://github.com/revealdata/helm/releases/download/reveal-samba-0.0.1/reveal-samba-0.0.1.tgz
     version: 0.0.1
   reveal-search-api:
+  - apiVersion: v2
+    appVersion: "1.0"
+    created: "2023-04-12T14:44:31.982455093Z"
+    dependencies:
+    - name: spark-operator
+      repository: https://googlecloudplatform.github.io/spark-on-k8s-operator
+      version: 1.1.27
+    - name: argo-workflows
+      repository: https://charts.bitnami.com/bitnami
+      version: 2.3.10
+    description: Reveal Search API
+    digest: d3577153e862478a099988cddeace407d8e6d46bb8c54ef2608436849f4f788f
+    name: reveal-search-api
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-search-api-0.1.10/reveal-search-api-0.1.10.tgz
+    version: 0.1.10
   - apiVersion: v2
     appVersion: "1.0"
     created: "2023-04-03T21:44:46.125821026Z"
@@ -933,6 +1089,16 @@ entries:
     - https://github.com/revealdata/helm/releases/download/reveal-search-api-0.1.1/reveal-search-api-0.1.1.tgz
     version: 0.1.1
   review-automation:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2023-04-12T14:44:32.110602545Z"
+    description: A Helm chart for Review Automation with Reveal Series11
+    digest: e72cd585885a849343df16eb66a0976c65a2513b1ed30a044814bb9c53e175d1
+    name: review-automation
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/review-automation-0.0.3/review-automation-0.0.3.tgz
+    version: 0.0.3
   - apiVersion: v2
     appVersion: 1.0.0
     created: "2023-03-15T15:43:50.80097918Z"
@@ -1119,4 +1285,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/review-upgrade-11.5.1/review-upgrade-11.5.1.tgz
     version: 11.5.1
-generated: "2023-04-12T13:22:22.194295547Z"
+generated: "2023-04-12T14:44:32.110994346Z"
