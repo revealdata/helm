@@ -1,7 +1,11 @@
 global:
   # -- Optionally set a namespace value. If empty, the helm release name is used
-  namespace: "selenium"
+  namespace: ""
   noNamespace: false
+
+secrets:
+  region: "us-east-1"
+  config: "eks/selenium/config" 
 
 selenium:
   # -- The version of the selenium docker image (tag) to use
