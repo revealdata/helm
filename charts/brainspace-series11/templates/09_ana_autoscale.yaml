@@ -32,8 +32,8 @@ spec:
       nodeSelector:
         kubernetes.io/os: linux
         kubernetes.io/arch: amd64
-        {{- if .Values.brains_ana.nodeGroup }}
-        eks.amazonaws.com/nodegroup: {{ .Values.brains_ana.nodeGroup }}
+        {{- if .Values.brains_ana.autoscale.nodeSelector }}
+        {{- toYaml .Values.brains_ana.autoscale.nodeSelector | nindent 8 }}
         {{- end }}
       {{- if .Values.global.ecr }} {{- if .Values.global.ecr.secret }}
       imagePullSecrets:
