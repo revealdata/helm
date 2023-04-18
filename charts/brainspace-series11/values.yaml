@@ -200,6 +200,10 @@ brains_ui:
   # -- Add a K8s node selector for this deployment to run in
   # -- Example: eks.amazonaws.com/nodegroup: brainspace-nodegroup
   nodeSelector: {}
+  tolerations: []
+    # - effect: "NoSchedule"
+    #   key: "linux-small"
+    #   operator: "Exists"
   # -- Specify customizations to the nginx proxy
   proxyConfig: ""
 
@@ -235,12 +239,13 @@ brains_app:
     tdmCache: false
   # -- Customize the JVM memory settings for the brains_app pods
   jvmMemory:
-    # -- Auto calculate the max ram percentages (default: true)
+    # -- Auto calculate the max ram percentages (default: false)
     # -- If false, then use the MaxRAMPercentage value below
+    # -- to calculate the max mem (-Xmx) from resource limits
     # -- https://www.eclipse.org/openj9/docs/xxusecontainersupport/
     useContainerSupport: false
-    # -- Maximum ram percentage (default: 75)
-    MaxRAMPercentage: "75"
+    # -- Maximum ram percentage (default: 73)
+    MaxRAMPercentage: "73"
     # -- Maximum metaspace size (default: 256m)
     MaxMetaspaceSize: "256m"
   plugins:
@@ -291,6 +296,10 @@ brains_ana:
     # --- 'emptyDir' (node local storage)
     class: "emptyDir"
     # size: 400
+  # -- Customize the JVM memory settings for the brains_ana pods
+  jvmMemory:
+    # -- Maximum ram percentage of resource limits for BT_HEAP_MAX (default: 75)
+    MaxRAMPercentage: "75"
   # -- Define static resources for the brains_ana pods
   resources:
     memory: 220
@@ -313,6 +322,7 @@ brains_ana:
     # -- Add a K8s node selector for this deployment to run in
     # -- Example: eks.amazonaws.com/nodegroup: brainspace-nodegroup
     nodeSelector: {}
+    tolerations: []
     debug: "0"
     thresholds:
       # -- The minimum number of replicas of the brains_ana deployment

@@ -53,6 +53,19 @@ spec:
             mountPath: /run/config
             readOnly: true
         {{- end }}
+      tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 300
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 300
+      {{- if .Values.brains_ui.tolerations }}
+{{ toYaml .Values.brains_ui.tolerations | indent 6}}
+      {{- end }}
+
       {{- if .Values.brains_ui.proxyConfig }}
       volumes:
         - name: proxy-config

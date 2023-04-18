@@ -89,6 +89,9 @@ spec:
         key: node.kubernetes.io/unreachable
         operator: Exists
         tolerationSeconds: 300
+      {{- if .Values.brains_ana.autoscale.tolerations }}
+{{ toYaml .Values.brains_ana.autoscale.tolerations | indent 6}}
+      {{- end }}
 {{- end }}
 {{- if .Values.PodDisruptionBudget_ana_autoscale.enabled }}
 ---
