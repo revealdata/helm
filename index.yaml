@@ -33,6 +33,20 @@ entries:
     version: 1.0.0
   brainspace-series11:
   - apiVersion: v2
+    appVersion: 11.6.0
+    created: "2023-04-19T15:49:25.092925599Z"
+    description: A Helm chart for Brainspace with Reveal Series11
+    digest: 7df2b471f37318f48b8ad66badfa4e408386305d99584ce222fa8a3c6cf8d6cb
+    maintainers:
+    - email: info@revealdata
+      name: Reveal-Brainspace
+      url: https://revealdata.com
+    name: brainspace-series11
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/brainspace-series11-11.6.0/brainspace-series11-11.6.0.tgz
+    version: 11.6.0
+  - apiVersion: v2
     appVersion: 11.5.0
     created: "2023-04-19T14:12:34.028177644Z"
     description: A Helm chart for Brainspace with Reveal Series11
@@ -1452,4 +1466,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/selenium-1.0.0/selenium-1.0.0.tgz
     version: 1.0.0
-generated: "2023-04-19T15:47:44.351233132Z"
+generated: "2023-04-19T15:49:25.093549203Z"
