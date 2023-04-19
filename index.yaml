@@ -1393,6 +1393,16 @@ entries:
   review-upgrade:
   - apiVersion: v2
     appVersion: 11.5.1
+    created: "2023-04-19T15:47:44.351009127Z"
+    description: A chart for deploying the review upgrade tool.
+    digest: 839ad57ea0d35e3a0c75bba4e70886b5cfa119a48dff11a3f5c672826ceb51b4
+    name: review-upgrade
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/review-upgrade-11.5.4/review-upgrade-11.5.4.tgz
+    version: 11.5.4
+  - apiVersion: v2
+    appVersion: 11.5.1
     created: "2023-04-12T18:51:15.185657592Z"
     description: A chart for deploying the review upgrade tool.
     digest: f1c039bdef20bfd6a7bee851469c79eff5e5f7f51fe6fe9808f51712fd70a9a6
@@ -1442,4 +1452,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/selenium-1.0.0/selenium-1.0.0.tgz
     version: 1.0.0
-generated: "2023-04-19T14:12:34.028433859Z"
+generated: "2023-04-19T15:47:44.351233132Z"
