@@ -136,7 +136,7 @@ spec:
           {{- include "java.resources.values" .Values.brains_app | indent 6 }}
           {{- else }}
           - name: CATALINA_OPTS
-            value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage={{ .Values.brains_app.jvmMemory.MaxRAMPercentage }} -XX:MaxMetaspaceSize={{ .Values.brains_app.jvmMemory.MaxMetaspaceSize }} -XshowSettings"
+            value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage={{ .Values.brains_app.jvmMemory.MaxRAMPercentage }} -XX:MaxMetaspaceSize={{ .Values.brains_app.jvmMemory.MaxMetaspaceSize }} -XX:-UseCompressedOops -XshowSettings"
           {{- end }}
           {{- /* env vars for Brainspace secrets (_helpers.tpl) */}}
           {{- include "secrets.env" . |indent 6 }}
