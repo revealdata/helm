@@ -55,7 +55,7 @@ spec:
             value: "{{ .Values.upgrade.docker_host | default "tcp://localhost" }}:{{ .Values.upgrade.docker_port | default "2375" }}"
         {{- if .Values.upgrade.launcher.resources }}
         resources:
-            {{- toYaml .Values.upgrade.launcher.resources | nindent 8 }}
+          {{- toYaml .Values.upgrade.launcher.resources | nindent 10 }}
         {{- end }}
         volumeMounts:
           - name: launcher-storage
@@ -80,7 +80,7 @@ spec:
             value: "{{ .Values.upgrade.docker_host | default "tcp://localhost" }}:{{ .Values.upgrade.docker_port | default "2375" }}"
         {{- if .Values.upgrade.launcher.resources }}
         resources:
-            {{- toYaml .Values.upgrade.launcher.resources | nindent 8 }}
+          {{- toYaml .Values.upgrade.launcher.resources | nindent 10 }}
         {{- end }}
         volumeMounts:
           - name: launcher-storage
