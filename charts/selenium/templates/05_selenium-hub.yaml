@@ -1,0 +1,87 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: selenium-hub
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: selenium-hub
+  strategy: 
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: selenium-hub
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: amd64
+      volumes:
+        - name: selenium-hub-config-vol
+          secret:
+            secretName: selenium-hub-config-toml
+            defaultMode: 420
+            optional: false
+      containers:
+      - name: selenium-hub
+        image: selenium/hub:{{ .Values.selenium.version }}
+        resources:
+{{ .Values.selenium.hub.resources | toYaml | indent 10 }}
+        ports:
+          - containerPort: 4442
+          - containerPort: 4443
+          - name: http-ui
+            containerPort: 4444
+        envFrom:
+        - configMapRef:
+            name: selenium-hub-config
+        livenessProbe:
+            httpGet:
+              path: /readyz
+              port: http-ui
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+        volumeMounts:
+          - name: selenium-hub-config-vol
+            readOnly: true
+            mountPath: /run/selenium
+        lifecycle:
+          postStart:
+            exec:
+              command: 
+                - "/bin/bash"
+                - "-c"
+                - |
+                  if [[ -e /run/selenium/config.toml ]]; then
+                  cp /run/selenium/config.toml /opt/selenium/config.toml;
+                  fi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: selenium-srv
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels:
+    app: selenium-hub
+spec:
+  type: NodePort
+  selector:
+    app: selenium-hub
+  ports:
+    - name: http-publish
+      protocol: TCP
+      port: 4442
+      targetPort: 4442
+    - name: http-subscribe
+      protocol: TCP
+      port: 4443
+      targetPort: 4443
+    - name: http-ui
+      protocol: TCP
+      port: 4444
+      targetPort: 4444

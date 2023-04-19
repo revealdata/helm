@@ -182,10 +182,11 @@ brains_db:
   image: "053522176595.dkr.ecr.us-east-1.amazonaws.com/ecr-public/bitnami/postgresql"
   # -- batch database/postgres container tag
   tag: "13.10.0"
+  # -- Add a K8s node selector for this deployment to run in
+  # -- Example: eks.amazonaws.com/nodegroup: brainspace-nodegroup
+  nodeSelector: {}
   # -- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: false
-  # -- Specify a K8s node group for this deployment to run in
-  nodeGroup: ""
 
 brains_ui:
   # Number of replicas for the UI workload
@@ -196,8 +197,13 @@ brains_ui:
   tag: "r11.5"
   # -- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: true
-  # -- Specify a K8s node group for this deployment to run in
-  nodeGroup: ""
+  # -- Add a K8s node selector for this deployment to run in
+  # -- Example: eks.amazonaws.com/nodegroup: brainspace-nodegroup
+  nodeSelector: {}
+  tolerations: []
+    # - effect: "NoSchedule"
+    #   key: "linux-small"
+    #   operator: "Exists"
   # -- Specify customizations to the nginx proxy
   proxyConfig: ""
 
@@ -222,8 +228,9 @@ brains_app:
   brainspaceLicenseFile: "/run/secrets/brainspace/license/brainspace_license.txt"
   # -- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: false
-  # -- Specify a K8s node group for this deployment to run in
-  nodeGroup: ""
+  # -- Add a K8s node selector for this deployment to run in
+  # -- Example: eks.amazonaws.com/nodegroup: brainspace-nodegroup
+  nodeSelector: {}
   # -- Specify customizations to the Brainspace Application
   options:
     # -- Run build jobs as k8s jobs rather than replicasets (default: true)
@@ -232,12 +239,13 @@ brains_app:
     tdmCache: false
   # -- Customize the JVM memory settings for the brains_app pods
   jvmMemory:
-    # -- Auto calculate the max ram percentages (default: true)
+    # -- Auto calculate the max ram percentages (default: false)
     # -- If false, then use the MaxRAMPercentage value below
+    # -- to calculate the max mem (-Xmx) from resource limits
     # -- https://www.eclipse.org/openj9/docs/xxusecontainersupport/
     useContainerSupport: false
-    # -- Maximum ram percentage (default: 75)
-    MaxRAMPercentage: "75"
+    # -- Maximum ram percentage (default: 73)
+    MaxRAMPercentage: "73"
     # -- Maximum metaspace size (default: 256m)
     MaxMetaspaceSize: "256m"
   plugins:
@@ -274,8 +282,9 @@ brains_ana:
   brainspaceHome: "/opt/bitnami/java"
   # -- Brainspace Logs directory - DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING
   brainspaceLogs: "/opt/bitnami/java/app/analytics-server/logs"
-  # -- Specify a K8s node group for this deployment to run in
-  nodeGroup: ""
+  # -- Add a K8s node selector for this deployment to run in
+  # -- Example: eks.amazonaws.com/nodegroup: brainspace-nodegroup
+  nodeSelector: {}
   replicas: 0
   # -- Force a re-deploy when a helm upgrade happens
   reloadOnUpgrade: false
@@ -287,6 +296,10 @@ brains_ana:
     # --- 'emptyDir' (node local storage)
     class: "emptyDir"
     # size: 400
+  # -- Customize the JVM memory settings for the brains_ana pods
+  jvmMemory:
+    # -- Maximum ram percentage of resource limits for BT_HEAP_MAX (default: 75)
+    MaxRAMPercentage: "75"
   # -- Define static resources for the brains_ana pods
   resources:
     memory: 220
@@ -306,6 +319,10 @@ brains_ana:
     image: 053522176595.dkr.ecr.us-east-1.amazonaws.com/prod/brainspace/ana-autoscale
     tag: "11.5.0"
     reloadOnUpgrade: true
+    # -- Add a K8s node selector for this deployment to run in
+    # -- Example: eks.amazonaws.com/nodegroup: brainspace-nodegroup
+    nodeSelector: {}
+    tolerations: []
     debug: "0"
     thresholds:
       # -- The minimum number of replicas of the brains_ana deployment

@@ -1,0 +1,36 @@
+{{- $ingress_class := (.Values.ingress.class | default "alb") -}}
+{{- if eq $ingress_class "nginx" }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  name: selenium-ingress
+  annotations:
+    # https://docs.nginx.com/nginx-ingress-controller/configuration/ingress-resources/basic-configuration/
+    kubernetes.io/ingress.class: {{ $ingress_class }}
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    {{ if .Values.ingress.annotations }}
+    {{- toYaml .Values.ingress.annotations }}
+    {{- end }}
+
+spec:
+  # Needed for nginx ingress for some reason. It doesn't like not having a default backend.
+  defaultBackend:
+    service:
+      name: selenium-srv
+      port:
+        number: 444
+  rules:
+    - host: {{ .Values.ingress.hostname | default "selenium.docker.internal" }}
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: selenium-srv
+                port:
+                  number: 444
+{{- end }}

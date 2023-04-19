@@ -1,0 +1,68 @@
+{{- $ingress_class := (.Values.ingress.class | default "alb") -}}
+{{- if eq $ingress_class "alb" }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: selenium-grid
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  annotations:
+    # https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/guide/ingress/annotations/
+    kubernetes.io/ingress.class: {{ $ingress_class }}
+    {{- if .Values.ingress.hostname }}
+    external-dns.alpha.kubernetes.io/hostname: {{ .Values.ingress.hostname }}
+    {{- end }}
+    {{- if .Values.ingress.public }}
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+    service.beta.kubernetes.io/aws-load-balancer-internal: "false"
+    {{- else }}
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internal"
+    service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+    {{- end }}
+    #  Health check path annotations
+    alb.ingress.kubernetes.io/healthcheck-path: /readyz
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "30"
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: "15"
+    alb.ingress.kubernetes.io/success-codes: "200-404"
+    alb.ingress.kubernetes.io/healthy-threshold-count: "2"
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: "4"
+    alb.ingress.kubernetes.io/target-group-attributes: "stickiness.enabled=false,deregistration_delay.timeout_seconds=15"
+    {{- if .Values.ingress.sslCertArn }}
+    # The ARN of your SSL certificate.
+    alb.ingress.kubernetes.io/certificate-arn: {{ .Values.ingress.sslCertArn }}
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-FS-1-2-Res-2020-10
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}, {"HTTP":80}]'
+    # SSL Redirect Setting
+    alb.ingress.kubernetes.io/actions.ssl-redirect: '{"Type": "redirect", "RedirectConfig": { "Protocol": "HTTPS", "Port": "443", "StatusCode": "HTTP_301"}}'
+    {{- else }}
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+    {{- end }}
+    {{ if .Values.ingress.annotations }}
+    {{- toYaml .Values.ingress.annotations }}
+    {{- end }}
+spec:
+  defaultBackend:
+    service:
+      name: selenium-srv
+      port:
+        number: 4444
+  rules:
+    - http:
+        paths:
+          {{- if .Values.ingress.sslCertArn }}
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ssl-redirect
+                port:
+                  name: use-annotation
+          {{- end }}
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: selenium-srv
+                port:
+                  number: 4444
+{{- end }}

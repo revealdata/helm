@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-chrome
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+spec:
+  replicas: {{ .Values.selenium.nodes.chrome.replicas }}
+  selector:
+    matchLabels:
+      app: node-chrome
+  strategy: 
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      name: node-chrome
+      labels:
+        app: node-chrome
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: amd64
+      containers:
+        - name: node-chrome
+          image: selenium/node-chrome:{{ .Values.selenium.nodes.chrome.version | default .Values.selenium.version }}
+          resources:
+{{ .Values.selenium.nodes.resources | toYaml | indent 12 }}
+          ports:
+            - containerPort: 5555
+              name: node-chrome
+          envFrom:
+          - configMapRef:
+              name: selenium-node-config

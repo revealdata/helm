@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-edge
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+spec:
+  replicas: {{ .Values.selenium.nodes.edge.replicas }}
+  selector:
+    matchLabels:
+      app: node-edge
+  strategy: 
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      name: node-edge
+      labels:
+        app: node-edge
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: amd64
+      containers:
+        - name: node-edge
+          image: selenium/node-edge:{{ .Values.selenium.nodes.edge.version | default .Values.selenium.version }}
+          resources:
+{{ .Values.selenium.nodes.resources | toYaml | indent 12 }}
+          ports:
+            - containerPort: 5555
+              name: node-edge
+          envFrom:
+          - configMapRef:
+              name: selenium-node-config

@@ -1,0 +1,62 @@
+global:
+  # -- Optionally set a namespace value. If empty, the helm release name is used
+  namespace: ""
+  noNamespace: false
+
+secrets:
+  region: "us-east-1"
+  config: "eks/selenium/config" 
+
+selenium:
+  # -- The version of the selenium docker image (tag) to use
+  version: "latest"
+  hub:
+    resources:
+      requests:
+        cpu: 500m
+        memory: 256Mi
+      limits:
+        cpu: 2000m
+        memory: 512Mi
+    env: {}
+    config_toml: |
+      [router]
+      username = "admin"
+      password = "myStrongPassword"
+  nodes:
+    # -- The number of sessions allowed per node
+    # -- Cannot be higher that the number of CPU cores
+    maxSessions: 2
+    resources:
+      requests:
+        cpu: 800m
+        memory: 2Gi
+      limits:
+        cpu: 4000m
+        memory: 8Gi
+    # Specify the chrome screen size (in pixels)
+    screen:
+      height: 1800
+      width: 2880
+      depth: 24
+    chrome:
+      replicas: 1
+    firefox:
+      replicas: 0
+    edge:
+      version: "109.0"
+      replicas: 0
+    
+ingress:
+  # -- The ingress class
+  # -- Options:
+  # --- alb: (AWS Application Load balancer - https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/)
+  # --- nginx: Nginx Ingress (https://kubernetes.github.io/ingress-nginx/)
+  class: "alb"
+  # -- Will the ingress use an internal or internet-facing load balancer
+  public: false
+  hostname: ""
+  # -- sslCertArn is only valid when using the 'alb' class
+  sslCertArn: ""
+  # -- Custom annotations for the ingress
+  annotations: {}

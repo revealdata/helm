@@ -46,10 +46,11 @@
 {{/* Set the memory and cpu values used in calculations */}}
 {{- $memory := .resources.memory | default 62 | int -}}
 {{- $cpu_cores := .resources.cpu | default 8 | int -}}
+{{- $max_percent := .jvmMemory.MaxRAMPercentage | int -}}
 
 {{/* Helm only does math on integers so multiply, then divide */}}
 {{/* Catalina memory = container memory less 10% */}}
-{{- $catalina_memory := div (mul $memory 75) 100 -}}
+{{- $catalina_memory := div (mul $memory $max_percent) 100 -}}
 {{/* BatchTools memory = container memory less 10% with 2G reserved */}}
 {{- $bt_memory := sub  $catalina_memory 2 -}}
 
