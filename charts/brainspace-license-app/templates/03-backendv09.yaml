@@ -1,0 +1,141 @@
+{{- if not .Values.backend.disable }}
+---
+# Deployment: licenseapp-v9
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: licenseapp-v9
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels:
+    app.kubernetes.io/name: licenseapp-v9
+    app.kubernetes.io/part-of: licenseapp
+    app.kubernetes.io/component: application
+spec:
+  selector:
+    matchLabels:
+      app: licenseapp-v9
+  progressDeadlineSeconds: 600
+  replicas: {{ .Values.backend.v9.replicas | default 1 }}
+  revisionHistoryLimit: 10
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: licenseapp-v9
+      {{- if .Values.backend.v9.reloadOnUpgrade }}
+      annotations:
+        timestamp: {{ now | quote }}
+      {{- end }}
+    spec:
+      hostname: licenseapp-v9
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: amd64
+        {{- if .Values.backend.v9.nodegroup }}
+        alpha.eksctl.io/nodegroup-name: {{ .Values.backend.v9.nodegroup }}
+        {{- end }}
+      volumes:
+        - name: licenseapp-key-vol
+          secret:
+            secretName: licenseapp-key
+            defaultMode: 420
+            optional: false
+      containers:
+      - name: licenseapp
+        image: {{ .Values.backend.image }}:{{ .Values.backend.v9.tag | default "latest" }}
+        imagePullPolicy: {{ .Values.backend.v9.imagePullPolicy | default "Always" }}
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "1000m"
+        volumeMounts:
+          - name: licenseapp-key-vol
+            readOnly: true
+            mountPath: /secrets/key-pair
+        ports:
+          - name: liveness-port
+            containerPort: 80
+            hostPort: 80
+        # startupProbe:
+        #   failureThreshold: 2
+        #   periodSeconds: 10
+        #   httpGet:
+        #     path: /licenses
+        #     port: liveness-port
+        # livenessProbe:
+        #   initialDelaySeconds: 15
+        #   periodSeconds: 30
+        #   httpGet:
+        #     path: /licenses
+        #     port: liveness-port
+        lifecycle:
+          postStart:
+            exec:
+              command: 
+                - "/bin/bash"
+                - "-c"
+                - |
+                  if [[ -e /secrets/key-pair/private-key.pkcs8.b64 ]]; then
+                  [[ ! -d /key-pair ]] && mkdir /key-pair;
+                  cat /secrets/key-pair/private-key.pkcs8.b64 | base64 -d > /key-pair/private-key.pkcs8;
+                  fi
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 60
+      tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 300
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 300
+        {{- if .Values.backend.tolerations }}
+{{ toYaml .Values.backend.tolerations | indent 6}}
+        {{- end }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backendv9
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  annotations:
+    #  Health check path annotations
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+spec:
+  type: NodePort
+  selector:
+    app: licenseapp-v9
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+---
+{{- if .Values.PodDisruptionBudgetlicenseappBackend}}
+{{- if .Values.PodDisruptionBudgetlicenseappBackend.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.PodDisruptionBudgetlicenseappBackend.name }}
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: licenseapp-v9
+{{- if .Values.PodDisruptionBudgetlicenseappBackend.minAvailable }}
+  minAvailable: {{ .Values.PodDisruptionBudgetlicenseappBackend.minAvailable }}
+{{- end }}
+{{- if .Values.PodDisruptionBudgetlicenseappBackend.maxUnavailable }}
+  maxUnavailable: {{ .Values.PodDisruptionBudgetlicenseapUi.maxUnavailable }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{- end }}
