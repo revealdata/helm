@@ -1,0 +1,181 @@
+{{- if not .Values.ui.disable }}
+---
+# Deployment: licenseapp-ui
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: licenseapp-ui
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels:
+    app.kubernetes.io/name: licenseapp-ui
+    app.kubernetes.io/part-of: licenseapp
+    app.kubernetes.io/component: application
+spec:
+  selector:
+    matchLabels:
+      app: licenseapp-ui
+  progressDeadlineSeconds: 600
+  replicas: {{ .Values.ui.replicas | default 1 }}
+  revisionHistoryLimit: 10
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: licenseapp-ui
+      {{- if .Values.ui.reloadOnUpgrade }}
+      annotations:
+        timestamp: {{ now | quote }}
+      {{- end }}
+    spec:
+      hostname: licenseapp-ui
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: amd64
+        {{- if .Values.ui.nodegroup }}
+        alpha.eksctl.io/nodegroup-name: {{ .Values.ui.nodegroup }}
+        {{- end }}
+      volumes:
+        - name: licenseapp-key-vol
+          secret:
+            secretName: licenseapp-key
+            defaultMode: 420
+            optional: false
+      containers:
+      - name: licenseapp
+        image: {{ .Values.ui.image }}:{{ .Values.ui.tag | default "latest" }}
+        imagePullPolicy: {{ .Values.ui.imagePullPolicy | default "Always" }}
+        {{- if .Values.ui.resources }}
+        resources:
+          requests:
+            {{- if .Values.ui.resources.memory }}
+            memory: "{{ .Values.ui.resources.memory }}Gi"
+            {{- end }}
+            {{- if .Values.ui.resources.cpu }}
+            cpu: "{{ .Values.ui.resources.cpu }}000m"
+            {{- end }}
+        {{- end }}
+        volumeMounts:
+          - name: licenseapp-key-vol
+            readOnly: false
+            mountPath: /secrets/key-pair
+        ports:
+          - name: liveness-port
+            containerPort: 5000
+        startupProbe:
+          failureThreshold: 2
+          periodSeconds: 10
+          httpGet:
+            path: /smoke
+            port: liveness-port
+        livenessProbe:
+          initialDelaySeconds: 15
+          periodSeconds: 30
+          httpGet:
+            path: /smoke
+            port: liveness-port
+        envFrom:
+        - configMapRef:
+            name: licenseapp-config
+        env:
+          - name: REDIS_URL
+            valueFrom:
+              secretKeyRef:
+                name: licenseapp-secrets
+                key: redis_url
+          - name: SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: licenseapp-secrets
+                key: session_secret
+          - name: PRODUCTION_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: licenseapp-secrets
+                key: oauth_client_id
+          - name: PRODUCTION_METADATA_URL
+            valueFrom:
+              secretKeyRef:
+                name: licenseapp-secrets
+                key: oauth_metadata_url
+          - name: PRODUCTION_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: licenseapp-secrets
+                key: oauth_client_secret
+          - name: OAUTH_ALLOWED_ROLES
+            valueFrom:
+              secretKeyRef:
+                name: licenseapp-secrets
+                key: oauth_roles
+        lifecycle:
+          postStart:
+            exec:
+              command: 
+                - "/bin/bash"
+                - "-c"
+                - |
+                  if [[ -e /secrets/key-pair/private-key.pkcs8.b64 ]]; then
+                  [[ ! -d /key-pair ]] && mkdir /key-pair;
+                  cat /secrets/key-pair/private-key.pkcs8.b64 | base64 -d > /key-pair/private-key.pkcs8;
+                  fi
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 60
+      tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 300
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 300
+        {{- if .Values.ui.tolerations }}
+{{ toYaml .Values.ui.tolerations | indent 6}}
+        {{- end }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: licenseapp-ui
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  annotations:
+    #  Health check path annotations
+    alb.ingress.kubernetes.io/healthcheck-path: /smoke
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+spec:
+  type: NodePort
+  selector:
+    app: licenseapp-ui
+  ports:
+    - name: http
+      protocol: TCP
+      port: 5000
+      targetPort: 5000
+---
+{{- if .Values.PodDisruptionBudgetlicenseappUi}}
+{{- if .Values.PodDisruptionBudgetlicenseappUi.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.PodDisruptionBudgetlicenseappUi.name }}
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: licenseapp-ui
+{{- if .Values.PodDisruptionBudgetlicenseappUi.minAvailable }}
+  minAvailable: {{ .Values.PodDisruptionBudgetlicenseappUi.minAvailable }}
+{{- end }}
+{{- if .Values.PodDisruptionBudgetlicenseappUi.maxUnavailable }}
+  maxUnavailable: {{ .Values.PodDisruptionBudgetlicenseapUi.maxUnavailable }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+
+{{- end }}

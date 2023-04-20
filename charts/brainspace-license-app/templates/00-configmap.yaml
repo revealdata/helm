@@ -1,0 +1,27 @@
+{{- if not .Values.global.noNamespace }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.global.namespace | default .Release.Name }}
+  labels:
+    application: "licenseapp"
+{{- end }}
+
+---
+# License-app Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: licenseapp-config
+  namespace: {{ .Values.global.namespace | default .Release.Name }}
+  labels:
+    application: "licenseapp"
+data:
+  OAUTH_ENFORCE_ROLES: {{ quote .Values.ui.session.oauthEnforceRoles | default "true"  }}
+  SESSION_TYPE: {{ quote .Values.ui.session.type | default  "filesystem" }}
+  SESSION_COOKIE_DOMAIN: {{ quote .Values.ui.session.cookieDomain | default "localhost" }}
+  SESSION_COOKIE_SAMESITE: "None"
+{{ if .Values.ui.env }}
+{{- toYaml .Values.ui.env | indent 2 }}
+{{- end }}
