@@ -31,21 +31,6 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/argo-application-1.0.0/argo-application-1.0.0.tgz
     version: 1.0.0
-  brainspace-license-app:
-  - apiVersion: v2
-    appVersion: 2.4.0
-    created: "2023-04-20T17:36:38.989196528Z"
-    description: Brainspace License Generator
-    digest: 8f4ae55fe4517e41e5e7fceb9c68670f2eda2a2f4de1abf8fa85d4ce0297054b
-    maintainers:
-    - email: info@revealdata.com
-      name: Reveal-Brainspace
-      url: https://revealdata.com
-    name: brainspace-license-app
-    type: application
-    urls:
-    - https://github.com/revealdata/helm/releases/download/brainspace-license-app-1.0.0/brainspace-license-app-1.0.0.tgz
-    version: 1.0.0
   brainspace-series11:
   - apiVersion: v2
     appVersion: 11.6.0
