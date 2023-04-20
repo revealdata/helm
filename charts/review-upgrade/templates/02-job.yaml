@@ -108,9 +108,7 @@ spec:
       {{- end }}
       {{- if .Values.upgrade.tolerations }}
       tolerations:
-          {{- range $key, $value := .Values.upgrade.tolerations }}
-          {{ $key }}: {{ $value | quote }}
-          {{- end }}
+        {{- toYaml .Values.upgrade.tolerations | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ .Values.upgrade.service_account_name }}
       securityContext: {}
