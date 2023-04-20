@@ -18,9 +18,9 @@ metadata:
   labels:
     application: "licenseapp"
 data:
-  OAUTH_ENFORCE_ROLES: {{ .Values.ui.session.type | default "true" }}
-  SESSION_TYPE: {{ .Values.ui.session.oauthEnforceRoles | default  "filesystem" }}
-  SESSION_COOKIE_DOMAIN: {{ .Values.ui.session.cookieDomain | default "localhost" }}
+  OAUTH_ENFORCE_ROLES: {{ quote .Values.ui.session.oauthEnforceRoles | default "true"  }}
+  SESSION_TYPE: {{ quote .Values.ui.session.type | default  "filesystem" }}
+  SESSION_COOKIE_DOMAIN: {{ quote .Values.ui.session.cookieDomain | default "localhost" }}
   SESSION_COOKIE_SAMESITE: "None"
 {{ if .Values.ui.env }}
 {{- toYaml .Values.ui.env | indent 2 }}
