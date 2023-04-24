@@ -1,0 +1,46 @@
+{{- if .Values.global.storage.efs -}}
+
+{{- range .Values.global.storage.efs }}
+{{- $fileSystemId := .fileSystemId }}
+{{- $class := .class }}
+{{- $driver := .driver }}
+{{- range .accessPoints }}
+{{- if .accessPointId }}
+---
+# Perisitent Volume for EFS {{ .name }} :: {{ .accessPointId }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-{{.name}}-{{ $.Values.global.namespace | default $.Release.Name }}
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ $class }}
+  csi:
+    driver: {{ $driver }}
+    volumeHandle: {{ trim $fileSystemId }}::{{ trim .accessPointId }}
+
+---
+## Persistent claim EFS {{ .name }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-{{ .name }}
+  namespace: {{ $.Values.global.namespace | default $.Release.Name }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: {{ $class }}
+  volumeName: pv-{{.name}}-{{ $.Values.global.namespace | default $.Release.Name }}
+  resources:
+    requests:
+      storage: 1Gi
+{{- end }}
+{{- end }}
+{{- end }}
+# END Perisitent Volume
+{{- end -}}

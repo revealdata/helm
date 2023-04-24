@@ -4,7 +4,7 @@ apiVersion: v2
 name: github-actions-controller
 description: A Helm chart for ephemeral GitHub Actions runners
 type: application
-version: 1.0.1
+version: 1.0.2
 appVersion: "0.22.0"
 
 dependencies:

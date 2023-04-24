@@ -21,6 +21,19 @@ spec:
       {{- else if .repository }}
       repository: {{ .repository }}
       {{- end }}
+      {{- if .volumes }}
+      volumeMounts:
+      {{- range .volumes }}
+       - name: {{ .name }}
+         mountPath: {{ .mountPath }}
+      {{- end }}
+      volumes:
+      {{- range .volumes }}
+        - name: {{ .name }}
+          persistentVolumeClaim:
+            claimName: "pvc-{{ .name }}"
+      {{- end }}
+      {{- end }}
       labels:
         - "self-hosted"
         {{- range $.Values.global.runners.labels }}

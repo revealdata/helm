@@ -1,6 +1,10 @@
 global:
   namespace: actions-runner-controller
   NoNamespace: false
+
+  storage:
+    # Optionally add persistent volume claims to the runner pods
+    efs: []
   
   runners:
     # Applied to all runners
