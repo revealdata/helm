@@ -5,6 +5,11 @@ global:
   storage:
     # Optionally add persistent volume claims to the runner pods
     efs: []
+
+  serviceAccount:
+    create: false
+    name: actions-runner-sa
+    roleArn: ""
   
   runners:
     # Applied to all runners

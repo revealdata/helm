@@ -21,6 +21,9 @@ spec:
       {{- else if .repository }}
       repository: {{ .repository }}
       {{- end }}
+      {{- if $.Values.global.serviceAccount.create }}
+      serviceAccountName: {{ $.Values.global.serviceAccount.name }}
+      {{- end }}
       {{- if .volumes }}
       volumeMounts:
       {{- range .volumes }}
