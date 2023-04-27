@@ -306,6 +306,22 @@ entries:
       category: Operations
     apiVersion: v2
     appVersion: 0.22.0
+    created: "2023-04-27T18:45:02.419291505Z"
+    dependencies:
+    - name: actions-runner-controller
+      repository: https://actions-runner-controller.github.io/actions-runner-controller
+      version: 0.22.0
+    description: A Helm chart for ephemeral GitHub Actions runners
+    digest: e1025b9abedf4fb27f6bbcd7fb58bd22ebcd7dd83df4dabe9dff4ea5bbeed4a9
+    name: github-actions-controller
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/github-actions-controller-1.0.3/github-actions-controller-1.0.3.tgz
+    version: 1.0.3
+  - annotations:
+      category: Operations
+    apiVersion: v2
+    appVersion: 0.22.0
     created: "2023-04-24T20:43:17.388918644Z"
     dependencies:
     - name: actions-runner-controller
@@ -1507,4 +1523,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/selenium-1.0.0/selenium-1.0.0.tgz
     version: 1.0.0
-generated: "2023-04-24T20:43:17.389323878Z"
+generated: "2023-04-27T18:45:02.419660404Z"
