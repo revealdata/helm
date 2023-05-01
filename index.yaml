@@ -616,6 +616,20 @@ entries:
   reveal-ai-bootstrap:
   - apiVersion: v2
     appVersion: 11.0.0
+    created: "2023-05-01T14:56:21.364917882Z"
+    description: reveal-ai-bootstrap
+    digest: 5f069d15e1f273a11587b1afa0392f18b1853938ea99e392ed1d623131275032
+    maintainers:
+    - email: info@revealdata.com
+      name: Reveal-Brainspace
+      url: https://revealdata.com
+    name: reveal-ai-bootstrap
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/reveal-ai-bootstrap-1.0.4/reveal-ai-bootstrap-1.0.4.tgz
+    version: 1.0.4
+  - apiVersion: v2
+    appVersion: 11.0.0
     created: "2023-04-12T18:51:14.472842433Z"
     description: reveal-ai-bootstrap
     digest: 677e823f7daba6b617bd9910c476923fb9f7804e3276cbf22c048c47ddb1863d
@@ -1453,6 +1467,16 @@ entries:
     version: 1.0.0
   review-upgrade:
   - apiVersion: v2
+    appVersion: 11.6.10
+    created: "2023-05-01T14:56:21.586268501Z"
+    description: A chart for deploying the review upgrade tool.
+    digest: 5da234df5287e6c77e253571bce2f91e663634504d835e6d769797072918c015
+    name: review-upgrade
+    type: application
+    urls:
+    - https://github.com/revealdata/helm/releases/download/review-upgrade-11.6.1/review-upgrade-11.6.1.tgz
+    version: 11.6.1
+  - apiVersion: v2
     appVersion: 11.5.1
     created: "2023-04-20T21:16:05.228597602Z"
     description: A chart for deploying the review upgrade tool.
@@ -1523,4 +1547,4 @@ entries:
     urls:
     - https://github.com/revealdata/helm/releases/download/selenium-1.0.0/selenium-1.0.0.tgz
     version: 1.0.0
-generated: "2023-04-27T18:45:02.419660404Z"
+generated: "2023-05-01T14:56:21.586986607Z"
