@@ -61,20 +61,19 @@ spec:
           - name: launcher-storage
             mountPath: /opt/launcher_storage
             subPath: launcher_storage
-        lifecycle:
-          preStop:
-            exec:
-              command:
-                - /bin/sh
-                - '-c'
-                - sleep 20
         securityContext: {}
       - name: dind
         image: "{{ .Values.upgrade.dind_image }}"
-        command:
-          - dockerd
-          - "--host"
-          - "tcp://127.0.0.1:{{ .Values.upgrade.docker_port | default "2375" }}"
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            dockerd --host tcp://127.0.0.1:{{ .Values.upgrade.docker_port | default "2375" }} &
+            while ! test -f /opt/launcher_storage/EXIT; do
+              echo 'Waiting for the upgrade agent pod to finish...'
+              sleep 5
+            done
+            echo "Upgrade agent pod finished, exiting"
+            exit 0
         env:
           - name: DOCKER_HOST
             value: "{{ .Values.upgrade.docker_host | default "tcp://localhost" }}:{{ .Values.upgrade.docker_port | default "2375" }}"
@@ -89,13 +88,6 @@ spec:
           - name: launcher-storage
             mountPath: /opt/launcher_storage
             subPath: launcher_storage
-        lifecycle:
-          preStop:
-            exec:
-              command:
-                - /bin/sh
-                - '-c'
-                - while [ ! -z $(docker ps -q) ]; do sleep 1; done;
         imagePullPolicy: Always
         securityContext:
           privileged: true
