@@ -77,3 +77,4 @@ bootstrap:
       value: execution
       effect: NoSchedule
   service_account_role_arn: ""
+  cluster_role_name: "reveal-ai-bootstrap"
