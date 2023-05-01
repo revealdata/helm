@@ -5,6 +5,6 @@ type: application
 version: 1.0.4
 appVersion: "11.0.0"
 maintainers:
-- name: Reveal-Brainspace
-  email: info@revealdata
-  url: https://revealdata.com
+  - name: Reveal-Brainspace
+    email: info@revealdata.com
+    url: https://revealdata.com
